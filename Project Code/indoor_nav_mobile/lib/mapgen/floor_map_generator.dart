@@ -251,7 +251,9 @@ List<DetectedRegion> detectRegions(Uint8List walls, int width, int height, {doub
   }
   while (queue.isNotEmpty) {
     final i = queue.removeFirst();
-    if (depth[i] >= r) continue;
+    // Up to 3r, so rooms on both sides of a doorway grow through the gap
+    // and meet there (real walls still stop them).
+    if (depth[i] >= 3 * r) continue;
     final x = i % w, y = i ~/ w;
     // Eight directions, so regions grow back as squares and keep sharp
     // corners (four directions would grow diamonds and chamfer them).
