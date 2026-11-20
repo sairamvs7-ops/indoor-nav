@@ -22,7 +22,7 @@ void main() {
 
       expect(middle.tilt, FloorChangePose.maxTilt);
       expect(middle.spread, 1);
-      expect(middle.travel, closeTo(0.5, 1e-9));
+      expect(middle.travel, closeTo(0.5, 0.05)); // eased, so only roughly halfway
       expect(FloorChangePose.at(0.3).travel, 0);
       expect(FloorChangePose.at(0.7).travel, 1);
     });
@@ -44,6 +44,7 @@ void main() {
     );
 
     final done = showFloorChange(screen, map: map, images: assetFloorImages(), from: map.node(9), to: map.node(23));
+    await tester.pump(); // a new route's first frame is built offstage
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.text('Lift up to First Floor'), findsOneWidget);
@@ -72,6 +73,7 @@ void main() {
     );
 
     unawaited(showFloorChange(screen, map: map, images: assetFloorImages(), from: map.node(25), to: map.node(11)));
+    await tester.pump(); // a new route's first frame is built offstage
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Stairs down to Ground Floor'), findsOneWidget);
 

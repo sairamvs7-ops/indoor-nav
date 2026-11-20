@@ -121,47 +121,90 @@ class MapColors extends ThemeExtension<MapColors> {
 ThemeData buildTheme(Brightness brightness) {
   final p = Brand.of(brightness);
   final light = brightness == Brightness.light;
+  // Light mode is earthy paper, not a green header: sand everywhere, olive
+  // and deep green only as accents, cream cards with a fine olive outline.
+  const cream = Color(0xFFFBF6EC);
+  const sage = Color(0xFFD9E0C8); // light olive tint for selections
+  const ink = Color(0xFF2B3320); // dark olive for text on sand
   final scheme = ColorScheme.fromSeed(
     seedColor: p.primary,
     brightness: brightness,
     primary: p.primary,
-    onPrimary: p.onPrimary,
+    onPrimary: light ? cream : p.onPrimary,
     secondary: p.secondary,
-    onSecondary: p.onSecondary,
+    onSecondary: light ? cream : p.onSecondary,
+    primaryContainer: light ? sage : null,
+    onPrimaryContainer: light ? ink : null,
+    secondaryContainer: light ? const Color(0xFFCFE3D3) : null,
+    onSecondaryContainer: light ? const Color(0xFF00321C) : null,
     surface: p.background,
-    surfaceContainerLowest: p.card,
-    surfaceContainerLow: p.card,
+    onSurface: light ? ink : null,
+    surfaceContainerLowest: light ? cream : p.card,
+    surfaceContainerLow: light ? cream : p.card,
     surfaceContainer: p.card,
+    outline: light ? p.primary.withValues(alpha: 0.35) : null,
+    outlineVariant: light ? p.primary.withValues(alpha: 0.18) : null,
   );
-  final rounded = RoundedRectangleBorder(borderRadius: BorderRadius.circular(16));
-  final appBarBackground = light ? p.primary : const Color(0xFF1A1A1A);
-  final appBarForeground = light ? p.onPrimary : p.primary;
+  final radius = BorderRadius.circular(light ? 20 : 16);
+  final rounded = RoundedRectangleBorder(borderRadius: radius);
+  final cardShape = light
+      ? RoundedRectangleBorder(borderRadius: radius, side: BorderSide(color: p.primary.withValues(alpha: 0.18)))
+      : rounded;
+  final appBarBackground = light ? p.background : const Color(0xFF1A1A1A);
+  final appBarForeground = light ? p.secondary : p.primary;
+  final buttonBackground = p.primary;
+  final buttonForeground = light ? cream : p.onPrimary;
+  final base = ThemeData(brightness: brightness, colorScheme: scheme);
   return ThemeData(
     colorScheme: scheme,
     brightness: brightness,
     scaffoldBackgroundColor: p.background,
     canvasColor: p.background,
+    textTheme: base.textTheme.copyWith(
+      headlineSmall: base.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.4),
+      titleLarge: base.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700, letterSpacing: -0.2),
+      titleMedium: base.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+    ),
     appBarTheme: AppBarTheme(
       backgroundColor: appBarBackground,
       foregroundColor: appBarForeground,
       surfaceTintColor: Colors.transparent,
+      // A sand bar that only shades slightly once content scrolls under it.
+      scrolledUnderElevation: light ? 1 : 0,
+      shadowColor: light ? p.primary.withValues(alpha: 0.25) : null,
       centerTitle: false,
-      titleTextStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, letterSpacing: 0.2, color: appBarForeground),
+      iconTheme: IconThemeData(color: appBarForeground),
+      titleTextStyle: TextStyle(
+        fontSize: 22,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -0.3,
+        color: light ? p.primary : appBarForeground,
+      ),
     ),
-    cardTheme: CardThemeData(elevation: 0, shape: rounded, color: p.card, margin: EdgeInsets.zero),
-    bottomSheetTheme: BottomSheetThemeData(backgroundColor: p.card, surfaceTintColor: Colors.transparent),
-    dialogTheme: DialogThemeData(backgroundColor: p.card, surfaceTintColor: Colors.transparent),
+    cardTheme: CardThemeData(
+      elevation: 0,
+      shape: cardShape,
+      color: light ? cream : p.card,
+      margin: EdgeInsets.zero,
+    ),
+    bottomSheetTheme: BottomSheetThemeData(
+      backgroundColor: light ? cream : p.card,
+      surfaceTintColor: Colors.transparent,
+    ),
+    dialogTheme: DialogThemeData(backgroundColor: light ? cream : p.card, surfaceTintColor: Colors.transparent),
     floatingActionButtonTheme: FloatingActionButtonThemeData(
-      backgroundColor: light ? p.secondary : p.primary,
-      foregroundColor: light ? p.onSecondary : p.onPrimary,
+      backgroundColor: buttonBackground,
+      foregroundColor: buttonForeground,
       shape: rounded,
+      elevation: light ? 2 : 6,
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         minimumSize: const Size(64, 48),
         shape: rounded,
-        backgroundColor: light ? p.secondary : p.primary,
-        foregroundColor: light ? p.onSecondary : p.onPrimary,
+        backgroundColor: buttonBackground,
+        foregroundColor: buttonForeground,
+        textStyle: const TextStyle(fontWeight: FontWeight.w700),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
@@ -169,12 +212,41 @@ ThemeData buildTheme(Brightness brightness) {
         minimumSize: const Size(64, 48),
         shape: rounded,
         foregroundColor: light ? p.secondary : p.primary,
-        side: BorderSide(color: (light ? p.secondary : p.primary).withValues(alpha: 0.6)),
+        side: BorderSide(color: (light ? p.secondary : p.primary).withValues(alpha: 0.5), width: 1.4),
+        textStyle: const TextStyle(fontWeight: FontWeight.w600),
       ),
     ),
-    chipTheme: ChipThemeData(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-    inputDecorationTheme: InputDecorationTheme(border: OutlineInputBorder(borderRadius: BorderRadius.circular(12))),
-    snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating),
+    chipTheme: ChipThemeData(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      backgroundColor: light ? cream : null,
+      selectedColor: light ? p.primary : null,
+      secondarySelectedColor: light ? p.primary : null,
+      labelStyle: TextStyle(color: light ? ink : null, fontWeight: FontWeight.w600),
+      secondaryLabelStyle: TextStyle(color: light ? cream : null, fontWeight: FontWeight.w600),
+      side: light ? BorderSide(color: p.primary.withValues(alpha: 0.3)) : null,
+    ),
+    segmentedButtonTheme: light
+        ? SegmentedButtonThemeData(
+            style: SegmentedButton.styleFrom(
+              backgroundColor: cream,
+              foregroundColor: ink,
+              selectedBackgroundColor: p.primary,
+              selectedForegroundColor: cream,
+              side: BorderSide(color: p.primary.withValues(alpha: 0.35)),
+            ),
+          )
+        : null,
+    inputDecorationTheme: InputDecorationTheme(
+      filled: light,
+      fillColor: light ? cream : null,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+    ),
+    progressIndicatorTheme: ProgressIndicatorThemeData(color: light ? p.secondary : p.primary),
+    snackBarTheme: SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: light ? ink : null,
+      contentTextStyle: light ? const TextStyle(color: cream) : null,
+    ),
     extensions: [MapColors.of(p)],
   );
 }
