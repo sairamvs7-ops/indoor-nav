@@ -31,7 +31,12 @@ void main() {
     await tester.pumpWidget(
       IndoorNavApp(repository: repo, settings: settings, loadSample: loadSample ?? () async => loadRealMap()),
     );
-    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 200)));
+    // The building list is read from disk; give the real file reads time to
+    // finish (the spinner shown meanwhile would never let pumpAndSettle end).
+    for (var i = 0; i < 50 && find.byType(CircularProgressIndicator).evaluate().isNotEmpty; i++) {
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+      await tester.pump();
+    }
     await tester.pumpAndSettle();
     return settings;
   }
