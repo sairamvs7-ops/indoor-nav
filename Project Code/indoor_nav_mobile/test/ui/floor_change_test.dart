@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:indoor_nav_mobile/ui/app_theme.dart';
@@ -69,7 +71,7 @@ void main() {
       ),
     );
 
-    showFloorChange(screen, map: map, images: assetFloorImages(), from: map.node(25), to: map.node(11));
+    unawaited(showFloorChange(screen, map: map, images: assetFloorImages(), from: map.node(25), to: map.node(11)));
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Stairs down to Ground Floor'), findsOneWidget);
 

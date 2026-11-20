@@ -13,6 +13,7 @@ import 'building_draft.dart';
 import 'floor_editor_screen.dart';
 import 'marker_guide_screen.dart';
 import 'share_actions.dart';
+import 'walk_recorder_screen.dart';
 
 /// Setting up a building: its floors (one blueprint each), what still needs
 /// doing, and the way on to markers and navigation.
@@ -82,6 +83,8 @@ class _BuildingEditorScreenState extends State<BuildingEditorScreen> {
       width: picked.width,
       height: picked.height,
     );
+    final scale = picked.metresPerPixel;
+    if (scale != null) draft.calibrateFloor(level, pixels: 1, metres: scale); // CAD drawings know their scale
     if (mounted) await _openFloor(level);
   }
 
@@ -157,6 +160,12 @@ class _BuildingEditorScreenState extends State<BuildingEditorScreen> {
   void _openMarkers(BuildingMap map) => Navigator.of(context).push(
     MaterialPageRoute<void>(
       builder: (_) => MarkerGuideScreen(map: map, images: _images, createDetector: widget.createDetector),
+    ),
+  );
+
+  void _openWalk() => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => WalkRecorderScreen(draft: _draft!, createDetector: widget.createDetector),
     ),
   );
 
@@ -241,6 +250,12 @@ class _BuildingEditorScreenState extends State<BuildingEditorScreen> {
           ),
           const SizedBox(height: 10),
           OutlinedButton.icon(
+            onPressed: map == null || map.markerIds.isEmpty ? null : _openWalk,
+            icon: const Icon(Icons.directions_walk),
+            label: const Text('Walk and check paths'),
+          ),
+          const SizedBox(height: 10),
+          OutlinedButton.icon(
             onPressed: ready ? () => _openNavigation(map) : null,
             icon: const Icon(Icons.navigation_outlined),
             label: const Text('Try navigation'),
@@ -286,8 +301,8 @@ class _SetupSteps extends StatelessWidget {
           children: [
             step(1, 'Upload a blueprint for each floor', hasFloors),
             step(2, 'Tap to add rooms, lifts, stairs and entrances', hasPlaces),
-            step(3, 'Connect them with paths (the app suggests them)', ready),
-            step(4, 'Print the markers and stick each one where shown', false),
+            step(3, 'Swipe along the corridors on each floor', ready),
+            step(4, 'Print the markers, stick them up, then walk and check', false),
           ],
         ),
       ),
