@@ -110,7 +110,7 @@ void main() {
 
     test('rejects a link on a place that is not a lift or stairs', () {
       final json = towerJson();
-      (json['nodes'] as List<Object?>)[7] = {...(json['nodes'] as List<Object?>)[7] as Map<String, dynamic>, 'link': 'x'};
+      ((json['nodes'] as List<Object?>)[7]! as Map<String, Object?>)['link'] = 'x';
 
       expect(() => BuildingMap.fromJson(json), throwsMapError('only lifts and stairs'));
     });
@@ -168,7 +168,7 @@ void main() {
 
     test('accepts markers up to 249', () {
       final json = towerJson();
-      (json['nodes'] as List<Object?>)[0] = {...(json['nodes'] as List<Object?>)[0] as Map<String, dynamic>, 'marker': 249};
+      ((json['nodes'] as List<Object?>)[0]! as Map<String, Object?>)['marker'] = 249;
 
       expect(BuildingMap.fromJson(json).nodeForMarker(249)!.name, 'Entrance');
     });

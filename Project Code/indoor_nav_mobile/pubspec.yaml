@@ -18,6 +18,9 @@ dependencies:
   opencv_dart: 1.4.5
   provider: ^6.1.5+1
   # Building setup: blueprint photos, storage, sharing and printable markers.
+  # Not used directly: image 4.11.0 (via pdf) calls ZLibDecoder.decodeLazy,
+  # which only exists from archive 4.4, but only asks for ^4.0.9.
+  archive: ^4.4.0
   file_picker: ^10.1.2
   image_picker: ^1.1.2
   path_provider: ^2.1.5
