@@ -48,6 +48,9 @@ void main() {
     expect(find.text('Set up your first building'), findsOneWidget);
     expect(find.text('Indoor Nav demo building'), findsOneWidget);
     expect(find.text('Copy to edit'), findsOneWidget);
+    // Only the card's buttons: no floating button covering Import.
+    expect(find.byType(FloatingActionButton), findsNothing);
+    expect(find.text('Import'), findsOneWidget);
   });
 
   testWidgets('lists buildings saved on the phone', (tester) async {
@@ -66,6 +69,7 @@ void main() {
     expect(find.text('Main Block'), findsOneWidget);
     expect(find.text('1 floor · 0 places'), findsOneWidget);
     expect(find.text('Set up your first building'), findsNothing);
+    expect(find.widgetWithText(FloatingActionButton, 'New building'), findsOneWidget);
   });
 
   testWidgets('explains a broken sample building', (tester) async {

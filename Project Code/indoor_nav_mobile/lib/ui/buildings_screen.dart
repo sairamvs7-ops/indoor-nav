@@ -238,11 +238,15 @@ class _BuildingsScreenState extends State<BuildingsScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _create,
-        icon: const Icon(Icons.add_business_outlined),
-        label: const Text('New building'),
-      ),
+      // On first launch the empty-state card already has New building and
+      // Import, and the floating button would cover Import.
+      floatingActionButton: (buildings == null || buildings.isEmpty)
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: _create,
+              icon: const Icon(Icons.add_business_outlined),
+              label: const Text('New building'),
+            ),
     );
   }
 }
