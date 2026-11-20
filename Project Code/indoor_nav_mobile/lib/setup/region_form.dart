@@ -71,7 +71,7 @@ class _RegionFormState extends State<_RegionForm> {
   late final TextEditingController _marker = TextEditingController(
     text: (_place?.marker ?? widget.draft.nextFreeMarker())?.toString() ?? '',
   );
-  late bool _hasMarker = _place == null || _place?.marker != null;
+  late bool _hasMarker = _place == null || _place.marker != null;
   String? _markerError;
 
   static const _roomTypes = [NodeType.room, NodeType.washroom, NodeType.entry, NodeType.landmark];
