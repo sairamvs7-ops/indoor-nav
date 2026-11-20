@@ -186,7 +186,9 @@ List<DetectedRegion> detectRegions(Uint8List walls, int width, int height, {doub
   //    connected lines; letters are small separate blobs.
   final clean = padded;
   final minSpeckArea = math.max(12, (n * 0.00015).round());
-  final minSpeckSpan = math.max(4, (longest * 0.03).round());
+  // Handwritten labels ("NODE-4") are a few letters joined together, so
+  // anything up to 5% of the drawing that isn't joined to the walls goes.
+  final minSpeckSpan = math.max(4, (longest * 0.05).round());
   _components(clean, w, h, eight: true, onComponent: (pixels, minX, minY, maxX, maxY) {
     final span = math.max(maxX - minX, maxY - minY) + 1;
     if (pixels.length < minSpeckArea || span < minSpeckSpan) {
@@ -251,7 +253,9 @@ List<DetectedRegion> detectRegions(Uint8List walls, int width, int height, {doub
     final i = queue.removeFirst();
     if (depth[i] >= r) continue;
     final x = i % w, y = i ~/ w;
-    for (final (dx, dy) in const [(1, 0), (-1, 0), (0, 1), (0, -1)]) {
+    // Eight directions, so regions grow back as squares and keep sharp
+    // corners (four directions would grow diamonds and chamfer them).
+    for (final (dx, dy) in _ring) {
       final nx = x + dx, ny = y + dy;
       if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
       final j = ny * w + nx;
@@ -266,9 +270,9 @@ List<DetectedRegion> detectRegions(Uint8List walls, int width, int height, {doub
   // 6. Trace, simplify and square up each region; long thin ones are corridors.
   final regions = <DetectedRegion>[];
   for (final id in areas.keys) {
-    final contour = _trace(labels, w, h, id);
+    final contour = _closedOutline(labels, w, h, id, smooth: math.max(2, (longest * 0.015).round()));
     if (contour.length < 4) continue;
-    final outline = squareUp(_simplifyClosed(contour, math.max(1.2, longest * 0.004)));
+    final outline = squareUp(_simplifyClosed(contour, math.max(1.5, longest * 0.006)), degrees: 12);
     if (outline.length < 3) continue;
     final (minX, minY, maxX, maxY) = boxes[id]!;
     final bw = maxX - minX + 1 + 2 * r;
@@ -368,6 +372,42 @@ Uint8List _dilate(Uint8List mask, int w, int h, int r) {
     }
   }
   return out;
+}
+
+/// Outline of region [id] after filling dents narrower than about 2 x
+/// [smooth] pixels (text or symbols touching a wall), by closing the region's
+/// shape: grow it by [smooth], then shrink it back.
+List<Pt> _closedOutline(Int32List labels, int w, int h, int id, {required int smooth}) {
+  var minX = w, minY = h, maxX = -1, maxY = -1;
+  for (var i = 0; i < labels.length; i++) {
+    if (labels[i] != id) continue;
+    final x = i % w, y = i ~/ w;
+    if (x < minX) minX = x;
+    if (x > maxX) maxX = x;
+    if (y < minY) minY = y;
+    if (y > maxY) maxY = y;
+  }
+  if (maxX < 0) return const [];
+  final m = smooth + 1;
+  final cw = maxX - minX + 1 + 2 * m;
+  final ch = maxY - minY + 1 + 2 * m;
+  final mask = Uint8List(cw * ch);
+  for (var y = minY; y <= maxY; y++) {
+    for (var x = minX; x <= maxX; x++) {
+      if (labels[y * w + x] == id) mask[(y - minY + m) * cw + (x - minX + m)] = 1;
+    }
+  }
+  final grown = _dilate(mask, cw, ch, smooth);
+  final outside = Uint8List(cw * ch);
+  for (var i = 0; i < outside.length; i++) {
+    outside[i] = grown[i] == 1 ? 0 : 1;
+  }
+  final shrunkOutside = _dilate(outside, cw, ch, smooth);
+  final closed = Int32List(cw * ch);
+  for (var i = 0; i < closed.length; i++) {
+    closed[i] = shrunkOutside[i] == 1 ? 0 : 1;
+  }
+  return [for (final p in _trace(closed, cw, ch, 1)) (x: p.x + minX - m, y: p.y + minY - m)];
 }
 
 const List<(int, int)> _ring = [(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)];

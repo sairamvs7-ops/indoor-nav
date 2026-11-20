@@ -251,22 +251,61 @@ class BuildingDraft extends ChangeNotifier {
     f.regions
       ..clear()
       ..addAll(regions);
+    // Places are linked to the room they sit in, or failing that a room right
+    // next to them (places are often plotted at the door). Corridors are never
+    // claimed: they are shared walkways, not places.
+    final reach = 0.03 * math.max(f.width, f.height);
+    final claimed = <String>{};
     for (final n in nodesOn(level)) {
       n.region = null;
-      for (final r in f.regions) {
-        if (r.contains((x: n.x, y: n.y))) {
-          n.region = r.id;
-          final kind = switch (n.type) {
-            NodeType.stairs => RegionKind.stairs,
-            NodeType.lift => RegionKind.lift,
-            _ => r.kind == RegionKind.corridor ? null : RegionKind.room,
-          };
-          if (kind != null && kind != r.kind) _setKind(f, r.id, kind);
-          break;
+    }
+    final places = nodesOn(level).where((n) => n.type != NodeType.corridor).toList();
+    for (final pass in [true, false]) {
+      for (final n in places) {
+        if (n.region != null) continue;
+        final p = (x: n.x, y: n.y);
+        FloorRegion? best;
+        var bestDistance = pass ? 0.0 : reach;
+        for (final r in f.regions) {
+          if (r.kind == RegionKind.corridor || r.kind == RegionKind.ignored || claimed.contains(r.id)) continue;
+          if (pass) {
+            if (r.contains(p)) {
+              best = r;
+              break;
+            }
+          } else {
+            final d = _distanceToOutline(p, r.outline);
+            if (d < bestDistance) {
+              best = r;
+              bestDistance = d;
+            }
+          }
         }
+        if (best == null) continue;
+        n.region = best.id;
+        claimed.add(best.id);
+        final kind = switch (n.type) {
+          NodeType.stairs => RegionKind.stairs,
+          NodeType.lift => RegionKind.lift,
+          _ => RegionKind.room,
+        };
+        if (kind != best.kind) _setKind(f, best.id, kind);
       }
     }
     _changed();
+  }
+
+  static double _distanceToOutline(Pt p, List<Pt> outline) {
+    var best = double.infinity;
+    for (var i = 0; i < outline.length; i++) {
+      final a = outline[i], b = outline[(i + 1) % outline.length];
+      final dx = b.x - a.x, dy = b.y - a.y;
+      final l2 = dx * dx + dy * dy;
+      final t = l2 == 0 ? 0.0 : (((p.x - a.x) * dx + (p.y - a.y) * dy) / l2).clamp(0.0, 1.0);
+      final qx = a.x + dx * t - p.x, qy = a.y + dy * t - p.y;
+      best = math.min(best, math.sqrt(qx * qx + qy * qy));
+    }
+    return best;
   }
 
   /// Sets what region [regionId] on [level] is. Corridors get walkable

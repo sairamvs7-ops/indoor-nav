@@ -160,6 +160,27 @@ void main() {
       expect(draft.nodes[id]!.region, startsWith('n'));
     });
 
+    test('a place plotted at a room door claims that room, never the corridor', () {
+      final draft = BuildingDraft.fromJson(
+        emptyBuildingJson(id: 'abcdef0123456789', name: 'Plan'),
+        save: (_) async {},
+        saveDelay: Duration.zero,
+      );
+      draft.addFloor(name: 'Ground', image: 'g.png', width: 400, height: 300);
+      // Just below the top-left room's wall, in the corridor.
+      final door = draft.addNode(name: 'Room 1', type: NodeType.room, floor: 0, x: 100, y: 127);
+      final generated = generateFloorMap(planPng());
+
+      draft.setGeneratedMap(0, [
+        for (final (i, r) in generated.regions.indexed)
+          FloorRegion(id: 'r${i + 1}', kind: r.kind, outline: r.outline, paths: r.paths),
+      ]);
+
+      final region = draft.floor(0).region(draft.nodes[door]!.region!)!;
+      expect(region.kind, RegionKind.room);
+      expect(region.contains((x: 100.0, y: 60.0)), isTrue); // the top-left room
+    });
+
     test('traced areas can become stairs with a link name', () {
       final draft = draftWithMap();
       final id = draft.addRegion(0, [(x: 20.0, y: 200.0), (x: 60.0, y: 200.0), (x: 60.0, y: 280.0), (x: 20.0, y: 280.0)]);
