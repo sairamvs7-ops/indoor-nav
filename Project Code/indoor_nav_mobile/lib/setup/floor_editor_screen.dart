@@ -1,34 +1,55 @@
+import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
 import '../map/aruco_markers.dart';
 import '../map/building_map.dart';
 import '../ui/app_theme.dart';
+import '../mapgen/floor_map_generator.dart' show GapClosing;
+import '../mapgen/generate_regions.dart';
 import '../ui/blueprint_view.dart';
+import '../ui/generated_map_painter.dart';
 import '../ui/node_style.dart';
 import 'building_draft.dart';
+import 'region_form.dart';
 
-enum EditMode { places, corridors, scale }
+enum EditMode { map, places, corridors, scale }
 
 /// What a touch does in corridors mode.
 enum CorridorTool { draw, pan, erase, link }
 
-/// Setting up one floor: tap the blueprint to add places, swipe along the
-/// corridors, and set the drawing's real-world scale.
+/// Setting up one floor: the app generates a map from the blueprint, then
+/// you say what each area is, add any extra places and paths, and set the
+/// real-world scale.
 class FloorEditorScreen extends StatefulWidget {
-  const FloorEditorScreen({super.key, required this.draft, required this.level, required this.images});
+  const FloorEditorScreen({
+    super.key,
+    required this.draft,
+    required this.level,
+    required this.images,
+    required this.loadImage,
+  });
 
   final BuildingDraft draft;
   final int level;
   final FloorImages images;
+
+  /// Reads a floor's blueprint file, for generating its map.
+  final Future<Uint8List> Function(String image) loadImage;
 
   @override
   State<FloorEditorScreen> createState() => _FloorEditorScreenState();
 }
 
 class _FloorEditorScreenState extends State<FloorEditorScreen> {
-  EditMode _mode = EditMode.places;
+  EditMode _mode = EditMode.map;
+  bool _guide = false; // show the blueprint faintly under the generated map
+  bool _generating = false;
+  String? _region; // map mode: the area just tapped
+  List<Offset>? _trace; // map mode: corners of an area being traced
+  GapClosing _gaps = GapClosing.normal;
   CorridorTool _tool = CorridorTool.draw;
   List<Offset>? _stroke; // corridor being drawn right now
   BuildingMap? _preview; // the built network, to show how places join corridors
@@ -45,6 +66,98 @@ class _FloorEditorScreenState extends State<FloorEditorScreen> {
     super.initState();
     _preview = draft.tryBuild().$1;
     draft.addListener(_redraw);
+    // A new floor gets its map generated straight away.
+    if (draft.floor(widget.level).regions.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(_generate()));
+    }
+  }
+
+  Future<void> _generate() async {
+    if (_generating) return;
+    setState(() => _generating = true);
+    try {
+      final floor = draft.floor(widget.level);
+      final regions = await generateRegions(await widget.loadImage(floor.image), gaps: _gaps);
+      if (!mounted) return;
+      draft.setGeneratedMap(widget.level, regions);
+      final rooms = regions.where((r) => r.kind == RegionKind.room).length;
+      final corridors = regions.where((r) => r.kind == RegionKind.corridor).length;
+      _toast(
+        regions.isEmpty
+            ? 'No rooms found. Try "Wider doorways", or trace the areas yourself.'
+            : 'Found $rooms rooms and $corridors corridors. Tap each area to say what it is.',
+      );
+    } on FormatException catch (e) {
+      if (mounted) _toast(e.message);
+    } finally {
+      if (mounted) setState(() => _generating = false);
+    }
+  }
+
+  Future<void> _regenerate() async {
+    final gaps = await showModalBottomSheet<GapClosing>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const ListTile(
+              title: Text('Generate the map again'),
+              subtitle: Text('Places you have named stay, linked to the area they sit in.'),
+            ),
+            for (final (option, title, subtitle) in const [
+              (GapClosing.narrow, 'Narrow doorways', 'Keeps small rooms apart'),
+              (GapClosing.normal, 'Normal', 'Works for most plans'),
+              (GapClosing.wide, 'Wider doorways', 'When rooms leak into each other'),
+            ])
+              ListTile(
+                leading: Icon(option == _gaps ? Icons.radio_button_checked : Icons.radio_button_off),
+                title: Text(title),
+                subtitle: Text(subtitle),
+                onTap: () => Navigator.of(context).pop(option),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (gaps == null) return;
+    _gaps = gaps;
+    await _generate();
+  }
+
+  Future<void> _openRegion(FloorRegion region) async {
+    setState(() => _region = region.id);
+    final result = await showRegionForm(context, draft: draft, region: region);
+    if (mounted) setState(() => _region = null);
+    if (result == null) return;
+    if (result.delete) {
+      draft.removeRegion(widget.level, region.id);
+      return;
+    }
+    switch (result.kind) {
+      case RegionKind.corridor || RegionKind.ignored:
+        draft.setRegionKind(widget.level, region.id, result.kind);
+      case RegionKind.room || RegionKind.stairs || RegionKind.lift:
+        draft.assignPlace(
+          widget.level,
+          region.id,
+          name: result.name,
+          type: result.type,
+          withMarker: result.hasMarker,
+          marker: result.marker,
+          link: result.link,
+        );
+    }
+  }
+
+  Future<void> _finishTrace() async {
+    final trace = _trace;
+    setState(() => _trace = null);
+    if (trace == null || trace.length < 3) return;
+    final id = draft.addRegion(widget.level, [for (final p in trace) (x: p.dx, y: p.dy)]);
+    final region = draft.floor(widget.level).region(id);
+    if (region != null) await _openRegion(region);
   }
 
   @override
@@ -85,6 +198,8 @@ class _FloorEditorScreenState extends State<FloorEditorScreen> {
 
   void _setMode(EditMode mode) => setState(() {
     _mode = mode;
+    _trace = null;
+    _region = null;
     _selected = null;
     _moving = null;
     _suggestions = null;
@@ -106,6 +221,21 @@ class _FloorEditorScreenState extends State<FloorEditorScreen> {
 
   Future<void> _onTap(Offset point, double scale) async {
     switch (_mode) {
+      case EditMode.map when _trace != null:
+        final trace = _trace!;
+        // Tapping near the first corner closes the shape.
+        if (trace.length >= 3 && (trace.first - point).distance * scale < 24) {
+          await _finishTrace();
+        } else {
+          setState(() => trace.add(point));
+        }
+      case EditMode.map:
+        final region = draft.regionAt(widget.level, (x: point.dx, y: point.dy));
+        if (region == null) {
+          _toast(draft.floor(widget.level).regions.isEmpty ? 'Generate the map first.' : 'Nothing here. Use Trace to add an area.');
+        } else {
+          await _openRegion(region);
+        }
       case EditMode.places:
         final moving = _moving;
         if (moving != null) {
@@ -233,6 +363,10 @@ class _FloorEditorScreenState extends State<FloorEditorScreen> {
   }
 
   String get _help => switch (_mode) {
+    EditMode.map when _generating => 'Reading the blueprint and drawing the map…',
+    EditMode.map when _trace != null =>
+      'Tap each corner of the area. Tap the first corner again, or Done, to finish (${_trace!.length} corners).',
+    EditMode.map => 'Tap each area to name the room, or mark it as corridor, stairs, lift or not used.',
     EditMode.places when _moving != null => 'Tap the new spot for ${draft.nodes[_moving]?.name}.',
     EditMode.places => 'Tap an empty spot to add a room, lift, stairs or entrance. Tap a place to edit it.',
     EditMode.corridors => switch (_tool) {
@@ -255,6 +389,12 @@ class _FloorEditorScreenState extends State<FloorEditorScreen> {
     final placeCount = draft.nodesOn(widget.level).length;
     final corridorCount = draft.corridorsOn(widget.level).length;
     final drawing = _mode == EditMode.corridors && _tool == CorridorTool.draw;
+    final hasMap = floor.regions.isNotEmpty;
+    final style = MapStyle.of(theme.brightness);
+    final names = {
+      for (final n in draft.nodesOn(widget.level))
+        if (n.region != null) n.region!: n.name,
+    };
 
     return Scaffold(
       appBar: AppBar(
@@ -268,9 +408,11 @@ class _FloorEditorScreenState extends State<FloorEditorScreen> {
                 backgroundColor: theme.colorScheme.surface,
                 selectedBackgroundColor: theme.colorScheme.secondaryContainer,
               ),
+              showSelectedIcon: false,
               segments: const [
+                ButtonSegment(value: EditMode.map, icon: Icon(Icons.map_outlined), label: Text('Map')),
                 ButtonSegment(value: EditMode.places, icon: Icon(Icons.add_location_alt_outlined), label: Text('Places')),
-                ButtonSegment(value: EditMode.corridors, icon: Icon(Icons.route), label: Text('Corridors')),
+                ButtonSegment(value: EditMode.corridors, icon: Icon(Icons.route), label: Text('Paths')),
                 ButtonSegment(value: EditMode.scale, icon: Icon(Icons.straighten), label: Text('Scale')),
               ],
               selected: {_mode},
@@ -308,6 +450,18 @@ class _FloorEditorScreenState extends State<FloorEditorScreen> {
                     onDrawUpdate: drawing ? _drawUpdate : null,
                     onDrawEnd: drawing ? _drawEnd : null,
                     image: widget.images(floor.image),
+                    // Once a map is generated the blueprint is only a faint guide.
+                    imageOpacity: hasMap ? (_guide ? 0.3 : 0) : 1,
+                    underlay: hasMap
+                        ? (_) => GeneratedMapPainter(
+                            regions: List.of(floor.regions),
+                            drawingWidth: floor.width,
+                            style: style,
+                            names: names,
+                            selectedRegion: _region,
+                            showIgnored: _mode == EditMode.map,
+                          )
+                        : null,
                     imageWidth: floor.width,
                     imageHeight: floor.height,
                     label: '${floor.name} blueprint',
@@ -322,6 +476,7 @@ class _FloorEditorScreenState extends State<FloorEditorScreen> {
                       selected: _selected ?? _moving,
                       suggestions: _suggestions ?? const [],
                       scalePoints: List.of(_scalePoints),
+                      trace: _trace == null ? null : List.of(_trace!),
                       scale: scale,
                       revision: Object.hash(placeCount, corridorCount, _selected, _moving, _suggestions, _scalePoints.length),
                     ),
@@ -332,6 +487,51 @@ class _FloorEditorScreenState extends State<FloorEditorScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
               child: switch (_mode) {
+                EditMode.map when _generating => const LinearProgressIndicator(),
+                EditMode.map when _trace != null => Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(onPressed: () => setState(() => _trace = null), child: const Text('Cancel')),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: (_trace?.length ?? 0) >= 3 ? _finishTrace : null,
+                        child: const Text('Done'),
+                      ),
+                    ),
+                  ],
+                ),
+                EditMode.map when !hasMap => FilledButton.icon(
+                  onPressed: _generate,
+                  icon: const Icon(Icons.auto_awesome),
+                  label: const Text('Generate map from blueprint'),
+                  style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+                ),
+                EditMode.map => Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => setState(() => _trace = []),
+                        icon: const Icon(Icons.polyline_outlined),
+                        label: const Text('Trace area'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton.filledTonal(
+                      tooltip: _guide ? 'Hide blueprint' : 'Show blueprint underneath',
+                      isSelected: _guide,
+                      onPressed: () => setState(() => _guide = !_guide),
+                      icon: const Icon(Icons.layers_outlined),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton.filledTonal(
+                      tooltip: 'Generate again',
+                      onPressed: _regenerate,
+                      icon: const Icon(Icons.refresh),
+                    ),
+                  ],
+                ),
                 EditMode.corridors when _tool == CorridorTool.link && (_suggestions?.isNotEmpty ?? false) => Row(
                   children: [
                     Expanded(
@@ -433,6 +633,7 @@ class _EditorPainter extends CustomPainter {
     required this.selected,
     required this.suggestions,
     required this.scalePoints,
+    this.trace,
     required this.scale,
     required this.revision,
   });
@@ -446,6 +647,9 @@ class _EditorPainter extends CustomPainter {
   final int? selected;
   final List<(int, int)> suggestions;
   final List<Offset> scalePoints;
+
+  /// Corners of an area being traced, in drawing pixels.
+  final List<Offset>? trace;
   final double scale;
   final int revision;
 
@@ -562,6 +766,25 @@ class _EditorPainter extends CustomPainter {
           backgroundColor: Color(0xCCFFFFFF),
         ),
       );
+    }
+
+    final corners = trace;
+    if (corners != null && corners.isNotEmpty) {
+      final line = Paint()
+        ..color = colors.selected
+        ..strokeWidth = 3
+        ..style = PaintingStyle.stroke
+        ..strokeJoin = StrokeJoin.round;
+      final path = Path()..moveTo(corners.first.dx * scale, corners.first.dy * scale);
+      for (final c in corners.skip(1)) {
+        path.lineTo(c.dx * scale, c.dy * scale);
+      }
+      canvas.drawPath(path, line);
+      for (final (i, c) in corners.indexed) {
+        canvas
+          ..drawCircle(c * scale, i == 0 ? 9 : 6, Paint()..color = Colors.white)
+          ..drawCircle(c * scale, i == 0 ? 7 : 4.5, Paint()..color = colors.selected);
+      }
     }
 
     if (scalePoints.isNotEmpty) {

@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../map/building_map.dart';
+import '../mapgen/generate_regions.dart';
 import '../scanner/marker_detector.dart';
+import '../setup/building_draft.dart';
 import '../setup/building_editor_screen.dart';
 import '../setup/share_actions.dart';
 import '../storage/building_repository.dart';
@@ -114,16 +116,50 @@ class _BuildingsScreenState extends State<BuildingsScreen> {
     }
   }
 
-  Future<void> _navigateSample(BuildingMap map) => Navigator.of(context).push(
-    MaterialPageRoute<void>(
-      builder: (_) => NavigationScreen(map: map, images: assetFloorImages(), createDetector: widget.createDetector),
-    ),
-  );
+  Future<BuildingMap>? _sampleWithMaps;
+
+  /// The sample building with a generated map on every floor, made once from
+  /// its bundled blueprints. Places are linked to the area they sit in.
+  Future<BuildingMap> _generateSampleMaps(BuildingMap sample) async {
+    final json = Map<String, dynamic>.from(jsonDecode(jsonEncode(sample.toJson())) as Map);
+    final draft = BuildingDraft.fromJson(json, save: (_) async {}, saveDelay: Duration.zero);
+    try {
+      for (final floor in sample.floors) {
+        final bytes = (await rootBundle.load(floor.image)).buffer.asUint8List();
+        draft.setGeneratedMap(floor.level, await generateRegions(bytes));
+      }
+      return BuildingMap.fromJson(draft.toJson());
+    } finally {
+      draft.dispose();
+    }
+  }
+
+  Future<void> _navigateSample(BuildingMap sample) async {
+    final future = _sampleWithMaps ??= _generateSampleMaps(sample);
+    BuildingMap map;
+    try {
+      map = await future;
+    } on Object {
+      map = sample; // fall back to the blueprint images
+    }
+    if (!mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => NavigationScreen(map: map, images: assetFloorImages(), createDetector: widget.createDetector),
+      ),
+    );
+  }
 
   /// Copies the bundled sample into an editable building.
   Future<void> _copySample(BuildingMap sample) async {
     final id = await repo.create('${sample.name} (copy)');
-    final json = Map<String, dynamic>.from(jsonDecode(jsonEncode(sample.toJson())) as Map);
+    var withMaps = sample;
+    try {
+      withMaps = await (_sampleWithMaps ??= _generateSampleMaps(sample));
+    } on Object {
+      // Copy without generated maps; they can be generated in the editor.
+    }
+    final json = Map<String, dynamic>.from(jsonDecode(jsonEncode(withMaps.toJson())) as Map);
     final floors = (json['floors'] as List<Object?>).cast<Map<String, dynamic>>();
     for (final floor in floors) {
       final asset = floor['image'] as String;

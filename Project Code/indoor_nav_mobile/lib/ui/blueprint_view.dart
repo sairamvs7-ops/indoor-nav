@@ -19,7 +19,7 @@ FloorImages folderFloorImages(Directory folder) =>
 class BlueprintView extends StatelessWidget {
   const BlueprintView({
     super.key,
-    required this.image,
+    this.image,
     required this.imageWidth,
     required this.imageHeight,
     required this.overlay,
@@ -31,9 +31,18 @@ class BlueprintView extends StatelessWidget {
     this.onDrawStart,
     this.onDrawUpdate,
     this.onDrawEnd,
+    this.underlay,
+    this.imageOpacity = 1,
   });
 
-  final ImageProvider image;
+  /// The blueprint photo or scan. Null when only a generated map is shown.
+  final ImageProvider? image;
+
+  /// Painted under [overlay], over the image: the generated floor map.
+  final CustomPainter Function(double scale)? underlay;
+
+  /// Fades the image, for using a blueprint as a tracing guide.
+  final double imageOpacity;
   final double imageWidth;
   final double imageHeight;
 
@@ -78,16 +87,21 @@ class BlueprintView extends StatelessWidget {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      Image(
-                        image: image,
-                        fit: BoxFit.fill,
-                        semanticLabel: label,
-                        gaplessPlayback: true,
-                        errorBuilder: (context, error, stack) => ColoredBox(
-                          color: theme.colorScheme.surfaceContainerHighest,
-                          child: const Center(child: Icon(Icons.broken_image_outlined, size: 48)),
+                      if (underlay != null) CustomPaint(painter: underlay!(scale)),
+                      if (image != null && imageOpacity > 0)
+                        Opacity(
+                          opacity: imageOpacity.clamp(0.0, 1.0),
+                          child: Image(
+                            image: image!,
+                            fit: BoxFit.fill,
+                            semanticLabel: label,
+                            gaplessPlayback: true,
+                            errorBuilder: (context, error, stack) => ColoredBox(
+                              color: theme.colorScheme.surfaceContainerHighest,
+                              child: const Center(child: Icon(Icons.broken_image_outlined, size: 48)),
+                            ),
+                          ),
                         ),
-                      ),
                       CustomPaint(painter: overlay(scale)),
                     ],
                   ),

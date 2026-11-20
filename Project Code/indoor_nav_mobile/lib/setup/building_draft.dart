@@ -7,6 +7,7 @@ import '../map/aruco_markers.dart';
 import '../map/building_map.dart';
 import '../map/corridor_network.dart' show simplifyStroke;
 import '../map/map_json.dart' show corridorsToJson;
+import '../mapgen/floor_map_generator.dart' show corridorCentrelines;
 import 'path_suggester.dart';
 
 class DraftFloor {
@@ -17,7 +18,8 @@ class DraftFloor {
     required this.width,
     required this.height,
     this.metresPerPixel,
-  });
+    List<FloorRegion>? regions,
+  }) : regions = regions ?? [];
 
   final int level;
   String name;
@@ -25,6 +27,16 @@ class DraftFloor {
   double width;
   double height;
   double? metresPerPixel;
+
+  /// The generated map of this floor (rooms, corridors, stairs, lifts).
+  final List<FloorRegion> regions;
+
+  FloorRegion? region(String id) {
+    for (final r in regions) {
+      if (r.id == id) return r;
+    }
+    return null;
+  }
 }
 
 class DraftNode {
@@ -37,6 +49,7 @@ class DraftNode {
     required this.y,
     this.marker,
     this.link,
+    this.region,
   });
 
   final int id;
@@ -47,6 +60,9 @@ class DraftNode {
   double y;
   int? marker;
   String? link;
+
+  /// The generated-map region this place is, if any.
+  String? region;
 }
 
 /// A building being set up: floors, places and paths that can be changed one
@@ -67,6 +83,10 @@ class BuildingDraft extends ChangeNotifier {
           width: (f['width'] as num).toDouble(),
           height: (f['height'] as num).toDouble(),
           metresPerPixel: (f['metresPerPixel'] as num?)?.toDouble(),
+          regions: [
+            for (final (i, r) in (f['regions'] as List<Object?>? ?? const []).indexed)
+              FloorRegion.fromJson(r, 'floor ${f['level']} region $i'),
+          ],
         ),
       );
     }
@@ -82,6 +102,7 @@ class BuildingDraft extends ChangeNotifier {
         y: (n['y'] as num).toDouble(),
         marker: n['marker'] as int?,
         link: n['link'] as String?,
+        region: n['region'] as String?,
       );
       nodes[node.id] = node;
     }
@@ -212,6 +233,152 @@ class BuildingDraft extends ChangeNotifier {
     return math.sqrt(qx * qx + qy * qy);
   }
 
+  // --- Generated floor maps ----------------------------------------------
+
+  /// The place that uses region [regionId], if any.
+  DraftNode? placeFor(String regionId) {
+    for (final n in nodes.values) {
+      if (n.region == regionId) return n;
+    }
+    return null;
+  }
+
+  /// Replaces a floor's generated map, e.g. after (re)generating it from the
+  /// blueprint. Places keep working: each is linked to the new region it
+  /// sits in, and lifts and stairs mark their region as such.
+  void setGeneratedMap(int level, List<FloorRegion> regions) {
+    final f = floor(level);
+    f.regions
+      ..clear()
+      ..addAll(regions);
+    for (final n in nodesOn(level)) {
+      n.region = null;
+      for (final r in f.regions) {
+        if (r.contains((x: n.x, y: n.y))) {
+          n.region = r.id;
+          final kind = switch (n.type) {
+            NodeType.stairs => RegionKind.stairs,
+            NodeType.lift => RegionKind.lift,
+            _ => r.kind == RegionKind.corridor ? null : RegionKind.room,
+          };
+          if (kind != null && kind != r.kind) _setKind(f, r.id, kind);
+          break;
+        }
+      }
+    }
+    _changed();
+  }
+
+  /// Sets what region [regionId] on [level] is. Corridors get walkable
+  /// centrelines; a region that stops being a place loses its place.
+  void setRegionKind(int level, String regionId, RegionKind kind) {
+    _setKind(floor(level), regionId, kind);
+    if (kind == RegionKind.corridor || kind == RegionKind.ignored) {
+      final place = placeFor(regionId);
+      if (place != null) deleteNode(place.id);
+    }
+    _changed();
+  }
+
+  void _setKind(DraftFloor f, String regionId, RegionKind kind) {
+    final index = f.regions.indexWhere((r) => r.id == regionId);
+    if (index < 0) return;
+    final region = f.regions[index];
+    f.regions[index] = region.copyWith(
+      kind: kind,
+      paths: kind == RegionKind.corridor
+          ? corridorCentrelines(region.outline, longest: math.max(f.width, f.height))
+          : const [],
+    );
+  }
+
+  /// Makes region [regionId] a named place (room, stairs, lift...), creating
+  /// its place at the region's centre or updating the existing one.
+  /// Returns the place's id.
+  int assignPlace(
+    int level,
+    String regionId, {
+    required String name,
+    required NodeType type,
+    bool withMarker = true,
+    int? marker,
+    String? link,
+  }) {
+    final region = floor(level).region(regionId)!;
+    final kind = switch (type) {
+      NodeType.stairs => RegionKind.stairs,
+      NodeType.lift => RegionKind.lift,
+      _ => RegionKind.room,
+    };
+    _setKind(floor(level), regionId, kind);
+    final existing = placeFor(regionId);
+    if (existing != null) {
+      updateNode(
+        existing.id,
+        name: name,
+        type: type,
+        link: link ?? '',
+        clearMarker: !withMarker,
+        marker: withMarker ? (marker ?? existing.marker ?? nextFreeMarker()) : null,
+      );
+      return existing.id;
+    }
+    final c = region.centre;
+    final id = addNode(name: name, type: type, floor: level, x: c.x, y: c.y, withMarker: withMarker, link: link);
+    if (marker != null && withMarker) updateNode(id, marker: marker);
+    nodes[id]!.region = regionId;
+    _changed();
+    return id;
+  }
+
+  /// Adds a region traced by hand (tapping its corners), for areas the
+  /// generator missed, like hatched stairwells. Returns its id.
+  String addRegion(int level, List<Pt> outline, {RegionKind kind = RegionKind.room}) {
+    final f = floor(level);
+    var n = f.regions.length + 1;
+    while (f.region('t$n') != null) {
+      n++;
+    }
+    final id = 't$n';
+    f.regions.add(FloorRegion(id: id, kind: RegionKind.room, outline: List.unmodifiable(outline)));
+    if (kind != RegionKind.room) _setKind(f, id, kind);
+    _changed();
+    return id;
+  }
+
+  void removeRegion(int level, String regionId) {
+    final place = placeFor(regionId);
+    if (place != null) place.region = null;
+    floor(level).regions.removeWhere((r) => r.id == regionId);
+    _changed();
+  }
+
+  /// The region on [level] under [point], smallest first (a stairwell drawn
+  /// inside a corridor wins over the corridor).
+  FloorRegion? regionAt(int level, Pt point, {bool includeIgnored = true}) {
+    FloorRegion? best;
+    var bestArea = double.infinity;
+    for (final r in floor(level).regions) {
+      if (!includeIgnored && r.kind == RegionKind.ignored) continue;
+      if (!r.contains(point)) continue;
+      final area = _area(r.outline);
+      if (area < bestArea) {
+        best = r;
+        bestArea = area;
+      }
+    }
+    return best;
+  }
+
+  static double _area(List<Pt> o) {
+    var a = 0.0;
+    for (var i = 0; i < o.length; i++) {
+      final p = o[i], q = o[(i + 1) % o.length];
+      a += p.x * q.y - q.x * p.y;
+    }
+    return a.abs() / 2;
+  }
+
   void rename(String value) {
     name = value.trim().isEmpty ? name : value.trim();
     _changed();
@@ -253,6 +420,16 @@ class BuildingDraft extends ChangeNotifier {
       final c = corridors[i];
       if (c.floor != level) continue;
       corridors[i] = CorridorStroke(level, [for (final p in c.points) (x: p.x * sx, y: p.y * sy)]);
+    }
+    Pt scaled(Pt p) => (x: p.x * sx, y: p.y * sy);
+    for (var i = 0; i < f.regions.length; i++) {
+      final r = f.regions[i];
+      f.regions[i] = r.copyWith(
+        outline: [for (final p in r.outline) scaled(p)],
+        paths: [
+          for (final path in r.paths) [for (final p in path) scaled(p)],
+        ],
+      );
     }
     f
       ..image = image
@@ -372,6 +549,7 @@ class BuildingDraft extends ChangeNotifier {
           'width': f.width,
           'height': f.height,
           'metresPerPixel': ?f.metresPerPixel,
+          if (f.regions.isNotEmpty) 'regions': [for (final r in f.regions) r.toJson()],
         },
     ],
     'nodes': [
@@ -385,6 +563,7 @@ class BuildingDraft extends ChangeNotifier {
           'y': n.y,
           'marker': n.marker,
           'link': ?n.link,
+          'region': ?n.region,
         },
     ],
     'edges': [

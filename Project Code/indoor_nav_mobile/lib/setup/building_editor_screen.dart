@@ -6,6 +6,7 @@ import '../map/building_map.dart';
 import '../scanner/marker_detector.dart';
 import '../storage/building_repository.dart';
 import '../ui/blueprint_view.dart';
+import '../ui/generated_map_painter.dart';
 import '../ui/navigation_screen.dart';
 import 'blueprint_picker.dart';
 import 'building_checks.dart';
@@ -113,7 +114,12 @@ class _BuildingEditorScreenState extends State<BuildingEditorScreen> {
 
   Future<void> _openFloor(int level) => Navigator.of(context).push(
     MaterialPageRoute<void>(
-      builder: (_) => FloorEditorScreen(draft: _draft!, level: level, images: _images),
+      builder: (_) => FloorEditorScreen(
+        draft: _draft!,
+        level: level,
+        images: _images,
+        loadImage: (image) => widget.repository.fileIn(widget.buildingId, image).readAsBytes(),
+      ),
     ),
   );
 
@@ -343,11 +349,28 @@ class _FloorCard extends StatelessWidget {
             SizedBox(
               width: 96,
               height: 80,
-              child: Image(
-                image: image,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stack) => const Icon(Icons.broken_image_outlined),
-              ),
+              child: floor.regions.isNotEmpty
+                  ? ClipRect(
+                      child: FittedBox(
+                        fit: BoxFit.cover,
+                        child: SizedBox(
+                          width: floor.width,
+                          height: floor.height,
+                          child: CustomPaint(
+                            painter: GeneratedMapPainter(
+                              regions: floor.regions,
+                              drawingWidth: floor.width,
+                              style: MapStyle.of(theme.brightness),
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  : Image(
+                      image: image,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stack) => const Icon(Icons.broken_image_outlined),
+                    ),
             ),
             const SizedBox(width: 14),
             Expanded(

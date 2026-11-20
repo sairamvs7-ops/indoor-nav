@@ -1,15 +1,18 @@
 import 'dart:math' as math;
 
 import 'corridor_network.dart';
+import 'floor_regions.dart';
 import 'map_json.dart';
 
 export 'corridor_network.dart' show CorridorStroke, Pt;
+export 'floor_regions.dart' show FloorRegion, RegionKind;
 export 'map_json.dart' show MapFormatException;
 
 /// The building file format written by this version of the app. Version 1 is
 /// the original hand-written building.json; 2 added computed distances and
-/// lift/stairs links; 3 added swiped corridors. Older files load unchanged.
-const int currentMapFormat = 3;
+/// lift/stairs links; 3 added swiped corridors; 4 added generated floor maps
+/// (regions). Older files load unchanged.
+const int currentMapFormat = 4;
 
 /// Ids of junctions made from corridors start here, well clear of the ids
 /// people give places.
@@ -99,6 +102,7 @@ class Floor {
     required this.width,
     required this.height,
     this.metresPerPixel,
+    this.regions = const [],
   });
 
   final int level;
@@ -113,6 +117,21 @@ class Floor {
   /// Real-world scale of the drawing, set by calibrating two points. Null
   /// means not calibrated, and [defaultFloorSpanMetres] is assumed.
   final double? metresPerPixel;
+
+  /// The floor's generated map: rooms, corridors, stairs and lifts as
+  /// outlines. Empty for floors made before maps were generated, which then
+  /// fall back to showing the blueprint image.
+  final List<FloorRegion> regions;
+
+  bool get hasGeneratedMap => regions.isNotEmpty;
+
+  FloorRegion? region(String? id) {
+    if (id == null) return null;
+    for (final r in regions) {
+      if (r.id == id) return r;
+    }
+    return null;
+  }
 
   double get effectiveMetresPerPixel => metresPerPixel ?? defaultFloorSpanMetres / math.max(width, height);
 }
@@ -131,6 +150,7 @@ class MapNode {
     required this.y,
     this.markerId,
     this.link,
+    this.region,
     this.automatic = false,
   });
 
@@ -142,6 +162,10 @@ class MapNode {
   final double y;
   final int? markerId;
   final String? link;
+
+  /// The id of the generated-map region this place is (its room outline,
+  /// its stairwell), if any.
+  final String? region;
 
   /// True for junctions made from swiped corridors. Never saved; rebuilt from
   /// the corridors on load.
@@ -233,7 +257,13 @@ class BuildingMap {
     final corridorEdges = <(int, int)>[];
     var nextJunction = math.max(firstJunctionId, (nodes.isEmpty ? 0 : nodes.keys.reduce(math.max)) + 1);
     for (final floor in floors) {
-      final strokes = [for (final c in corridors) if (c.floor == floor.level) c.points];
+      final strokes = [
+        for (final c in corridors)
+          if (c.floor == floor.level) c.points,
+        // Corridors on the generated map are walkable along their centrelines.
+        for (final r in floor.regions)
+          if (r.kind == RegionKind.corridor) ...r.paths,
+      ];
       if (strokes.isEmpty) continue;
       final places = [for (final n in nodes.values) if (n.floor == floor.level) (n.id, (x: n.x, y: n.y))];
       final network = buildCorridorNetwork(
@@ -400,6 +430,7 @@ class BuildingMap {
           'width': f.width,
           'height': f.height,
           'metresPerPixel': ?f.metresPerPixel,
+          if (f.regions.isNotEmpty) 'regions': [for (final r in f.regions) r.toJson()],
         },
     ],
     'nodes': [
@@ -413,6 +444,7 @@ class BuildingMap {
           'y': n.y,
           'marker': n.markerId,
           'link': ?n.link,
+          'region': ?n.region,
         },
     ],
     'edges': [

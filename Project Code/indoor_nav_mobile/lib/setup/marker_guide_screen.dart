@@ -5,6 +5,7 @@ import '../scanner/marker_detector.dart';
 import '../scanner/scanner_screen.dart';
 import '../ui/app_theme.dart';
 import '../ui/blueprint_view.dart';
+import '../ui/generated_map_painter.dart';
 import '../ui/node_style.dart';
 import 'marker_sheet.dart';
 import 'share_actions.dart';
@@ -83,7 +84,16 @@ class _MarkerGuideScreenState extends State<MarkerGuideScreen> {
               Text(floor.name),
               const SizedBox(height: 12),
               BlueprintView(
-                image: widget.images(floor.image),
+                image: floor.hasGeneratedMap ? null : widget.images(floor.image),
+                underlay: floor.hasGeneratedMap
+                    ? (_) => GeneratedMapPainter(
+                        regions: floor.regions,
+                        drawingWidth: floor.width,
+                        style: MapStyle.of(Theme.of(context).brightness),
+                        names: regionNames(map, floor.level),
+                        selectedRegion: place.region,
+                      )
+                    : null,
                 imageWidth: floor.width,
                 imageHeight: floor.height,
                 overlay: (scale) => _PinPainter(Offset(place.x * scale, place.y * scale), colors.destination),

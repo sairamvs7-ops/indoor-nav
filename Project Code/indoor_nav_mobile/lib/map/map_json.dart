@@ -32,6 +32,7 @@ List<Floor> parseFloors(List<Object?> rawFloors) {
       width: requirePositive(json, 'width', ctx),
       height: requirePositive(json, 'height', ctx),
       metresPerPixel: optionalPositive(json, 'metresPerPixel', ctx),
+      regions: _regions(json['regions'], ctx),
     );
     floors.add(floor);
   }
@@ -77,7 +78,21 @@ MapNode parseNode(Object? raw, String ctx, Map<int, Floor> floorByLevel) {
     y: y,
     markerId: marker as int?,
     link: link,
+    region: optionalString(json, 'region', nodeCtx),
   );
+}
+
+List<FloorRegion> _regions(Object? raw, String ctx) {
+  if (raw == null) return const [];
+  if (raw is! List<Object?>) throw MapFormatException('$ctx: "regions" must be a list');
+  final seen = <String>{};
+  final regions = <FloorRegion>[];
+  for (final (i, item) in raw.indexed) {
+    final region = FloorRegion.fromJson(item, '$ctx.regions[$i]');
+    if (!seen.add(region.id)) throw MapFormatException('$ctx: two regions are called "${region.id}"');
+    regions.add(region);
+  }
+  return List.unmodifiable(regions);
 }
 
 /// An edge as written in the file. [weight] is null when it should be
