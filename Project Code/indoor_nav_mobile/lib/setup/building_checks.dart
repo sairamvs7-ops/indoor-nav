@@ -26,14 +26,14 @@ List<BuildingIssue> checkBuilding(BuildingMap map) {
   final issues = <BuildingIssue>[];
 
   for (final floor in map.floors) {
-    if (map.nodesOnFloor(floor.level).isEmpty) {
+    if (map.nodesOnFloor(floor.level).every((n) => n.automatic)) {
       issues.add(
         BuildingIssue(IssueLevel.warning, '${floor.name} has no places yet.', floorLevel: floor.level),
       );
     }
   }
 
-  if (map.nodes.isEmpty) {
+  if (map.nodes.values.every((n) => n.automatic)) {
     issues.add(const BuildingIssue(IssueLevel.problem, 'Add at least one place to navigate to.'));
     return issues;
   }
@@ -42,14 +42,16 @@ List<BuildingIssue> checkBuilding(BuildingMap map) {
   final groups = connectedGroups(map);
   if (groups.length > 1) {
     final main = groups.first;
+    final mainName = main.map(map.node).firstWhere((n) => !n.automatic, orElse: () => map.node(main.first)).name;
     for (final group in groups.skip(1)) {
       for (final id in group) {
         final node = map.node(id);
+        if (node.automatic) continue; // a stray corridor is reported via its places
         issues.add(
           BuildingIssue(
             IssueLevel.problem,
-            '${node.name} (${map.floor(node.floor).name}) is not connected to ${map.node(main.first).name}. '
-            'Draw a path to it.',
+            '${node.name} (${map.floor(node.floor).name}) is not connected to $mainName. '
+            'Swipe a corridor to it, or move it next to one.',
             nodeId: id,
             floorLevel: node.floor,
           ),
@@ -82,7 +84,8 @@ List<BuildingIssue> checkBuilding(BuildingMap map) {
   return issues;
 }
 
-/// Groups of node ids that can reach each other, largest group first.
+/// Groups of node ids that can reach each other, the group with the most
+/// places first.
 List<List<int>> connectedGroups(BuildingMap map) {
   final graph = map.graph;
   final seen = <int>{};
@@ -101,6 +104,9 @@ List<List<int>> connectedGroups(BuildingMap map) {
     }
     groups.add(group);
   }
-  groups.sort((a, b) => b.length.compareTo(a.length));
+  // Most places first: a stray corridor with many junctions but no places
+  // must not count as the main part of the building.
+  int places(List<int> group) => group.where((id) => !map.node(id).automatic).length;
+  groups.sort((a, b) => places(b).compareTo(places(a)));
   return groups;
 }

@@ -9,10 +9,13 @@ import '../ui/blueprint_view.dart';
 import '../ui/node_style.dart';
 import 'building_draft.dart';
 
-enum EditMode { places, paths, scale }
+enum EditMode { places, corridors, scale }
 
-/// Setting up one floor: tap the blueprint to add places, connect them with
-/// walkable paths, and set the drawing's real-world scale.
+/// What a touch does in corridors mode.
+enum CorridorTool { draw, pan, erase, link }
+
+/// Setting up one floor: tap the blueprint to add places, swipe along the
+/// corridors, and set the drawing's real-world scale.
 class FloorEditorScreen extends StatefulWidget {
   const FloorEditorScreen({super.key, required this.draft, required this.level, required this.images});
 
@@ -26,7 +29,11 @@ class FloorEditorScreen extends StatefulWidget {
 
 class _FloorEditorScreenState extends State<FloorEditorScreen> {
   EditMode _mode = EditMode.places;
-  int? _selected; // paths mode: the place a new path starts from
+  CorridorTool _tool = CorridorTool.draw;
+  List<Offset>? _stroke; // corridor being drawn right now
+  BuildingMap? _preview; // the built network, to show how places join corridors
+  final TransformationController _view = TransformationController();
+  int? _selected; // link tool: the place a new path starts from
   int? _moving; // places mode: the place waiting for its new spot
   List<(int, int)>? _suggestions;
   final List<Offset> _scalePoints = [];
@@ -36,16 +43,45 @@ class _FloorEditorScreenState extends State<FloorEditorScreen> {
   @override
   void initState() {
     super.initState();
+    _preview = draft.tryBuild().$1;
     draft.addListener(_redraw);
   }
 
   @override
   void dispose() {
     draft.removeListener(_redraw);
+    _view.dispose();
     super.dispose();
   }
 
-  void _redraw() => setState(() {});
+  void _redraw() => setState(() => _preview = draft.tryBuild().$1);
+
+  void _setTool(CorridorTool tool) => setState(() {
+    _tool = tool;
+    _selected = null;
+    _suggestions = null;
+  });
+
+  void _drawStart(Offset p) => setState(() => _stroke = [p]);
+
+  void _drawUpdate(Offset p) {
+    final stroke = _stroke;
+    if (stroke == null) return;
+    // Skip points closer than ~2 screen pixels; the stroke is smoothed later.
+    if ((stroke.last - p).distance * _screenScale < 2) return;
+    setState(() => stroke.add(p));
+  }
+
+  void _drawEnd() {
+    final stroke = _stroke;
+    setState(() => _stroke = null);
+    if (stroke == null) return;
+    final added = draft.addCorridor(widget.level, [for (final p in stroke) (x: p.dx, y: p.dy)]);
+    if (!added) _toast('Too short. Swipe along the whole corridor.');
+  }
+
+  /// Drawing-to-screen scale, including pinch zoom.
+  double _screenScale = 1;
 
   void _setMode(EditMode mode) => setState(() {
     _mode = mode;
@@ -83,7 +119,17 @@ class _FloorEditorScreenState extends State<FloorEditorScreen> {
         } else {
           await _editPlace(node);
         }
-      case EditMode.paths:
+      case EditMode.corridors when _tool == CorridorTool.erase:
+        final index = draft.corridorNear(widget.level, (x: point.dx, y: point.dy), 24 / scale);
+        if (index == null) {
+          _toast('Tap on a corridor line to erase it');
+        } else {
+          draft.removeCorridor(index);
+          _toast('Corridor erased');
+        }
+      case EditMode.corridors when _tool != CorridorTool.link:
+        return;
+      case EditMode.corridors:
         final node = _nodeAt(point, scale);
         final selected = _selected;
         if (node == null || node.id == selected) {
@@ -189,9 +235,14 @@ class _FloorEditorScreenState extends State<FloorEditorScreen> {
   String get _help => switch (_mode) {
     EditMode.places when _moving != null => 'Tap the new spot for ${draft.nodes[_moving]?.name}.',
     EditMode.places => 'Tap an empty spot to add a room, lift, stairs or entrance. Tap a place to edit it.',
-    EditMode.paths when _selected != null =>
-      'From ${draft.nodes[_selected]?.name}: tap the next place along the corridor. Tap it again to stop.',
-    EditMode.paths => 'Tap two places to connect them with a walkable path, or let the app suggest paths.',
+    EditMode.corridors => switch (_tool) {
+      CorridorTool.draw => 'Swipe along each corridor, end to end. Rooms join the nearest corridor by themselves.',
+      CorridorTool.pan => 'Pinch to zoom and drag to move around the blueprint.',
+      CorridorTool.erase => 'Tap a corridor line to erase it.',
+      CorridorTool.link when _selected != null =>
+        'From ${draft.nodes[_selected]?.name}: tap a place to link or unlink it. Tap it again to stop.',
+      CorridorTool.link => 'Link two places directly, for a door or passage no corridor covers.',
+    },
     EditMode.scale when _scalePoints.length == 1 => 'Now tap the second point.',
     EditMode.scale => 'Tap two points whose real distance you know, like the ends of a corridor.',
   };
@@ -202,7 +253,8 @@ class _FloorEditorScreenState extends State<FloorEditorScreen> {
     final theme = Theme.of(context);
     final colors = MapColors.resolve(context);
     final placeCount = draft.nodesOn(widget.level).length;
-    final pathCount = draft.edgesOn(widget.level).length;
+    final corridorCount = draft.corridorsOn(widget.level).length;
+    final drawing = _mode == EditMode.corridors && _tool == CorridorTool.draw;
 
     return Scaffold(
       appBar: AppBar(
@@ -218,7 +270,7 @@ class _FloorEditorScreenState extends State<FloorEditorScreen> {
               ),
               segments: const [
                 ButtonSegment(value: EditMode.places, icon: Icon(Icons.add_location_alt_outlined), label: Text('Places')),
-                ButtonSegment(value: EditMode.paths, icon: Icon(Icons.timeline), label: Text('Paths')),
+                ButtonSegment(value: EditMode.corridors, icon: Icon(Icons.route), label: Text('Corridors')),
                 ButtonSegment(value: EditMode.scale, icon: Icon(Icons.straighten), label: Text('Scale')),
               ],
               selected: {_mode},
@@ -250,6 +302,11 @@ class _FloorEditorScreenState extends State<FloorEditorScreen> {
                 padding: const EdgeInsets.all(12),
                 child: Center(
                   child: BlueprintView(
+                    transformationController: _view,
+                    interactive: !drawing,
+                    onDrawStart: drawing ? _drawStart : null,
+                    onDrawUpdate: drawing ? _drawUpdate : null,
+                    onDrawEnd: drawing ? _drawEnd : null,
                     image: widget.images(floor.image),
                     imageWidth: floor.width,
                     imageHeight: floor.height,
@@ -257,13 +314,16 @@ class _FloorEditorScreenState extends State<FloorEditorScreen> {
                     onTap: (point, scale) => _onTap(point, scale),
                     overlay: (scale) => _EditorPainter(
                       draft: draft,
+                      preview: _preview,
+                      stroke: _stroke,
+                      screenScale: (s) => _screenScale = s * _view.value.getMaxScaleOnAxis(),
                       level: widget.level,
                       colors: colors,
                       selected: _selected ?? _moving,
                       suggestions: _suggestions ?? const [],
                       scalePoints: List.of(_scalePoints),
                       scale: scale,
-                      revision: Object.hash(placeCount, pathCount, _selected, _moving, _suggestions, _scalePoints.length),
+                      revision: Object.hash(placeCount, corridorCount, _selected, _moving, _suggestions, _scalePoints.length),
                     ),
                   ),
                 ),
@@ -272,7 +332,7 @@ class _FloorEditorScreenState extends State<FloorEditorScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
               child: switch (_mode) {
-                EditMode.paths when _suggestions != null && _suggestions!.isNotEmpty => Row(
+                EditMode.corridors when _tool == CorridorTool.link && (_suggestions?.isNotEmpty ?? false) => Row(
                   children: [
                     Expanded(
                       child: OutlinedButton(
@@ -291,11 +351,57 @@ class _FloorEditorScreenState extends State<FloorEditorScreen> {
                     ),
                   ],
                 ),
-                EditMode.paths => FilledButton.tonalIcon(
-                  onPressed: placeCount < 2 ? null : _suggest,
-                  icon: const Icon(Icons.auto_fix_high),
-                  label: const Text('Suggest paths'),
-                  style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+                EditMode.corridors => Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SegmentedButton<CorridorTool>(
+                            showSelectedIcon: false,
+                            segments: const [
+                              ButtonSegment(value: CorridorTool.draw, icon: Icon(Icons.gesture), tooltip: 'Draw'),
+                              ButtonSegment(
+                                value: CorridorTool.pan,
+                                icon: Icon(Icons.pan_tool_outlined),
+                                tooltip: 'Move map',
+                              ),
+                              ButtonSegment(
+                                value: CorridorTool.erase,
+                                icon: Icon(Icons.backspace_outlined),
+                                tooltip: 'Erase',
+                              ),
+                              ButtonSegment(value: CorridorTool.link, icon: Icon(Icons.link), tooltip: 'Link places'),
+                            ],
+                            selected: {_tool},
+                            onSelectionChanged: (s) => _setTool(s.first),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton.filledTonal(
+                          tooltip: 'Undo last corridor',
+                          onPressed: corridorCount == 0 ? null : () => draft.undoCorridor(widget.level),
+                          icon: const Icon(Icons.undo),
+                        ),
+                      ],
+                    ),
+                    if (_tool == CorridorTool.link) ...[
+                      const SizedBox(height: 8),
+                      FilledButton.tonalIcon(
+                        onPressed: placeCount < 2 ? null : _suggest,
+                        icon: const Icon(Icons.auto_fix_high),
+                        label: const Text('Suggest direct links'),
+                        style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(44)),
+                      ),
+                    ] else
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Text(
+                          '$corridorCount corridors · $placeCount places',
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ),
+                  ],
                 ),
                 EditMode.scale => Text(
                   floor.metresPerPixel == null
@@ -304,7 +410,7 @@ class _FloorEditorScreenState extends State<FloorEditorScreen> {
                   style: theme.textTheme.bodyMedium,
                 ),
                 EditMode.places => Text(
-                  '$placeCount places · $pathCount paths · pinch to zoom',
+                  '$placeCount places · $corridorCount corridors · pinch to zoom',
                   style: theme.textTheme.bodyMedium,
                 ),
               },
@@ -319,6 +425,9 @@ class _FloorEditorScreenState extends State<FloorEditorScreen> {
 class _EditorPainter extends CustomPainter {
   _EditorPainter({
     required this.draft,
+    required this.preview,
+    required this.stroke,
+    required this.screenScale,
     required this.level,
     required this.colors,
     required this.selected,
@@ -329,6 +438,9 @@ class _EditorPainter extends CustomPainter {
   });
 
   final BuildingDraft draft;
+  final BuildingMap? preview;
+  final List<Offset>? stroke;
+  final void Function(double scale) screenScale;
   final int level;
   final MapColors colors;
   final int? selected;
@@ -339,7 +451,60 @@ class _EditorPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    screenScale(scale);
     Offset at(DraftNode n) => Offset(n.x * scale, n.y * scale);
+    Offset pt(Pt p) => Offset(p.x * scale, p.y * scale);
+
+    // Corridors: a wide translucent band with a centre line.
+    final band = Paint()
+      ..color = colors.path.withValues(alpha: 0.22)
+      ..strokeWidth = 16
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..style = PaintingStyle.stroke;
+    final centre = Paint()
+      ..color = colors.path
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..style = PaintingStyle.stroke;
+    for (final (_, corridor) in draft.corridorsOn(level)) {
+      final path = Path()..moveTo(pt(corridor.points.first).dx, pt(corridor.points.first).dy);
+      for (final p in corridor.points.skip(1)) {
+        path.lineTo(pt(p).dx, pt(p).dy);
+      }
+      canvas
+        ..drawPath(path, band)
+        ..drawPath(path, centre);
+    }
+
+    // How each place joins its corridor (worked out automatically).
+    final map = preview;
+    if (map != null) {
+      final join = Paint()
+        ..color = colors.suggestion
+        ..strokeWidth = 2
+        ..strokeCap = StrokeCap.round;
+      for (final e in map.edges) {
+        if (!e.automatic || e.kind != EdgeKind.walk) continue;
+        final a = map.nodes[e.from]!;
+        final b = map.nodes[e.to]!;
+        if (a.floor != level || a.automatic == b.automatic) continue;
+        _dashedLine(canvas, Offset(a.x * scale, a.y * scale), Offset(b.x * scale, b.y * scale), join);
+      }
+    }
+
+    // The corridor being drawn right now.
+    final live = stroke;
+    if (live != null && live.length > 1) {
+      final path = Path()..moveTo(live.first.dx * scale, live.first.dy * scale);
+      for (final p in live.skip(1)) {
+        path.lineTo(p.dx * scale, p.dy * scale);
+      }
+      canvas
+        ..drawPath(path, band..color = colors.selected.withValues(alpha: 0.3))
+        ..drawPath(path, centre..color = colors.selected);
+    }
 
     final pathCasing = Paint()
       ..color = Colors.white

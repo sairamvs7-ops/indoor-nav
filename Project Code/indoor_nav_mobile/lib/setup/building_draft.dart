@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart';
 
 import '../map/aruco_markers.dart';
 import '../map/building_map.dart';
+import '../map/corridor_network.dart' show simplifyStroke;
+import '../map/map_json.dart' show corridorsToJson;
 import 'path_suggester.dart';
 
 class DraftFloor {
@@ -87,12 +89,24 @@ class BuildingDraft extends ChangeNotifier {
       final e = raw! as Map<String, dynamic>;
       _edges[_key(e['from'] as int, e['to'] as int)] = (e['weight'] as num?)?.toDouble();
     }
+    for (final raw in (json['corridors'] as List<Object?>? ?? const [])) {
+      final c = raw! as Map<String, dynamic>;
+      corridors.add(
+        CorridorStroke(c['floor'] as int, [
+          for (final p in (c['points'] as List<Object?>).cast<List<Object?>>())
+            (x: (p[0]! as num).toDouble(), y: (p[1]! as num).toDouble()),
+        ]),
+      );
+    }
   }
 
   final String? id;
   String name;
   final List<DraftFloor> floors = [];
   final Map<int, DraftNode> nodes = {};
+
+  /// Corridors swiped on the blueprints, in the order they were drawn.
+  final List<CorridorStroke> corridors = [];
 
   /// Walkable paths as (smaller id, larger id), with a hand-set weight if the
   /// file had one (the original sample building does).
@@ -134,6 +148,70 @@ class BuildingDraft extends ChangeNotifier {
     return names.toList()..sort();
   }
 
+  /// Corridors on [level], with their index in [corridors].
+  Iterable<(int, CorridorStroke)> corridorsOn(int level) =>
+      corridors.indexed.where((entry) => entry.$2.floor == level);
+
+  /// Adds a corridor swiped along [points] (drawing pixels). Finger wobble is
+  /// smoothed out; very short swipes are ignored. Returns true if added.
+  bool addCorridor(int level, List<Pt> points) {
+    final f = floor(level);
+    final longest = math.max(f.width, f.height);
+    final clamped = [
+      for (final p in points) (x: p.x.clamp(0, f.width).toDouble(), y: p.y.clamp(0, f.height).toDouble()),
+    ];
+    final simple = simplifyStroke(clamped, longest * 0.004);
+    final length = [
+      for (var i = 0; i + 1 < simple.length; i++)
+        math.sqrt(math.pow(simple[i + 1].x - simple[i].x, 2) + math.pow(simple[i + 1].y - simple[i].y, 2)),
+    ].fold<double>(0, (a, b) => a + b);
+    if (simple.length < 2 || length < longest * 0.02) return false;
+    corridors.add(CorridorStroke(level, List.unmodifiable(simple)));
+    _changed();
+    return true;
+  }
+
+  void removeCorridor(int index) {
+    corridors.removeAt(index);
+    _changed();
+  }
+
+  /// Removes the corridor most recently drawn on [level]. Returns false if
+  /// there is none.
+  bool undoCorridor(int level) {
+    final last = corridors.lastIndexWhere((c) => c.floor == level);
+    if (last < 0) return false;
+    removeCorridor(last);
+    return true;
+  }
+
+  /// The corridor on [level] passing closest to [point], within [radius]
+  /// pixels, as an index into [corridors].
+  int? corridorNear(int level, Pt point, double radius) {
+    int? best;
+    var bestDistance = radius;
+    for (final (i, c) in corridorsOn(level)) {
+      for (var k = 0; k + 1 < c.points.length; k++) {
+        final d = _segmentDistance(point, c.points[k], c.points[k + 1]);
+        if (d < bestDistance) {
+          best = i;
+          bestDistance = d;
+        }
+      }
+    }
+    return best;
+  }
+
+  static double _segmentDistance(Pt p, Pt a, Pt b) {
+    final dx = b.x - a.x;
+    final dy = b.y - a.y;
+    final l2 = dx * dx + dy * dy;
+    final t = l2 == 0 ? 0.0 : (((p.x - a.x) * dx + (p.y - a.y) * dy) / l2).clamp(0.0, 1.0);
+    final qx = a.x + dx * t - p.x;
+    final qy = a.y + dy * t - p.y;
+    return math.sqrt(qx * qx + qy * qy);
+  }
+
   void rename(String value) {
     name = value.trim().isEmpty ? name : value.trim();
     _changed();
@@ -171,6 +249,11 @@ class BuildingDraft extends ChangeNotifier {
       n.x *= sx;
       n.y *= sy;
     }
+    for (var i = 0; i < corridors.length; i++) {
+      final c = corridors[i];
+      if (c.floor != level) continue;
+      corridors[i] = CorridorStroke(level, [for (final p in c.points) (x: p.x * sx, y: p.y * sy)]);
+    }
     f
       ..image = image
       ..width = width
@@ -183,6 +266,7 @@ class BuildingDraft extends ChangeNotifier {
     final gone = nodesOn(level).map((n) => n.id).toSet();
     _edges.removeWhere((e, _) => gone.contains(e.$1) || gone.contains(e.$2));
     nodes.removeWhere((id, _) => gone.contains(id));
+    corridors.removeWhere((c) => c.floor == level);
     floors.removeWhere((f) => f.level == level);
     _changed();
   }
@@ -306,6 +390,7 @@ class BuildingDraft extends ChangeNotifier {
     'edges': [
       for (final e in _edges.entries) {'from': e.key.$1, 'to': e.key.$2, 'weight': ?e.value},
     ],
+    'corridors': corridorsToJson(corridors),
   };
 
   /// The building as a map ready for navigation, or the reason it isn't one.

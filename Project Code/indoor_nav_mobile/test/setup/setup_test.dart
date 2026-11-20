@@ -126,6 +126,41 @@ void main() {
       expect(saved.last['nodes'], hasLength(2));
     });
 
+    test('swiped corridors: smoothed, too-short swipes ignored, undo and erase', () {
+      final (draft, _) = newDraft();
+      draft.addFloor(name: 'Ground', image: 'g.jpg', width: 100, height: 100);
+      final room = draft.addNode(name: 'Lab', type: NodeType.room, floor: 0, x: 50, y: 40);
+
+      expect(draft.addCorridor(0, [(x: 10.0, y: 50.0), (x: 10.5, y: 50.0)]), isFalse);
+      expect(draft.addCorridor(0, [(x: 0.0, y: 50.0), (x: 50.0, y: 50.2), (x: 100.0, y: 50.0)]), isTrue);
+      expect(draft.corridors.single.points, hasLength(2)); // wobble removed
+
+      final (map, error) = draft.tryBuild();
+      expect(error, isNull);
+      expect(map!.graph[room], hasLength(1)); // joined to the corridor
+
+      expect(draft.corridorNear(0, (x: 70.0, y: 52.0), 5), 0);
+      expect(draft.corridorNear(0, (x: 70.0, y: 80.0), 5), isNull);
+      draft.addCorridor(0, [(x: 50.0, y: 0.0), (x: 50.0, y: 100.0)]);
+      expect(draft.undoCorridor(0), isTrue);
+      expect(draft.corridors, hasLength(1));
+      draft.removeCorridor(0);
+      expect(draft.undoCorridor(0), isFalse);
+    });
+
+    test('replacing a drawing moves its corridors too', () {
+      final (draft, _) = newDraft();
+      draft.addFloor(name: 'Ground', image: 'g.jpg', width: 100, height: 100);
+      draft.addCorridor(0, [(x: 0.0, y: 50.0), (x: 100.0, y: 50.0)]);
+
+      draft.replaceFloorImage(0, image: 'g2.jpg', width: 200, height: 200);
+
+      expect(draft.corridors.single.points.last, (x: 200.0, y: 100.0));
+      expect(draft.toJson()['corridors'], hasLength(1));
+      draft.removeFloor(0);
+      expect(draft.corridors, isEmpty);
+    });
+
     test('tryBuild explains why an unfinished building is not ready', () {
       final (draft, _) = newDraft();
 

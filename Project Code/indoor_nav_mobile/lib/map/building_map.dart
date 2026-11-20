@@ -1,12 +1,23 @@
 import 'dart:math' as math;
 
+import 'corridor_network.dart';
 import 'map_json.dart';
 
+export 'corridor_network.dart' show CorridorStroke, Pt;
 export 'map_json.dart' show MapFormatException;
 
 /// The building file format written by this version of the app. Version 1 is
-/// the original hand-written building.json; it still loads unchanged.
-const int currentMapFormat = 2;
+/// the original hand-written building.json; 2 added computed distances and
+/// lift/stairs links; 3 added swiped corridors. Older files load unchanged.
+const int currentMapFormat = 3;
+
+/// Ids of junctions made from corridors start here, well clear of the ids
+/// people give places.
+const int firstJunctionId = 1000000;
+
+/// How close (as a share of the drawing's longer side) swiped corridor ends
+/// and points must be to join up.
+const double corridorSnapShare = 0.02;
 
 /// When a floor has no scale set, assume its drawing spans this many metres
 /// along its longer side. Only affects how routes compare, never what is drawn.
@@ -120,6 +131,7 @@ class MapNode {
     required this.y,
     this.markerId,
     this.link,
+    this.automatic = false,
   });
 
   final int id;
@@ -130,6 +142,10 @@ class MapNode {
   final double y;
   final int? markerId;
   final String? link;
+
+  /// True for junctions made from swiped corridors. Never saved; rebuilt from
+  /// the corridors on load.
+  final bool automatic;
 }
 
 /// A walkable connection between two nodes. Edges are two-way.
@@ -170,6 +186,7 @@ class BuildingMap {
     required this.floors,
     required this.nodes,
     required this.edges,
+    required this.corridors,
     required Map<int, int> nodeIdByMarker,
     required Map<int, Floor> floorByLevel,
   }) : _nodeIdByMarker = nodeIdByMarker,
@@ -210,6 +227,42 @@ class BuildingMap {
       nodes[node.id] = node;
     }
 
+    // Swiped corridors become junction nodes and walkable edges, and every
+    // place joins its nearest corridor.
+    final corridors = parseCorridors(json['corridors'], floorByLevel);
+    final corridorEdges = <(int, int)>[];
+    var nextJunction = math.max(firstJunctionId, (nodes.isEmpty ? 0 : nodes.keys.reduce(math.max)) + 1);
+    for (final floor in floors) {
+      final strokes = [for (final c in corridors) if (c.floor == floor.level) c.points];
+      if (strokes.isEmpty) continue;
+      final places = [for (final n in nodes.values) if (n.floor == floor.level) (n.id, (x: n.x, y: n.y))];
+      final network = buildCorridorNetwork(
+        strokes: strokes,
+        places: places,
+        snap: corridorSnapShare * math.max(floor.width, floor.height),
+      );
+      final junctionIds = <int>[];
+      for (final p in network.junctions) {
+        final id = nextJunction++;
+        junctionIds.add(id);
+        nodes[id] = MapNode(
+          id: id,
+          name: 'Corridor',
+          type: NodeType.corridor,
+          floor: floor.level,
+          x: p.x.clamp(0, floor.width).toDouble(),
+          y: p.y.clamp(0, floor.height).toDouble(),
+          automatic: true,
+        );
+      }
+      for (final (a, b) in network.segments) {
+        corridorEdges.add((junctionIds[a], junctionIds[b]));
+      }
+      for (final entry in network.attachments.entries) {
+        corridorEdges.add((entry.key, junctionIds[entry.value]));
+      }
+    }
+
     double walkCost(MapNode a, MapNode b) {
       final floor = floorByLevel[a.floor]!;
       final pixels = math.sqrt(math.pow(a.x - b.x, 2) + math.pow(a.y - b.y, 2));
@@ -235,6 +288,11 @@ class BuildingMap {
       final weight = raw.weight ?? (kind == EdgeKind.walk ? walkCost(a, b) : verticalCost(kind, a, b));
       edges.add(MapEdge(raw.from, raw.to, weight, kind: kind, explicitWeight: raw.weight));
       connected.add(_key(raw.from, raw.to));
+    }
+
+    for (final (a, b) in corridorEdges) {
+      if (a == b || !connected.add(_key(a, b))) continue;
+      edges.add(MapEdge(a, b, walkCost(nodes[a]!, nodes[b]!), automatic: true));
     }
 
     // Lifts and stairs that share a link name are one shaft or staircase:
@@ -269,6 +327,7 @@ class BuildingMap {
       floors: List.unmodifiable(floors),
       nodes: Map.unmodifiable(nodes),
       edges: List.unmodifiable(edges),
+      corridors: List.unmodifiable(corridors),
       nodeIdByMarker: Map.unmodifiable(nodeIdByMarker),
       floorByLevel: Map.unmodifiable(floorByLevel),
     );
@@ -284,8 +343,12 @@ class BuildingMap {
   final List<Floor> floors;
   final Map<int, MapNode> nodes;
 
-  /// Every connection, including lift/stairs links made from link names.
+  /// Every connection, including lift/stairs links made from link names and
+  /// paths made from swiped corridors.
   final List<MapEdge> edges;
+
+  /// Corridors as swiped, kept so they can be saved and edited again.
+  final List<CorridorStroke> corridors;
   final Map<int, int> _nodeIdByMarker;
   final Map<int, Floor> _floorByLevel;
   final Map<RoutePreference, Graph> _graphs = {};
@@ -341,7 +404,7 @@ class BuildingMap {
     ],
     'nodes': [
       for (final n in nodes.values)
-        {
+        if (!n.automatic) {
           'id': n.id,
           'name': n.name,
           'type': n.type.name,
@@ -356,5 +419,6 @@ class BuildingMap {
       for (final e in edges)
         if (!e.automatic) {'from': e.from, 'to': e.to, 'weight': ?e.explicitWeight},
     ],
+    'corridors': corridorsToJson(corridors),
   };
 }

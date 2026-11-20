@@ -1,5 +1,6 @@
 import 'aruco_markers.dart';
 import 'building_map.dart';
+import 'corridor_network.dart';
 
 /// Markers are DICT_4X4_250, which only decodes ids 0-249. A marker outside
 /// that range could never be scanned, so it is rejected at load.
@@ -156,3 +157,38 @@ double requirePositive(Map<String, dynamic> json, String key, String ctx) {
   if (value > 0) return value;
   throw MapFormatException('$ctx: "$key" must be greater than 0');
 }
+
+/// Reads swiped corridors: `[{"floor": 0, "points": [[x, y], ...]}, ...]`.
+/// Missing means none.
+List<CorridorStroke> parseCorridors(Object? raw, Map<int, Floor> floorByLevel) {
+  if (raw == null) return const [];
+  if (raw is! List<Object?>) throw const MapFormatException('map: "corridors" must be a list');
+  final strokes = <CorridorStroke>[];
+  for (final (i, item) in raw.indexed) {
+    final ctx = 'corridors[$i]';
+    final json = asObject(item, ctx);
+    final level = requireInt(json, 'floor', ctx);
+    if (!floorByLevel.containsKey(level)) throw MapFormatException('$ctx: floor $level is not listed in "floors"');
+    final points = <Pt>[];
+    for (final p in requireList(json, 'points', ctx)) {
+      if (p is! List<Object?> || p.length != 2 || p[0] is! num || p[1] is! num) {
+        throw MapFormatException('$ctx: each point must be [x, y]');
+      }
+      points.add((x: (p[0]! as num).toDouble(), y: (p[1]! as num).toDouble()));
+    }
+    if (points.length >= 2) strokes.add(CorridorStroke(level, List.unmodifiable(points)));
+  }
+  return strokes;
+}
+
+List<Map<String, Object>> corridorsToJson(List<CorridorStroke> corridors) => [
+  for (final c in corridors)
+    {
+      'floor': c.floor,
+      'points': [
+        for (final p in c.points) [_round(p.x), _round(p.y)],
+      ],
+    },
+];
+
+double _round(double v) => (v * 10).roundToDouble() / 10;

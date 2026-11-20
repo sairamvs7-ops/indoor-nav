@@ -27,6 +27,10 @@ class BlueprintView extends StatelessWidget {
     this.onTap,
     this.transformationController,
     this.borderRadius = 16,
+    this.interactive = true,
+    this.onDrawStart,
+    this.onDrawUpdate,
+    this.onDrawEnd,
   });
 
   final ImageProvider image;
@@ -40,6 +44,14 @@ class BlueprintView extends StatelessWidget {
   final TransformationController? transformationController;
   final double borderRadius;
 
+  /// False while drawing, so one-finger drags draw instead of panning.
+  final bool interactive;
+
+  /// Finger-drawing callbacks, in drawing pixels.
+  final void Function(Offset imagePoint)? onDrawStart;
+  final void Function(Offset imagePoint)? onDrawUpdate;
+  final VoidCallback? onDrawEnd;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -52,12 +64,17 @@ class BlueprintView extends StatelessWidget {
           child: InteractiveViewer(
             transformationController: transformationController,
             maxScale: 8,
+            panEnabled: interactive,
+            scaleEnabled: interactive,
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final scale = constraints.maxWidth / imageWidth;
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTapUp: onTap == null ? null : (details) => onTap!(details.localPosition / scale, scale),
+                  onPanStart: onDrawStart == null ? null : (d) => onDrawStart!(d.localPosition / scale),
+                  onPanUpdate: onDrawUpdate == null ? null : (d) => onDrawUpdate!(d.localPosition / scale),
+                  onPanEnd: onDrawEnd == null ? null : (_) => onDrawEnd!(),
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
