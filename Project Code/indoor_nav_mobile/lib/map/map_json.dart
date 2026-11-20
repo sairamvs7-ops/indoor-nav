@@ -1,8 +1,9 @@
+import 'aruco_markers.dart';
 import 'building_map.dart';
 
-/// The printed markers are DICT_4X4_50, which only decodes ids 0-49. A marker
-/// outside that range could never be scanned, so it is rejected at load.
-const int maxMarkerId = 49;
+/// Markers are DICT_4X4_250, which only decodes ids 0-249. A marker outside
+/// that range could never be scanned, so it is rejected at load.
+const int maxMarkerId = markerCount - 1;
 
 /// Thrown when building.json is malformed. The message names the bad entry so
 /// a hand edit can be fixed quickly.
@@ -30,6 +31,7 @@ List<Floor> parseFloors(List<Object?> rawFloors) {
       image: requireString(json, 'image', ctx),
       width: requirePositive(json, 'width', ctx),
       height: requirePositive(json, 'height', ctx),
+      metresPerPixel: optionalPositive(json, 'metresPerPixel', ctx),
     );
     floors.add(floor);
   }
@@ -59,33 +61,51 @@ MapNode parseNode(Object? raw, String ctx, Map<int, Floor> floorByLevel) {
     throw MapFormatException('$nodeCtx: "marker" must be a whole number from 0 to $maxMarkerId, or null');
   }
 
+  final type = NodeType.parse(requireString(json, 'type', nodeCtx), nodeCtx);
+  final rawLink = optionalString(json, 'link', nodeCtx);
+  final link = (rawLink == null || rawLink.trim().isEmpty) ? null : rawLink.trim();
+  if (link != null && !type.isVertical) {
+    throw MapFormatException('$nodeCtx: only lifts and stairs can have a "link"');
+  }
+
   return MapNode(
     id: id,
     name: requireString(json, 'name', nodeCtx),
-    type: NodeType.parse(requireString(json, 'type', nodeCtx), nodeCtx),
+    type: type,
     floor: level,
     x: x,
     y: y,
     markerId: marker as int?,
+    link: link,
   );
 }
 
-List<MapEdge> parseEdges(List<Object?> rawEdges, Map<int, MapNode> nodes) {
-  final edges = <MapEdge>[];
+/// An edge as written in the file. [weight] is null when it should be
+/// worked out from the drawing.
+class RawEdge {
+  const RawEdge(this.from, this.to, this.weight);
+
+  final int from;
+  final int to;
+  final double? weight;
+}
+
+List<RawEdge> parseEdges(List<Object?> rawEdges, Map<int, MapNode> nodes) {
+  final edges = <RawEdge>[];
   final seen = <(int, int)>{};
   for (final (i, raw) in rawEdges.indexed) {
     final ctx = 'edges[$i]';
     final json = asObject(raw, ctx);
     final from = requireInt(json, 'from', ctx);
     final to = requireInt(json, 'to', ctx);
-    final weight = requirePositive(json, 'weight', ctx);
+    final weight = optionalPositive(json, 'weight', ctx);
     for (final end in [from, to]) {
       if (!nodes.containsKey(end)) throw MapFormatException('$ctx: node $end does not exist');
     }
     if (from == to) throw MapFormatException('$ctx: an edge cannot connect node $from to itself');
     final key = from < to ? (from, to) : (to, from);
     if (!seen.add(key)) throw MapFormatException('$ctx: nodes $from and $to are already connected');
-    edges.add(MapEdge(from, to, weight));
+    edges.add(RawEdge(from, to, weight));
   }
   return edges;
 }
@@ -124,6 +144,11 @@ double requireNumber(Map<String, dynamic> json, String key, String ctx) {
   final value = json[key];
   if (value is num && value.isFinite) return value.toDouble();
   throw MapFormatException('$ctx: "$key" must be a number');
+}
+
+double? optionalPositive(Map<String, dynamic> json, String key, String ctx) {
+  if (json[key] == null) return null;
+  return requirePositive(json, key, ctx);
 }
 
 double requirePositive(Map<String, dynamic> json, String key, String ctx) {

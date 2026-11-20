@@ -64,15 +64,15 @@ void main() {
     test('rejects two nodes sharing one marker', () {
       expect(
         () => BuildingMap.fromJson(withNode(1, {'marker': 1})),
-        throwsMapError('marker 1 is already used by node 1'),
+        throwsMapError('Entry and Room A both use marker 1'),
       );
     });
 
     test('rejects a negative, non-integer or unscannable marker', () {
       expect(() => BuildingMap.fromJson(withNode(0, {'marker': -1})), throwsMapError('"marker"'));
       expect(() => BuildingMap.fromJson(withNode(0, {'marker': 'one'})), throwsMapError('"marker"'));
-      expect(() => BuildingMap.fromJson(withNode(0, {'marker': 50})), throwsMapError('from 0 to 49'));
-      expect(BuildingMap.fromJson(withNode(0, {'marker': 49})).nodeForMarker(49)!.id, 1);
+      expect(() => BuildingMap.fromJson(withNode(0, {'marker': 250})), throwsMapError('from 0 to 249'));
+      expect(BuildingMap.fromJson(withNode(0, {'marker': 249})).nodeForMarker(249)!.id, 1);
     });
 
     test('rejects a node on a floor that does not exist', () {

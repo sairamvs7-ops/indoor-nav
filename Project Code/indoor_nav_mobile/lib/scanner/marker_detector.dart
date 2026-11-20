@@ -13,13 +13,13 @@ abstract interface class FrameDetector {
   void dispose();
 }
 
-/// Finds ArUco markers (DICT_4X4_50, the printed set) in camera frames.
+/// Finds ArUco markers (DICT_4X4_250; its first 50 are the original printed set) in camera frames.
 /// Works on the luminance plane only, so frames must be requested as
 /// [ImageFormatGroup.yuv420] (Android YUV_420_888 and iOS NV12 both put Y in
 /// plane 0). Detection runs on an OpenCV worker thread, not the UI isolate.
 class MarkerDetector implements FrameDetector {
   MarkerDetector()
-    : _dictionary = cv.ArucoDictionary.predefined(cv.PredefinedDictionaryType.DICT_4X4_50),
+    : _dictionary = cv.ArucoDictionary.predefined(cv.PredefinedDictionaryType.DICT_4X4_250),
       _parameters = cv.ArucoDetectorParameters.empty() {
     _detector = cv.ArucoDetector.create(_dictionary, _parameters);
   }

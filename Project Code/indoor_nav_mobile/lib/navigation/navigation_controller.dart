@@ -16,6 +16,7 @@ class NavigationController extends ChangeNotifier {
 
   int? _currentId;
   int? _destinationId;
+  RoutePreference _preference = RoutePreference.fastest;
   ShortestPath? _route;
   List<RouteStep> _steps = const [];
   int _viewFloor;
@@ -34,6 +35,9 @@ class NavigationController extends ChangeNotifier {
   /// True when both ends are set but no path connects them.
   bool get isUnreachable => _currentId != null && _destinationId != null && _route == null;
 
+  /// Which connections routes may use (all, no stairs, or no lifts).
+  RoutePreference get preference => _preference;
+
   /// The floor shown on the map. Follows your location, but can be changed.
   int get viewFloor => _viewFloor;
 
@@ -47,7 +51,10 @@ class NavigationController extends ChangeNotifier {
     }
     if (current == null) return 'Scan the nearest marker to start navigating to ${destination.name}.';
     if (hasArrived) return 'You have arrived at ${destination.name}.';
-    if (isUnreachable) return 'No route from ${current.name} to ${destination.name}.';
+    if (isUnreachable) {
+      final kind = _preference == RoutePreference.fastest ? '' : '${_preference.label.toLowerCase()} ';
+      return 'No ${kind}route from ${current.name} to ${destination.name}.';
+    }
     return _steps.first.instruction;
   }
 
@@ -87,6 +94,13 @@ class NavigationController extends ChangeNotifier {
     if (next != null) setCurrentLocation(next.id);
   }
 
+  void setPreference(RoutePreference preference) {
+    if (preference == _preference) return;
+    _preference = preference;
+    _recomputeRoute();
+    notifyListeners();
+  }
+
   void showFloor(int level) {
     map.floor(level); // throws for unknown levels
     if (level == _viewFloor) return;
@@ -105,7 +119,7 @@ class NavigationController extends ChangeNotifier {
   void _recomputeRoute() {
     final current = _currentId;
     final destination = _destinationId;
-    _route = (current == null || destination == null) ? null : bidirectionalDijkstra(map.graph, current, destination);
+    _route = (current == null || destination == null) ? null : bidirectionalDijkstra(map.graphFor(_preference), current, destination);
     _steps = _route == null ? const [] : buildSteps(map, _route!.nodes);
   }
 }
