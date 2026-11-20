@@ -13,13 +13,13 @@ class ShortestPath {
 /// Bidirectional ("double") Dijkstra on an undirected graph with positive
 /// weights. One search grows from [source], one from [target], until they meet.
 ///
-/// Port of the search that ran on the ESP32 (wifi/wifi.ino), with its bug
-/// fixed: the ESP32 only counted a meeting at nodes that *both* searches had
-/// finished, so it missed shortest paths that cross between the two searches
-/// along a single edge, and returned a longer route for 36 of 756 start/goal
-/// pairs. Here the best total is updated whenever either search improves a
-/// node the other search has already reached, which is the standard,
-/// provably correct rule.
+/// Port of the search that ran on the original ESP32 firmware (no longer in the
+/// repo; see the first commit), with its bug fixed: the ESP32 only counted a
+/// meeting at nodes that *both* searches had finished, so it missed shortest
+/// paths that cross between the two searches along a single edge, and returned
+/// a longer route for 36 of 756 start/goal pairs. Here the best total is
+/// updated whenever either search improves a node the other search has already
+/// reached, which is the standard, provably correct rule.
 ///
 /// Returns null when either id is not in [graph] or the goal is unreachable.
 ShortestPath? bidirectionalDijkstra(Graph graph, int source, int target) {

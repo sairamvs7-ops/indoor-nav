@@ -11,12 +11,9 @@ This started as a college subject project where an ESP32 computed the routes. Th
 | [`Project Code/indoor_nav_mobile/`](Project%20Code/indoor_nav_mobile/) | **The current app.** Flutter, Android and iOS. Scans markers with the camera, finds routes on the phone with bidirectional Dijkstra, and draws them on the floor plan. No internet, no ESP32. |
 | [`Floor Plan/`](Floor%20Plan/) | The hand-drawn floor plans the node map was built from. The app shows a cropped copy of `New Floor Plan New.jpeg`. |
 | [`ArUco/`](ArUco/) | Printable markers (`DICT_4X4_50`, ids 1–27) and `Node Graph.pdf`, which lists what each node is. Marker *N* goes at node *N*. |
-| [`Project Code/wifi/`](Project%20Code/wifi/) | Original ESP32 firmware: bidirectional Dijkstra, requests and results through Firebase Realtime Database. `wifi2/` is an earlier version with a simpler graph. |
 | [`Project Code/Indoor Nav/`](Project%20Code/Indoor%20Nav/) | Original React web app and first Flutter app. Both needed the ESP32 through Firebase. Kept for reference. |
 
-## Running the ESP32 sketches
-
-The WiFi and Firebase credentials are not in the repo. In `wifi/` (or `wifi2/`), copy `secrets.example.h` to `secrets.h` and fill in your values. `secrets.h` is git-ignored.
+The original ESP32 firmware (which ran the route search and talked to Firebase) has been removed. It is still in the first commit if you need it: `git show 693921f:"Project Code/wifi/wifi.ino"`.
 
 ## Printing markers
 

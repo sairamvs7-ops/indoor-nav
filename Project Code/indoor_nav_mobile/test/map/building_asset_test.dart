@@ -6,8 +6,9 @@ import 'package:indoor_nav_mobile/map/building_map.dart';
 
 import '../support/test_map.dart';
 
-/// Edges exactly as they were in wifi/wifi.ino initGraph(). The app must keep
-/// the same graph the ESP32 used unless the map is changed on purpose.
+/// Edges exactly as they were in the ESP32 firmware (wifi.ino initGraph(), see
+/// the first commit). The app must keep the same graph the ESP32 used unless
+/// the map is changed on purpose.
 const esp32Edges = <(int, int, double)>[
   (13, 4, 1),
   (4, 5, 1),
