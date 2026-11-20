@@ -12,3 +12,5 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+# Public test-build signing key (see app/build.gradle.kts).
+!app/test-signing.jks

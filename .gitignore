@@ -28,6 +28,8 @@ Thumbs.db
 **/key.properties
 **/*.keystore
 **/*.jks
+# Public test-build signing key (see android/app/build.gradle.kts).
+!Project Code/indoor_nav_mobile/android/app/test-signing.jks
 
 # Archives: duplicates of folders in this repo, or third-party downloads
 *.zip

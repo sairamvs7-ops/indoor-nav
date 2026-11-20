@@ -30,11 +30,24 @@ android {
         versionName = flutter.versionName
     }
 
+    // One shared key for test builds, so an APK from CI installs over one built
+    // on another machine (Android refuses updates signed with a different key).
+    // It is public, in the repo: never use it for a Play Store release.
+    signingConfigs {
+        create("test") {
+            storeFile = file("test-signing.jks")
+            storePassword = "indoornav-test"
+            keyAlias = "indoornav"
+            keyPassword = "indoornav-test"
+        }
+    }
+
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("test")
+        }
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("test")
         }
     }
 }
