@@ -1,0 +1,658 @@
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+
+import '../map/aruco_markers.dart';
+import '../map/building_map.dart';
+import '../ui/app_theme.dart';
+import '../ui/blueprint_view.dart';
+import '../ui/node_style.dart';
+import 'building_draft.dart';
+
+enum EditMode { places, paths, scale }
+
+/// Setting up one floor: tap the blueprint to add places, connect them with
+/// walkable paths, and set the drawing's real-world scale.
+class FloorEditorScreen extends StatefulWidget {
+  const FloorEditorScreen({super.key, required this.draft, required this.level, required this.images});
+
+  final BuildingDraft draft;
+  final int level;
+  final FloorImages images;
+
+  @override
+  State<FloorEditorScreen> createState() => _FloorEditorScreenState();
+}
+
+class _FloorEditorScreenState extends State<FloorEditorScreen> {
+  EditMode _mode = EditMode.places;
+  int? _selected; // paths mode: the place a new path starts from
+  int? _moving; // places mode: the place waiting for its new spot
+  List<(int, int)>? _suggestions;
+  final List<Offset> _scalePoints = [];
+
+  BuildingDraft get draft => widget.draft;
+
+  @override
+  void initState() {
+    super.initState();
+    draft.addListener(_redraw);
+  }
+
+  @override
+  void dispose() {
+    draft.removeListener(_redraw);
+    super.dispose();
+  }
+
+  void _redraw() => setState(() {});
+
+  void _setMode(EditMode mode) => setState(() {
+    _mode = mode;
+    _selected = null;
+    _moving = null;
+    _suggestions = null;
+    _scalePoints.clear();
+  });
+
+  DraftNode? _nodeAt(Offset point, double scale) {
+    DraftNode? nearest;
+    var best = 26 / scale;
+    for (final node in draft.nodesOn(widget.level)) {
+      final d = (Offset(node.x, node.y) - point).distance;
+      if (d <= best) {
+        nearest = node;
+        best = d;
+      }
+    }
+    return nearest;
+  }
+
+  Future<void> _onTap(Offset point, double scale) async {
+    switch (_mode) {
+      case EditMode.places:
+        final moving = _moving;
+        if (moving != null) {
+          draft.moveNode(moving, point.dx, point.dy);
+          setState(() => _moving = null);
+          return;
+        }
+        final node = _nodeAt(point, scale);
+        if (node == null) {
+          await _addPlace(point);
+        } else {
+          await _editPlace(node);
+        }
+      case EditMode.paths:
+        final node = _nodeAt(point, scale);
+        final selected = _selected;
+        if (node == null || node.id == selected) {
+          setState(() => _selected = null);
+        } else if (selected == null) {
+          setState(() => _selected = node.id);
+        } else {
+          final added = draft.togglePath(selected, node.id);
+          _toast(added ? 'Path added' : 'Path removed');
+          // Keep going from the place just reached, so a corridor can be
+          // drawn with one tap per place.
+          setState(() => _selected = node.id);
+        }
+      case EditMode.scale:
+        setState(() => _scalePoints.add(point));
+        if (_scalePoints.length == 2) await _askDistance();
+    }
+  }
+
+  Future<void> _addPlace(Offset point) async {
+    final result = await showPlaceForm(context, draft: draft);
+    if (result == null) return;
+    draft.addNode(
+      name: result.name,
+      type: result.type,
+      floor: widget.level,
+      x: point.dx,
+      y: point.dy,
+      withMarker: result.hasMarker,
+      link: result.link,
+    );
+  }
+
+  Future<void> _editPlace(DraftNode node) async {
+    final result = await showPlaceForm(context, draft: draft, existing: node);
+    if (result == null) return;
+    switch (result.action) {
+      case PlaceAction.delete:
+        draft.deleteNode(node.id);
+      case PlaceAction.move:
+        setState(() => _moving = node.id);
+      case PlaceAction.save:
+        draft.updateNode(
+          node.id,
+          name: result.name,
+          type: result.type,
+          link: result.link ?? '',
+          clearMarker: !result.hasMarker,
+          marker: result.hasMarker ? (result.marker ?? node.marker ?? draft.nextFreeMarker()) : null,
+        );
+    }
+  }
+
+  Future<void> _askDistance() async {
+    final pixels = (_scalePoints[0] - _scalePoints[1]).distance;
+    final controller = TextEditingController();
+    final metres = await showDialog<double>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('How far apart are these points?'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: const InputDecoration(suffixText: 'metres', hintText: 'e.g. 12.5'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(double.tryParse(controller.text.replaceAll(',', '.'))),
+            child: const Text('Set scale'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (metres != null && metres > 0 && pixels > 0) {
+      draft.calibrateFloor(widget.level, pixels: pixels, metres: metres);
+      _toast('Scale set: 1 m ≈ ${(pixels / metres).toStringAsFixed(1)} px');
+    }
+    setState(_scalePoints.clear);
+  }
+
+  void _suggest() {
+    final suggestions = draft.suggestionsFor(widget.level);
+    setState(() => _suggestions = suggestions);
+    if (suggestions.isEmpty) _toast('No new paths to suggest');
+  }
+
+  void _acceptSuggestions() {
+    final suggestions = _suggestions ?? const [];
+    draft.addPaths(suggestions);
+    setState(() => _suggestions = null);
+    _toast('Added ${suggestions.length} paths. Tap two places to remove any that cross a wall.');
+  }
+
+  void _toast(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message), duration: const Duration(seconds: 2)));
+  }
+
+  String get _help => switch (_mode) {
+    EditMode.places when _moving != null => 'Tap the new spot for ${draft.nodes[_moving]?.name}.',
+    EditMode.places => 'Tap an empty spot to add a room, lift, stairs or entrance. Tap a place to edit it.',
+    EditMode.paths when _selected != null =>
+      'From ${draft.nodes[_selected]?.name}: tap the next place along the corridor. Tap it again to stop.',
+    EditMode.paths => 'Tap two places to connect them with a walkable path, or let the app suggest paths.',
+    EditMode.scale when _scalePoints.length == 1 => 'Now tap the second point.',
+    EditMode.scale => 'Tap two points whose real distance you know, like the ends of a corridor.',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final floor = draft.floor(widget.level);
+    final theme = Theme.of(context);
+    final colors = MapColors.resolve(context);
+    final placeCount = draft.nodesOn(widget.level).length;
+    final pathCount = draft.edgesOn(widget.level).length;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(floor.name),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(56),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+            child: SegmentedButton<EditMode>(
+              style: SegmentedButton.styleFrom(
+                backgroundColor: theme.colorScheme.surface,
+                selectedBackgroundColor: theme.colorScheme.secondaryContainer,
+              ),
+              segments: const [
+                ButtonSegment(value: EditMode.places, icon: Icon(Icons.add_location_alt_outlined), label: Text('Places')),
+                ButtonSegment(value: EditMode.paths, icon: Icon(Icons.timeline), label: Text('Paths')),
+                ButtonSegment(value: EditMode.scale, icon: Icon(Icons.straighten), label: Text('Scale')),
+              ],
+              selected: {_mode},
+              onSelectionChanged: (s) => _setMode(s.first),
+            ),
+          ),
+        ),
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Material(
+              color: theme.colorScheme.secondaryContainer,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                child: Row(
+                  children: [
+                    Icon(Icons.touch_app_outlined, color: theme.colorScheme.onSecondaryContainer),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(_help, style: TextStyle(color: theme.colorScheme.onSecondaryContainer)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Center(
+                  child: BlueprintView(
+                    image: widget.images(floor.image),
+                    imageWidth: floor.width,
+                    imageHeight: floor.height,
+                    label: '${floor.name} blueprint',
+                    onTap: (point, scale) => _onTap(point, scale),
+                    overlay: (scale) => _EditorPainter(
+                      draft: draft,
+                      level: widget.level,
+                      colors: colors,
+                      selected: _selected ?? _moving,
+                      suggestions: _suggestions ?? const [],
+                      scalePoints: List.of(_scalePoints),
+                      scale: scale,
+                      revision: Object.hash(placeCount, pathCount, _selected, _moving, _suggestions, _scalePoints.length),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: switch (_mode) {
+                EditMode.paths when _suggestions != null && _suggestions!.isNotEmpty => Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => setState(() => _suggestions = null),
+                        child: const Text('Dismiss'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 2,
+                      child: FilledButton.icon(
+                        onPressed: _acceptSuggestions,
+                        icon: const Icon(Icons.done_all),
+                        label: Text('Add ${_suggestions!.length} suggested'),
+                      ),
+                    ),
+                  ],
+                ),
+                EditMode.paths => FilledButton.tonalIcon(
+                  onPressed: placeCount < 2 ? null : _suggest,
+                  icon: const Icon(Icons.auto_fix_high),
+                  label: const Text('Suggest paths'),
+                  style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+                ),
+                EditMode.scale => Text(
+                  floor.metresPerPixel == null
+                      ? 'Scale not set: distances are estimated.'
+                      : 'Scale: 1 m ≈ ${(1 / floor.metresPerPixel!).toStringAsFixed(1)} px on this drawing',
+                  style: theme.textTheme.bodyMedium,
+                ),
+                EditMode.places => Text(
+                  '$placeCount places · $pathCount paths · pinch to zoom',
+                  style: theme.textTheme.bodyMedium,
+                ),
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EditorPainter extends CustomPainter {
+  _EditorPainter({
+    required this.draft,
+    required this.level,
+    required this.colors,
+    required this.selected,
+    required this.suggestions,
+    required this.scalePoints,
+    required this.scale,
+    required this.revision,
+  });
+
+  final BuildingDraft draft;
+  final int level;
+  final MapColors colors;
+  final int? selected;
+  final List<(int, int)> suggestions;
+  final List<Offset> scalePoints;
+  final double scale;
+  final int revision;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Offset at(DraftNode n) => Offset(n.x * scale, n.y * scale);
+
+    final pathCasing = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 6
+      ..strokeCap = StrokeCap.round;
+    final pathPaint = Paint()
+      ..color = colors.path
+      ..strokeWidth = 3.5
+      ..strokeCap = StrokeCap.round;
+    for (final (a, b) in draft.edgesOn(level)) {
+      canvas
+        ..drawLine(at(draft.nodes[a]!), at(draft.nodes[b]!), pathCasing)
+        ..drawLine(at(draft.nodes[a]!), at(draft.nodes[b]!), pathPaint);
+    }
+
+    final dash = Paint()
+      ..color = colors.suggestion
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round;
+    for (final (a, b) in suggestions) {
+      _dashedLine(canvas, at(draft.nodes[a]!), at(draft.nodes[b]!), dash);
+    }
+
+    for (final node in draft.nodesOn(level)) {
+      final c = at(node);
+      final isSelected = node.id == selected;
+      if (node.type == NodeType.corridor) {
+        canvas
+          ..drawCircle(c, 6, Paint()..color = Colors.white)
+          ..drawCircle(c, 4, Paint()..color = isSelected ? colors.selected : colors.path);
+        continue;
+      }
+      if (isSelected) canvas.drawCircle(c, 19, Paint()..color = colors.selected.withValues(alpha: 0.45));
+      canvas
+        ..drawCircle(c, 13, Paint()..color = Colors.white)
+        ..drawCircle(c, 11, Paint()..color = node.type.isVertical ? colors.connector : colors.place);
+      _text(
+        canvas,
+        node.marker?.toString() ?? '–',
+        c,
+        TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: node.type.isVertical ? Colors.black : Colors.white,
+        ),
+      );
+      _text(
+        canvas,
+        node.name,
+        c + const Offset(0, 21),
+        const TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          color: Colors.black,
+          backgroundColor: Color(0xCCFFFFFF),
+        ),
+      );
+    }
+
+    if (scalePoints.isNotEmpty) {
+      final p = Paint()
+        ..color = colors.selected
+        ..strokeWidth = 3;
+      final points = [for (final s in scalePoints) s * scale];
+      for (final point in points) {
+        canvas.drawCircle(point, 7, p);
+      }
+      if (points.length == 2) canvas.drawLine(points[0], points[1], p);
+    }
+  }
+
+  void _text(Canvas canvas, String text, Offset center, TextStyle style) {
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+      ellipsis: '…',
+    )..layout(maxWidth: 120);
+    painter.paint(canvas, center - Offset(painter.width / 2, painter.height / 2));
+  }
+
+  void _dashedLine(Canvas canvas, Offset a, Offset b, Paint paint) {
+    final length = (b - a).distance;
+    if (length == 0) return;
+    final direction = (b - a) / length;
+    for (var t = 0.0; t < length; t += 12) {
+      canvas.drawLine(a + direction * t, a + direction * math.min(t + 7, length), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_EditorPainter old) => true;
+}
+
+enum PlaceAction { save, move, delete }
+
+class PlaceFormResult {
+  const PlaceFormResult({
+    required this.action,
+    required this.name,
+    required this.type,
+    required this.hasMarker,
+    this.marker,
+    this.link,
+  });
+
+  final PlaceAction action;
+  final String name;
+  final NodeType type;
+  final bool hasMarker;
+  final int? marker;
+  final String? link;
+}
+
+/// The add/edit sheet for a place. Resolves to null if dismissed.
+Future<PlaceFormResult?> showPlaceForm(BuildContext context, {required BuildingDraft draft, DraftNode? existing}) {
+  return showModalBottomSheet<PlaceFormResult>(
+    context: context,
+    isScrollControlled: true,
+    showDragHandle: true,
+    builder: (context) => Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: _PlaceForm(draft: draft, existing: existing),
+    ),
+  );
+}
+
+class _PlaceForm extends StatefulWidget {
+  const _PlaceForm({required this.draft, this.existing});
+
+  final BuildingDraft draft;
+  final DraftNode? existing;
+
+  @override
+  State<_PlaceForm> createState() => _PlaceFormState();
+}
+
+class _PlaceFormState extends State<_PlaceForm> {
+  late final TextEditingController _name = TextEditingController(text: widget.existing?.name ?? '');
+  late final TextEditingController _link = TextEditingController(text: widget.existing?.link ?? '');
+  late final TextEditingController _marker = TextEditingController(
+    text: (widget.existing?.marker ?? widget.draft.nextFreeMarker())?.toString() ?? '',
+  );
+  late NodeType _type = widget.existing?.type ?? NodeType.room;
+  late bool _hasMarker = widget.existing == null || widget.existing!.marker != null;
+  String? _markerError;
+
+  @override
+  void dispose() {
+    _name.dispose();
+    _link.dispose();
+    _marker.dispose();
+    super.dispose();
+  }
+
+  void _submit(PlaceAction action) {
+    int? marker;
+    if (_hasMarker && _type != NodeType.corridor) {
+      marker = int.tryParse(_marker.text.trim());
+      if (marker == null || marker < 0 || marker >= markerCount) {
+        setState(() => _markerError = 'Use a number from 0 to ${markerCount - 1}');
+        return;
+      }
+    }
+    Navigator.of(context).pop(
+      PlaceFormResult(
+        action: action,
+        name: _name.text,
+        type: _type,
+        hasMarker: _hasMarker && _type != NodeType.corridor,
+        marker: marker,
+        link: _type.isVertical ? _link.text : null,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final existing = widget.existing;
+    final markerOwner = () {
+      final value = int.tryParse(_marker.text.trim());
+      if (value == null) return null;
+      for (final n in widget.draft.nodes.values) {
+        if (n.marker == value && n.id != existing?.id) return n;
+      }
+      return null;
+    }();
+    final linkNames = _type.isVertical ? widget.draft.linkNames(_type) : const <String>[];
+
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(existing == null ? 'Add a place' : 'Edit ${existing.name}', style: theme.textTheme.titleLarge),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final type in NodeType.values)
+                  ChoiceChip(
+                    avatar: Icon(iconFor(type), size: 18),
+                    label: Text(type.label),
+                    selected: _type == type,
+                    showCheckmark: false,
+                    onSelected: (_) => setState(() => _type = type),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _name,
+              autofocus: existing == null,
+              textCapitalization: TextCapitalization.words,
+              decoration: InputDecoration(
+                labelText: 'Name',
+                hintText: switch (_type) {
+                  NodeType.room => 'e.g. Room 101, Library',
+                  NodeType.lift => 'e.g. Lift A',
+                  NodeType.stairs => 'e.g. Main stairs',
+                  NodeType.corridor => 'Optional',
+                  _ => 'e.g. ${_type.label}',
+                },
+              ),
+            ),
+            if (_type.isVertical) ...[
+              const SizedBox(height: 16),
+              TextField(
+                controller: _link,
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(
+                  labelText: 'Link name',
+                  helperText: 'Use the same link name on every floor this lift or staircase reaches.',
+                  helperMaxLines: 2,
+                ),
+              ),
+              if (linkNames.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    for (final name in linkNames)
+                      ActionChip(label: Text(name), onPressed: () => setState(() => _link.text = name)),
+                  ],
+                ),
+              ],
+            ],
+            if (_type != NodeType.corridor) ...[
+              const SizedBox(height: 8),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Has a marker on the wall'),
+                subtitle: const Text('People scan it to find where they are'),
+                value: _hasMarker,
+                onChanged: (v) => setState(() => _hasMarker = v),
+              ),
+              if (_hasMarker)
+                TextField(
+                  controller: _marker,
+                  keyboardType: TextInputType.number,
+                  onChanged: (_) => setState(() => _markerError = null),
+                  decoration: InputDecoration(
+                    labelText: 'Marker number',
+                    errorText: _markerError,
+                    helperText: markerOwner == null
+                        ? null
+                        : 'In use by ${markerOwner.name}; the two will swap markers.',
+                  ),
+                ),
+            ] else
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Text(
+                  'Corridor points have no marker. Use them to shape routes around corners.',
+                  style: theme.textTheme.bodySmall,
+                ),
+              ),
+            const SizedBox(height: 20),
+            FilledButton(
+              onPressed: () => _submit(PlaceAction.save),
+              child: Text(existing == null ? 'Add place' : 'Save'),
+            ),
+            if (existing != null) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => _submit(PlaceAction.move),
+                      icon: const Icon(Icons.open_with),
+                      label: const Text('Move'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(foregroundColor: theme.colorScheme.error),
+                      onPressed: () => Navigator.of(context).pop(
+                        PlaceFormResult(action: PlaceAction.delete, name: '', type: _type, hasMarker: false),
+                      ),
+                      icon: const Icon(Icons.delete_outline),
+                      label: const Text('Delete'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}

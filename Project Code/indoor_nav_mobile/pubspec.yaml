@@ -17,6 +17,12 @@ dependencies:
   # source on every first build and leaves the aruco module out by default.
   opencv_dart: 1.4.5
   provider: ^6.1.5+1
+  # Building setup: blueprint photos, storage, sharing and printable markers.
+  file_picker: ^10.1.2
+  image_picker: ^1.1.2
+  path_provider: ^2.1.5
+  pdf: ^3.11.3
+  share_plus: ^11.0.0
 
 dev_dependencies:
   flutter_test:

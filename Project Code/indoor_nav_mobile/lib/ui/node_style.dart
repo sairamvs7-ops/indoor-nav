@@ -9,4 +9,5 @@ IconData iconFor(NodeType type) => switch (type) {
   NodeType.stairs => Icons.stairs_outlined,
   NodeType.entry => Icons.door_front_door_outlined,
   NodeType.landmark => Icons.place_outlined,
+  NodeType.corridor => Icons.more_horiz,
 };

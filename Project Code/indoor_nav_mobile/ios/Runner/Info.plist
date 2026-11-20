@@ -2,8 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Choose a floor blueprint image when setting up a building.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>The camera is used to scan the navigation markers on the walls so the app knows where you are.</string>
+	<string>The camera scans the navigation markers on the walls, and can photograph a printed floor plan when setting up a building.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

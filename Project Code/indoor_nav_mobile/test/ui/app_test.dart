@@ -1,22 +1,33 @@
 import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:indoor_nav_mobile/app.dart';
 import 'package:indoor_nav_mobile/map/building_map.dart';
 import 'package:indoor_nav_mobile/scanner/marker_confirmer.dart';
 import 'package:indoor_nav_mobile/scanner/scanner_screen.dart';
+import 'package:indoor_nav_mobile/ui/app_theme.dart';
+import 'package:indoor_nav_mobile/ui/blueprint_view.dart';
 import 'package:indoor_nav_mobile/ui/floor_plan_view.dart';
+import 'package:indoor_nav_mobile/ui/navigation_screen.dart';
 
 import '../support/fake_camera.dart';
 import '../support/test_map.dart';
 
 String instructionText(WidgetTester tester) => tester.widget<Text>(find.byKey(const Key('instruction'))).data!;
 
-Future<void> pumpApp(WidgetTester tester, Future<BuildingMap> Function() loadMap, {ScriptedDetector? detector}) async {
+Future<void> pumpApp(WidgetTester tester, BuildingMap map, {ScriptedDetector? detector}) async {
   tester.view.physicalSize = const Size(1080, 2400);
   tester.view.devicePixelRatio = 2.5;
   addTearDown(tester.view.reset);
-  await tester.pumpWidget(IndoorNavApp(loadMap: loadMap, createDetector: () => detector ?? ScriptedDetector(const [])));
+  await tester.pumpWidget(
+    MaterialApp(
+      theme: buildTheme(Brightness.light),
+      home: NavigationScreen(
+        map: map,
+        images: assetFloorImages(),
+        createDetector: () => detector ?? ScriptedDetector(const []),
+      ),
+    ),
+  );
   await tester.pumpAndSettle();
 }
 
@@ -47,24 +58,18 @@ Future<void> pickPlace(WidgetTester tester, {required String button, required St
 void main() {
   final realMap = loadRealMap();
 
-  testWidgets('starts on the home screen with the ground floor plan', (tester) async {
-    await pumpApp(tester, () async => realMap);
+  testWidgets('starts with the building name and the ground floor plan', (tester) async {
+    await pumpApp(tester, realMap);
 
-    expect(find.text('Indoor Nav'), findsOneWidget);
+    expect(find.text(realMap.name), findsOneWidget);
+    expect(tester.widget<FloorPlanView>(find.byType(FloorPlanView)).floor.level, 0);
     expect(instructionText(tester), 'Choose a destination, then scan the nearest marker.');
     expect(find.byType(FloorPlanView), findsOneWidget);
     expect(find.text('Scan marker'), findsOneWidget);
   });
 
-  testWidgets('shows the map error screen when building.json is broken', (tester) async {
-    await pumpApp(tester, () async => throw const MapFormatException('node 3: "x" must be a number'));
-
-    expect(find.text('The building map could not be loaded'), findsOneWidget);
-    expect(find.text('node 3: "x" must be a number'), findsOneWidget);
-  });
-
   testWidgets('choosing a destination and location shows the route and steps', (tester) async {
-    await pumpApp(tester, () async => realMap);
+    await pumpApp(tester, realMap);
 
     await pickPlace(tester, button: 'Choose a destination', place: 'Room 104');
 
@@ -79,7 +84,7 @@ void main() {
   });
 
   testWidgets('"I\'m at" advances one stop and the map follows to the next floor', (tester) async {
-    await pumpApp(tester, () async => realMap);
+    await pumpApp(tester, realMap);
     await pickPlace(tester, button: 'Choose a destination', place: 'Room 104');
     await pickPlace(tester, button: 'Set my location', place: 'Lift 1');
 
@@ -89,21 +94,20 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(instructionText(tester), 'Walk to Entry 3');
-    final segmented = tester.widget<SegmentedButton<int>>(find.byType(SegmentedButton<int>));
-    expect(segmented.selected, {1});
+    expect(tester.widget<FloorPlanView>(find.byType(FloorPlanView)).floor.level, 1);
   });
 
   testWidgets('the floor switcher changes the plan shown', (tester) async {
-    await pumpApp(tester, () async => realMap);
+    await pumpApp(tester, realMap);
 
-    await tester.tap(find.text('First Floor'));
+    await tester.tap(find.byKey(const ValueKey('floor-1')));
     await tester.pumpAndSettle();
 
     expect(tester.widget<FloorPlanView>(find.byType(FloorPlanView)).floor.level, 1);
   });
 
   testWidgets('tapping a place on the plan makes it the destination', (tester) async {
-    await pumpApp(tester, () async => realMap);
+    await pumpApp(tester, realMap);
     final entry = realMap.node(13);
     final plan = find.byType(FloorPlanView);
     final scale = tester.getSize(plan).width / realMap.floor(0).width;
@@ -123,7 +127,7 @@ void main() {
       [DetectedMarker(18, 900)],
       [DetectedMarker(18, 900)],
     ]);
-    await pumpApp(tester, () async => realMap, detector: detector);
+    await pumpApp(tester, realMap, detector: detector);
     await pickPlace(tester, button: 'Choose a destination', place: 'Room 104');
 
     await scanFromHome(tester, camera, frames: 2);
@@ -139,7 +143,7 @@ void main() {
 
   testWidgets('closing the scanner without a marker changes nothing', (tester) async {
     CameraPlatform.instance = FakeCameraPlatform();
-    await pumpApp(tester, () async => realMap);
+    await pumpApp(tester, realMap);
 
     await tester.tap(find.text('Scan marker'));
     for (var i = 0; i < 10; i++) {
@@ -151,8 +155,24 @@ void main() {
     expect(instructionText(tester), 'Choose a destination, then scan the nearest marker.');
   });
 
+  testWidgets('route preference chips reroute and explain a missing step-free route', (tester) async {
+    await pumpApp(tester, realMap);
+    await pickPlace(tester, button: 'Choose a destination', place: 'Room 104');
+    await pickPlace(tester, button: 'Set my location', place: 'Stairs 1');
+
+    await tester.tap(find.text('Avoid lifts'));
+    await tester.pumpAndSettle();
+
+    expect(instructionText(tester), 'Take Stairs 1 up to the First Floor');
+
+    await tester.tap(find.text('Step-free'));
+    await tester.pumpAndSettle();
+
+    expect(instructionText(tester), isNot(contains('Stairs 1 up')));
+  });
+
   testWidgets('"Start over" clears the destination and location', (tester) async {
-    await pumpApp(tester, () async => realMap);
+    await pumpApp(tester, realMap);
     await pickPlace(tester, button: 'Choose a destination', place: 'Room 104');
 
     await tester.tap(find.byTooltip('Start over'));

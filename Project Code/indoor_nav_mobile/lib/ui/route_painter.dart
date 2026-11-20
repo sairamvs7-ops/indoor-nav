@@ -1,23 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../map/building_map.dart';
-
-/// Colours for the route overlay, taken from the app theme.
-class RouteColors {
-  const RouteColors({required this.route, required this.current, required this.destination, required this.connector});
-
-  factory RouteColors.of(ColorScheme scheme) => RouteColors(
-    route: scheme.primary,
-    current: Colors.blue.shade600,
-    destination: Colors.red.shade600,
-    connector: Colors.orange.shade700,
-  );
-
-  final Color route;
-  final Color current;
-  final Color destination;
-  final Color connector;
-}
+import 'app_theme.dart';
 
 /// Draws nodes and the route on top of one floor's drawing. Node positions are
 /// pixels on the floor image, scaled to the widget size.
@@ -34,7 +18,7 @@ class RoutePainter extends CustomPainter {
   final BuildingMap map;
   final Floor floor;
   final List<int> route;
-  final RouteColors colors;
+  final MapColors colors;
   final int? currentId;
   final int? destinationId;
 
@@ -45,11 +29,11 @@ class RoutePainter extends CustomPainter {
 
     final dot = Paint()..color = Colors.black.withValues(alpha: 0.35);
     for (final node in map.nodesOnFloor(floor.level)) {
-      canvas.drawCircle(at(node), 3.5, dot);
+      if (node.type != NodeType.corridor) canvas.drawCircle(at(node), 3.5, dot);
     }
 
     final casing = Paint()
-      ..color = Colors.white
+      ..color = colors.routeCasing
       ..strokeWidth = 9
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
@@ -95,7 +79,7 @@ class RoutePainter extends CustomPainter {
     final painter = TextPainter(
       text: TextSpan(
         text: String.fromCharCode(icon.codePoint),
-        style: TextStyle(fontFamily: icon.fontFamily, package: icon.fontPackage, fontSize: 16, color: Colors.white),
+        style: TextStyle(fontFamily: icon.fontFamily, package: icon.fontPackage, fontSize: 16, color: Colors.black87),
       ),
       textDirection: TextDirection.ltr,
     )..layout();

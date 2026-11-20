@@ -34,7 +34,10 @@ class _PlacePickerState extends State<_PlacePicker> {
     final theme = Theme.of(context);
     final rows = <Widget>[];
     for (final floor in widget.map.floors) {
-      final places = widget.map.nodesOnFloor(floor.level).where(_matches).toList()
+      final places = widget.map
+          .nodesOnFloor(floor.level)
+          .where((n) => n.type != NodeType.corridor && _matches(n))
+          .toList()
         ..sort((a, b) => a.name.compareTo(b.name));
       if (places.isEmpty) continue;
       rows.add(
