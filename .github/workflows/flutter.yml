@@ -21,17 +21,24 @@ defaults:
   run:
     working-directory: "Project Code/indoor_nav_mobile"
 
+env:
+  # The app targets Flutter 3.41 (Dart 3.11). Newer releases deprecate
+  # package:flutter/material.dart, which makes `flutter analyze` fail, so pin
+  # the version and raise it on purpose when the code is migrated.
+  FLUTTER_VERSION: "3.41.x"
+
 jobs:
   test:
     name: Analyze and test
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
       - run: flutter --version
@@ -45,9 +52,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
@@ -56,6 +63,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
       - run: flutter pub get
