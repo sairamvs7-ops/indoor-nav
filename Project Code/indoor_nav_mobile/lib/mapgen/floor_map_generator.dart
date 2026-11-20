@@ -55,7 +55,12 @@ const int _workSize = 640;
 /// Runs in well under a second for a 2400 px image; call it in an isolate
 /// ([Isolate.run]) to keep the UI smooth.
 GeneratedFloorMap generateFloorMap(Uint8List imageBytes, {GapClosing gaps = GapClosing.normal}) {
-  final decoded = img.decodeImage(imageBytes);
+  img.Image? decoded;
+  try {
+    decoded = img.decodeImage(imageBytes);
+  } on Object {
+    decoded = null; // the decoder can throw on damaged or non-image files
+  }
   if (decoded == null) throw const FormatException('This image could not be read.');
   final grid = _Grid.fromImage(decoded);
   final regions = detectRegions(grid.walls, grid.width, grid.height, gapShare: gaps.share);
