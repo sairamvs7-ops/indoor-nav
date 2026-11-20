@@ -1,0 +1,7 @@
+{
+  "name": "Indoor Nav Pro",
+  "description": "Indoor navigation system using camera scanning and ESP32 communication.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
