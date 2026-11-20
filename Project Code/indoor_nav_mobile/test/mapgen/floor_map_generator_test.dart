@@ -60,6 +60,30 @@ void main() {
     expect(topLeft.outline.length, inInclusiveRange(4, 10));
   });
 
+  test('a wide hall that three rooms open onto is a corridor', () {
+    final image = img.Image(width: 300, height: 300);
+    img.fill(image, color: img.ColorRgb8(255, 255, 255));
+    void wall(int x1, int y1, int x2, int y2) =>
+        img.fillRect(image, x1: x1, y1: y1, x2: x2, y2: y2, color: img.ColorRgb8(0, 0, 0));
+    wall(10, 10, 290, 13);
+    wall(10, 287, 290, 290);
+    wall(10, 10, 13, 290);
+    wall(287, 10, 290, 290);
+    // Three rooms on top, each with a doorway onto the hall below.
+    wall(103, 10, 106, 150);
+    wall(197, 10, 200, 150);
+    wall(10, 150, 50, 153);
+    wall(58, 150, 146, 153);
+    wall(154, 150, 240, 153);
+    wall(248, 150, 290, 153);
+
+    final map = generateFloorMap(img.encodePng(image));
+
+    expect(map.regions.where((r) => r.kind == RegionKind.room), hasLength(3));
+    final hall = map.regions.singleWhere((r) => r.kind == RegionKind.corridor);
+    expect(hall.outline.every((p) => p.y > 140), isTrue);
+  });
+
   test('reads a white-on-blue blueprint the same way', () {
     final map = generateFloorMap(planPng(blueprint: true));
 

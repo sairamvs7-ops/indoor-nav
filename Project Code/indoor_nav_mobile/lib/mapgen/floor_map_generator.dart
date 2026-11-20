@@ -267,7 +267,24 @@ List<DetectedRegion> detectRegions(Uint8List walls, int width, int height, {doub
     }
   }
 
-  // 6. Trace, simplify and square up each region; long thin ones are corridors.
+  // 6. Which regions meet at doorways (they grew into the same gap). A
+  //    corridor is what many rooms open onto.
+  final neighbours = <int, Set<int>>{for (final id in areas.keys) id: <int>{}};
+  for (var y = 0; y < h; y++) {
+    for (var x = 0; x < w; x++) {
+      final a = labels[y * w + x];
+      if (a == 0) continue;
+      for (final b in [if (x + 1 < w) labels[y * w + x + 1], if (y + 1 < h) labels[(y + 1) * w + x]]) {
+        if (b != 0 && b != a) {
+          neighbours[a]!.add(b);
+          neighbours[b]!.add(a);
+        }
+      }
+    }
+  }
+
+  // 7. Trace, simplify and square up each region. Long thin ones, and ones
+  //    that three or more others open onto, are corridors.
   final regions = <DetectedRegion>[];
   for (final id in areas.keys) {
     final contour = _closedOutline(labels, w, h, id, smooth: math.max(2, (longest * 0.015).round()));
@@ -279,7 +296,7 @@ List<DetectedRegion> detectRegions(Uint8List walls, int width, int height, {doub
     final bh = maxY - minY + 1 + 2 * r;
     final aspect = math.max(bw, bh) / math.max(1, math.min(bw, bh));
     final fill = areas[id]! / (bw * bh);
-    final corridor = aspect > 3.2 || (fill < 0.45 && areas[id]! > minRoom * 4);
+    final corridor = aspect > 3.2 || (fill < 0.45 && areas[id]! > minRoom * 4) || neighbours[id]!.length >= 3;
     regions.add(
       DetectedRegion(
         outline: outline,
