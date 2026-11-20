@@ -5,7 +5,9 @@ import '../map/building_map.dart';
 import '../navigation/navigation_controller.dart';
 import '../scanner/marker_detector.dart';
 import '../scanner/scanner_screen.dart';
+import '../routing/directions.dart';
 import 'blueprint_view.dart';
+import 'floor_change_view.dart';
 import 'floor_plan_view.dart';
 import 'instruction_card.dart';
 import 'place_picker.dart';
@@ -34,11 +36,55 @@ class NavigationScreen extends StatelessWidget {
   }
 }
 
-class _NavigationView extends StatelessWidget {
+class _NavigationView extends StatefulWidget {
   const _NavigationView({required this.images, required this.createDetector});
 
   final FloorImages images;
   final FrameDetector Function() createDetector;
+
+  @override
+  State<_NavigationView> createState() => _NavigationViewState();
+}
+
+class _NavigationViewState extends State<_NavigationView> {
+  late final NavigationController _nav = context.read<NavigationController>();
+  MapNode? _lastNode;
+
+  FloorImages get images => widget.images;
+  FrameDetector Function() get createDetector => widget.createDetector;
+
+  @override
+  void initState() {
+    super.initState();
+    _lastNode = _nav.currentNode;
+    _nav.addListener(_onNavigationChanged);
+  }
+
+  @override
+  void dispose() {
+    _nav.removeListener(_onNavigationChanged);
+    super.dispose();
+  }
+
+  /// Moving from a lift or stairs on one floor to one on another floor means
+  /// you just changed floors: show it.
+  void _onNavigationChanged() {
+    final before = _lastNode;
+    final now = _nav.currentNode;
+    _lastNode = now;
+    if (before == null || now == null || before.floor == now.floor) return;
+    if (!before.type.isVertical || !now.type.isVertical) return;
+    showFloorChange(context, map: _nav.map, images: images, from: before, to: now, route: _nav.routeNodes);
+  }
+
+  void _replayFloorChange(RouteStep step) => showFloorChange(
+    context,
+    map: _nav.map,
+    images: images,
+    from: step.from,
+    to: step.to,
+    route: _nav.routeNodes,
+  );
 
   Future<void> _pickDestination(BuildContext context) async {
     final nav = context.read<NavigationController>();
@@ -150,7 +196,10 @@ class _NavigationView extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text('Pinch to zoom · tap a place to go there', textAlign: TextAlign.center, style: theme.textTheme.bodySmall),
-          if (nav.steps.isNotEmpty) ...[const SizedBox(height: 16), RouteSteps(map: map, steps: nav.steps)],
+          if (nav.steps.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            RouteSteps(map: map, steps: nav.steps, onShowFloorChange: _replayFloorChange),
+          ],
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(

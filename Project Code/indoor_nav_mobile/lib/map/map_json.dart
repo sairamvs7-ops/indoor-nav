@@ -1,6 +1,5 @@
 import 'aruco_markers.dart';
 import 'building_map.dart';
-import 'corridor_network.dart';
 
 /// Markers are DICT_4X4_250, which only decodes ids 0-249. A marker outside
 /// that range could never be scanned, so it is rejected at load.
