@@ -241,7 +241,7 @@ class _BuildingEditorScreenState extends State<BuildingEditorScreen> {
           ),
           const SizedBox(height: 10),
           OutlinedButton.icon(
-            onPressed: ready && map != null ? () => _openNavigation(map) : null,
+            onPressed: ready ? () => _openNavigation(map) : null,
             icon: const Icon(Icons.navigation_outlined),
             label: const Text('Try navigation'),
           ),
