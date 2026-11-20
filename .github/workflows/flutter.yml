@@ -1,0 +1,72 @@
+# Builds and tests the mobile app on GitHub's servers, so nothing has to run
+# locally. Each run uploads the Android APKs as a downloadable artifact.
+name: Flutter app
+
+on:
+  push:
+    paths:
+      - "Project Code/indoor_nav_mobile/**"
+      - ".github/workflows/flutter.yml"
+  pull_request:
+    paths:
+      - "Project Code/indoor_nav_mobile/**"
+      - ".github/workflows/flutter.yml"
+  workflow_dispatch: # "Run workflow" button on the Actions tab
+
+concurrency:
+  group: flutter-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: "Project Code/indoor_nav_mobile"
+
+jobs:
+  test:
+    name: Analyze and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - run: flutter --version
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+
+  build-apk:
+    name: Build Android APK
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      # One APK per CPU type keeps each file small. Almost every current
+      # Android phone needs the arm64-v8a one.
+      - run: flutter build apk --release --split-per-abi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: indoor-nav-apk
+          path: "Project Code/indoor_nav_mobile/build/app/outputs/flutter-apk/*.apk"
+          if-no-files-found: error
+          retention-days: 30
