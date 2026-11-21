@@ -186,6 +186,9 @@ void main() {
     expect(find.byType(ScannerScreen), findsOneWidget);
     await tester.tap(find.byTooltip('Close scanner'));
     await tester.pumpAndSettle();
+    // Back to the top, where the instruction card is.
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, 3000));
+    await tester.pumpAndSettle();
     expect(instructionText(tester), 'Scan the nearest marker to start navigating to Room 104.');
     expect(find.text('Going to Room 104'), findsOneWidget);
   });
