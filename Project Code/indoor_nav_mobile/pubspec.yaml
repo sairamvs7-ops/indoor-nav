@@ -29,6 +29,9 @@ dependencies:
   share_plus: ^11.0.0
   # Scan once, then walk: steps, compass, barometer and spoken turns.
   flutter_tts: ^4.2.0
+  # Reads room names and STAIRS/LIFT labels on blueprints, fully on the phone
+  # (the Latin text model is bundled in the app; nothing is downloaded).
+  google_mlkit_text_recognition: ^0.15.0
   sensors_plus: ^6.1.1
 
 dev_dependencies:

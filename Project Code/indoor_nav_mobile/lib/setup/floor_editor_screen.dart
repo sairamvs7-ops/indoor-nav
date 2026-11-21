@@ -9,6 +9,8 @@ import '../map/building_map.dart';
 import '../ui/app_theme.dart';
 import '../mapgen/floor_map_generator.dart' show GapClosing;
 import '../mapgen/generate_regions.dart';
+import '../mapgen/plan_text_reader.dart';
+import '../mapgen/text_labels.dart';
 import '../ui/blueprint_view.dart';
 import '../ui/generated_map_painter.dart';
 import '../ui/node_style.dart';
@@ -30,6 +32,7 @@ class FloorEditorScreen extends StatefulWidget {
     required this.level,
     required this.images,
     required this.loadImage,
+    this.readText = readPlanText,
   });
 
   final BuildingDraft draft;
@@ -38,6 +41,10 @@ class FloorEditorScreen extends StatefulWidget {
 
   /// Reads a floor's blueprint file, for generating its map.
   final Future<Uint8List> Function(String image) loadImage;
+
+  /// Reads the text on the blueprint (offline OCR), to name rooms and find
+  /// stairs and lifts.
+  final PlanTextReader readText;
 
   @override
   State<FloorEditorScreen> createState() => _FloorEditorScreenState();
@@ -77,15 +84,26 @@ class _FloorEditorScreenState extends State<FloorEditorScreen> {
     setState(() => _generating = true);
     try {
       final floor = draft.floor(widget.level);
-      final regions = await generateRegions(await widget.loadImage(floor.image), gaps: _gaps);
+      final bytes = await widget.loadImage(floor.image);
+      final regions = await generateRegions(bytes, gaps: _gaps);
       if (!mounted) return;
       draft.setGeneratedMap(widget.level, regions);
+      // Read the plan's text to name rooms and find stairs and lifts. Text
+      // recognition failing (or finding nothing) just leaves more to tap.
+      var read = LabelResult();
+      try {
+        read = applyTextLabels(draft, widget.level, await widget.readText(bytes));
+      } on Object catch (e) {
+        debugPrint('Reading the plan text failed: $e');
+      }
+      if (!mounted) return;
       final rooms = regions.where((r) => r.kind == RegionKind.room).length;
       final corridors = regions.where((r) => r.kind == RegionKind.corridor).length;
       _toast(
         regions.isEmpty
             ? 'No rooms found. Try "Wider doorways", or trace the areas yourself.'
-            : 'Found $rooms rooms and $corridors corridors. Tap each area to say what it is.',
+            : 'Found $rooms rooms and $corridors corridors${read.total > 0 ? '; from the plan text: $read' : ''}. '
+                  'Tap any area to change it.',
       );
     } on FormatException catch (e) {
       if (mounted) _toast(e.message);
