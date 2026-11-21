@@ -42,8 +42,12 @@ Future<void> scanFromHome(WidgetTester tester, FakeCameraPlatform camera, {requi
     await tester.pump();
     await tester.pump();
   }
+  // Let the scanner close and the message appear, but don't wait out the
+  // guide dot's runs (pumpAndSettle would, and the 4 s message would be gone).
   await tester.pump(const Duration(milliseconds: 400));
-  await tester.pumpAndSettle();
+  for (var i = 0; i < 10; i++) {
+    await tester.pump(const Duration(milliseconds: 100));
+  }
 }
 
 Future<void> pickPlace(WidgetTester tester, {required String button, required String place}) async {
