@@ -14,6 +14,9 @@ abstract interface class MotionSensors {
   Stream<(Vec3, Duration)> get accelerometer;
   Stream<Vec3> get magnetometer;
 
+  /// Rotation rates (rad/s) with their time; null if there is no gyroscope.
+  Stream<(Vec3, Duration)>? get gyroscope;
+
   /// Air pressure in hPa; null on phones without a barometer.
   Stream<double>? get barometer;
 }
@@ -71,7 +74,7 @@ class LiveWalk extends ChangeNotifier {
 
   RouteTracker? _tracker;
   final StepDetector _steps = StepDetector();
-  final HeadingFilter _heading = HeadingFilter();
+  final FusedHeading _heading = FusedHeading();
   final FloorChangeDetector _pressure = FloorChangeDetector();
   final List<StreamSubscription<Object?>> _subs = [];
   Vec3? _gravity;
@@ -117,6 +120,10 @@ class LiveWalk extends ChangeNotifier {
     _subs
       ..add(sensors.accelerometer.listen(_onAccel, onError: (Object _) {}))
       ..add(sensors.magnetometer.listen(_onMag, onError: (Object _) {}));
+    final gyroscope = sensors.gyroscope;
+    if (gyroscope != null) {
+      _subs.add(gyroscope.listen((g) => _heading.gyro(g.$1, g.$2), onError: (Object _) {}));
+    }
     final barometer = sensors.barometer;
     if (barometer != null) _subs.add(barometer.listen(_onPressure, onError: (Object _) {}));
     nav.addListener(_onNavChanged);
@@ -146,6 +153,7 @@ class LiveWalk extends ChangeNotifier {
   void _onAccel((Vec3, Duration) reading) {
     final (accel, time) = reading;
     _gravity = accel;
+    _heading.gravity(accel);
     if (_steps.add(accel, time)) _onStep();
   }
 
@@ -153,7 +161,7 @@ class LiveWalk extends ChangeNotifier {
     final gravity = _gravity;
     if (gravity == null) return;
     final heading = compassHeading(gravity, mag);
-    if (heading != null) _heading.add(heading);
+    if (heading != null) _heading.compass(heading);
   }
 
   void _onStep() {

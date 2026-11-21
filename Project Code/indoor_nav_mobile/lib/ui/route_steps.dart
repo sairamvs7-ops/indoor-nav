@@ -5,13 +5,16 @@ import '../routing/directions.dart';
 
 /// The remaining route as a list of steps. The first step is what to do next.
 class RouteSteps extends StatelessWidget {
-  const RouteSteps({super.key, required this.map, required this.steps, this.onShowFloorChange});
+  const RouteSteps({super.key, required this.map, required this.steps, this.onShowFloorChange, this.onRelocate});
 
   final BuildingMap map;
   final List<RouteStep> steps;
 
   /// Replays the 3D floor-change view for a lift or stairs step.
   final ValueChanged<RouteStep>? onShowFloorChange;
+
+  /// Forget the current position, keep the destination, scan again.
+  final VoidCallback? onRelocate;
 
   @override
   Widget build(BuildContext context) {
@@ -22,8 +25,18 @@ class RouteSteps extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-            child: Text('Route · $stops to go', style: theme.textTheme.titleMedium),
+            padding: const EdgeInsets.fromLTRB(16, 8, 8, 0),
+            child: Row(
+              children: [
+                Expanded(child: Text('Route · $stops to go', style: theme.textTheme.titleMedium)),
+                if (onRelocate != null)
+                  TextButton.icon(
+                    onPressed: onRelocate,
+                    icon: const Icon(Icons.qr_code_scanner, size: 18),
+                    label: const Text('Re-locate'),
+                  ),
+              ],
+            ),
           ),
           for (final (i, step) in steps.indexed)
             ListTile(

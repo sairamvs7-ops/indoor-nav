@@ -18,6 +18,11 @@ class DeviceMotionSensors implements MotionSensors {
       magnetometerEventStream(samplingPeriod: SensorInterval.gameInterval).map((e) => (x: e.x, y: e.y, z: e.z));
 
   @override
+  Stream<(Vec3, Duration)>? get gyroscope => gyroscopeEventStream(
+    samplingPeriod: SensorInterval.gameInterval,
+  ).map((e) => ((x: e.x, y: e.y, z: e.z), _clock.elapsed));
+
+  @override
   Stream<double>? get barometer =>
       barometerEventStream(samplingPeriod: SensorInterval.uiInterval).map((e) => e.pressure);
 }

@@ -66,6 +66,15 @@ class NavigationController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Forgets where you are but keeps the destination, so the next scan
+  /// routes you from wherever you are now ("Re-locate").
+  void clearLocation() {
+    if (_currentId == null) return;
+    _currentId = null;
+    _recomputeRoute();
+    notifyListeners();
+  }
+
   void clearDestination() {
     _destinationId = null;
     _recomputeRoute();

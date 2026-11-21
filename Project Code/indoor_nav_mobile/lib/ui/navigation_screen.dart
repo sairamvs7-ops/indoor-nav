@@ -148,6 +148,13 @@ class _NavigationViewState extends State<_NavigationView> {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
+  /// Re-locate: forget where you are, keep the destination, and scan the
+  /// nearest marker to be routed from there.
+  Future<void> _relocate(BuildContext context) async {
+    context.read<NavigationController>().clearLocation();
+    await _scan(context);
+  }
+
   Future<void> _startWalking(BuildContext context) async {
     final walk = context.read<LiveWalk>();
     final go = await showModalBottomSheet<bool>(
@@ -271,7 +278,12 @@ class _NavigationViewState extends State<_NavigationView> {
           Text('Pinch to zoom · tap a place to go there', textAlign: TextAlign.center, style: theme.textTheme.bodySmall),
           if (nav.steps.isNotEmpty) ...[
             const SizedBox(height: 16),
-            RouteSteps(map: map, steps: nav.steps, onShowFloorChange: _replayFloorChange),
+            RouteSteps(
+              map: map,
+              steps: nav.steps,
+              onShowFloorChange: _replayFloorChange,
+              onRelocate: () => _relocate(context),
+            ),
           ],
         ],
       ),

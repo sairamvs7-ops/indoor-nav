@@ -50,6 +50,9 @@ class FakeSensors implements MotionSensors {
   @override
   Stream<double>? get barometer => pressure.stream;
 
+  @override
+  Stream<(Vec3, Duration)>? get gyroscope => null;
+
   /// One footstep: half a second of the bounce walking makes, at 50 Hz,
   /// with the phone's compass reading [field].
   void step(Vec3 field) {
@@ -110,6 +113,26 @@ void main() {
       final filter = HeadingFilter(strength: 0.5);
       filter.add(2 * math.pi - 0.1);
       expect(angleBetween(filter.add(0.1), 0), closeTo(0, 1e-9));
+    });
+
+    test('the gyroscope turns the heading and the compass corrects its drift', () {
+      final heading = FusedHeading()
+        ..gravity(flat)
+        ..compass(1.0)
+        ..gyro((x: 0, y: 0, z: 0), Duration.zero);
+      // Turning counter-clockwise at 0.5 rad/s for one second.
+      for (var i = 1; i <= 50; i++) {
+        heading.gyro((x: 0, y: 0, z: 0.5), Duration(milliseconds: 20 * i));
+      }
+      expect(heading.value, closeTo(0.5, 0.02));
+
+      // A compass reading far off barely moves it; many readings win.
+      heading.compass(2.0);
+      expect(heading.value, closeTo(0.53, 0.01));
+      for (var i = 0; i < 400; i++) {
+        heading.compass(2.0);
+      }
+      expect(heading.value, closeTo(2.0, 0.01));
     });
 
     test('air pressure dropping about 0.4 hPa is one floor up', () {

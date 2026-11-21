@@ -93,13 +93,13 @@ class InstructionCard extends StatelessWidget {
                   ),
                 ],
                 if (next != null) ...[
-                  const SizedBox(height: 4),
-                  TextButton.icon(
+                  const SizedBox(height: 12),
+                  // Move on without scanning, so the camera can stay off.
+                  FilledButton.tonalIcon(
                     onPressed: nav.advanceToNextStop,
-                    icon: const Icon(Icons.check),
-                    label: Text(
-                      next.markerId == null ? "I'm at ${next.name} (no marker here)" : "I'm at ${next.name}",
-                    ),
+                    icon: const Icon(Icons.skip_next_rounded),
+                    label: Text(next.markerId == null ? 'Next: ${next.name} (no marker)' : 'Next: ${next.name}'),
+                    style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
                   ),
                 ],
               ],

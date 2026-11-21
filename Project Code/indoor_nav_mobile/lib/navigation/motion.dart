@@ -91,6 +91,51 @@ class HeadingFilter {
   }
 }
 
+/// Heading from the gyroscope, kept honest by the compass. The gyroscope
+/// tracks turns smoothly and instantly but drifts slowly; the compass never
+/// drifts but jumps around near steel and wiring indoors. Each gyroscope
+/// reading turns the heading; each compass reading pulls it a little
+/// ([trust]) towards north as the compass sees it.
+class FusedHeading {
+  FusedHeading({this.trust = 0.02});
+
+  /// How much of the gap to the compass is closed per compass reading.
+  final double trust;
+
+  double? _heading;
+  Duration? _lastGyro;
+  Vec3? _up;
+
+  double? get value => _heading;
+
+  /// Which way is up, from the accelerometer (needed to know which part of
+  /// the phone's rotation is turning left or right).
+  void gravity(Vec3 accel) => _up = accel;
+
+  /// A gyroscope reading (rad/s around the phone's axes).
+  void gyro(Vec3 rate, Duration timestamp) {
+    final last = _lastGyro;
+    _lastGyro = timestamp;
+    final up = _up;
+    final heading = _heading;
+    if (last == null || up == null || heading == null) return;
+    final dt = (timestamp - last).inMicroseconds / 1e6;
+    if (dt <= 0 || dt > 0.5) return; // a gap in readings: wait for the compass
+    final norm = math.sqrt(up.x * up.x + up.y * up.y + up.z * up.z);
+    if (norm < 0.1) return;
+    // Turning about the up axis. Counter-clockwise (seen from above) is a
+    // positive rate and makes the compass heading smaller.
+    final yawRate = (rate.x * up.x + rate.y * up.y + rate.z * up.z) / norm;
+    _heading = normaliseAngle(heading - yawRate * dt);
+  }
+
+  /// A compass heading (from [compassHeading]).
+  void compass(double heading) {
+    final h = _heading;
+    _heading = h == null ? heading : normaliseAngle(h + trust * angleBetween(heading, h));
+  }
+}
+
 /// Notices a floor change from air pressure. Pressure drops about 0.12 hPa
 /// per metre of height, so one storey (~3.5 m) is roughly 0.4 hPa.
 class FloorChangeDetector {

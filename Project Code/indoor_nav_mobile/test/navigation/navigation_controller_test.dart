@@ -136,6 +136,21 @@ void main() {
     expect(nav.currentNode!.id, 1);
   });
 
+  test('clearLocation keeps the destination for a fresh scan', () {
+    final nav = NavigationController(BuildingMap.fromJson(smallMapJson()))
+      ..selectDestination(5)
+      ..setCurrentLocation(1);
+
+    nav.clearLocation();
+
+    expect(nav.currentNode, isNull);
+    expect(nav.destinationNode!.id, 5);
+    expect(nav.routeNodes, isEmpty);
+    expect(nav.instruction, contains('Scan the nearest marker'));
+    nav.handleMarker(3);
+    expect(nav.routeNodes.first, 3);
+  });
+
   test('reset clears everything', () {
     nav
       ..selectDestination(5)

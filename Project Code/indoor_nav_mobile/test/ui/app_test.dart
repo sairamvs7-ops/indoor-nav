@@ -90,7 +90,7 @@ void main() {
 
     expect(instructionText(tester), 'Take Lift 1 up to the First Floor');
 
-    await tester.tap(find.text("I'm at Lift 3"));
+    await tester.tap(find.text('Next: Lift 3'));
     await tester.pumpAndSettle();
 
     expect(instructionText(tester), 'Walk to Entry 3');
@@ -169,6 +169,25 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(instructionText(tester), isNot(contains('Stairs 1 up')));
+  });
+
+  testWidgets('Re-locate keeps the destination and opens the scanner', (tester) async {
+    CameraPlatform.instance = FakeCameraPlatform();
+    await pumpApp(tester, realMap);
+    await pickPlace(tester, button: 'Choose a destination', place: 'Room 104');
+    await pickPlace(tester, button: 'Set my location', place: 'Entry 1');
+
+    await tester.scrollUntilVisible(find.text('Re-locate'), 300);
+    await tester.tap(find.text('Re-locate'));
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+
+    expect(find.byType(ScannerScreen), findsOneWidget);
+    await tester.tap(find.byTooltip('Close scanner'));
+    await tester.pumpAndSettle();
+    expect(instructionText(tester), 'Scan the nearest marker to start navigating to Room 104.');
+    expect(find.text('Going to Room 104'), findsOneWidget);
   });
 
   testWidgets('"Start over" clears the destination and location', (tester) async {
