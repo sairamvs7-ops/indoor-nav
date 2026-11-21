@@ -128,7 +128,7 @@ class _FloorEditorScreenState extends State<FloorEditorScreen> {
 
   Future<void> _openRegion(FloorRegion region) async {
     setState(() => _region = region.id);
-    final result = await showRegionForm(context, draft: draft, region: region);
+    final result = await showRegionForm(context, draft: draft, region: region, level: widget.level);
     if (mounted) setState(() => _region = null);
     if (result == null) return;
     if (result.delete) {

@@ -235,10 +235,11 @@ class BuildingDraft extends ChangeNotifier {
 
   // --- Generated floor maps ----------------------------------------------
 
-  /// The place that uses region [regionId], if any.
-  DraftNode? placeFor(String regionId) {
+  /// The place on [level] that uses region [regionId], if any. Region ids
+  /// are only unique within a floor.
+  DraftNode? placeFor(String regionId, int level) {
     for (final n in nodes.values) {
-      if (n.region == regionId) return n;
+      if (n.floor == level && n.region == regionId) return n;
     }
     return null;
   }
@@ -313,7 +314,7 @@ class BuildingDraft extends ChangeNotifier {
   void setRegionKind(int level, String regionId, RegionKind kind) {
     _setKind(floor(level), regionId, kind);
     if (kind == RegionKind.corridor || kind == RegionKind.ignored) {
-      final place = placeFor(regionId);
+      final place = placeFor(regionId, level);
       if (place != null) deleteNode(place.id);
     }
     _changed();
@@ -350,7 +351,7 @@ class BuildingDraft extends ChangeNotifier {
       _ => RegionKind.room,
     };
     _setKind(floor(level), regionId, kind);
-    final existing = placeFor(regionId);
+    final existing = placeFor(regionId, level);
     if (existing != null) {
       updateNode(
         existing.id,
@@ -419,7 +420,7 @@ class BuildingDraft extends ChangeNotifier {
   }
 
   void removeRegion(int level, String regionId) {
-    final place = placeFor(regionId);
+    final place = placeFor(regionId, level);
     if (place != null) place.region = null;
     floor(level).regions.removeWhere((r) => r.id == regionId);
     _changed();

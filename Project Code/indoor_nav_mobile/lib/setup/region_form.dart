@@ -35,6 +35,7 @@ Future<RegionFormResult?> showRegionForm(
   BuildContext context, {
   required BuildingDraft draft,
   required FloorRegion region,
+  required int level,
 }) {
   return showModalBottomSheet<RegionFormResult>(
     context: context,
@@ -42,23 +43,24 @@ Future<RegionFormResult?> showRegionForm(
     showDragHandle: true,
     builder: (context) => Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-      child: _RegionForm(draft: draft, region: region),
+      child: _RegionForm(draft: draft, region: region, level: level),
     ),
   );
 }
 
 class _RegionForm extends StatefulWidget {
-  const _RegionForm({required this.draft, required this.region});
+  const _RegionForm({required this.draft, required this.region, required this.level});
 
   final BuildingDraft draft;
   final FloorRegion region;
+  final int level;
 
   @override
   State<_RegionForm> createState() => _RegionFormState();
 }
 
 class _RegionFormState extends State<_RegionForm> {
-  late final DraftNode? _place = widget.draft.placeFor(widget.region.id);
+  late final DraftNode? _place = widget.draft.placeFor(widget.region.id, widget.level);
   late RegionKind _kind = widget.region.kind;
   late NodeType _type = _place?.type ??
       switch (widget.region.kind) {

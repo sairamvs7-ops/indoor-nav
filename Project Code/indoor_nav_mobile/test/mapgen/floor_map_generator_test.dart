@@ -170,7 +170,7 @@ void main() {
       final b = draft.assignPlace(0, bottom.id, name: 'Hall', type: NodeType.room);
 
       expect(draft.nodes[a]!.region, topLeft.id);
-      expect(draft.placeFor(bottom.id)!.name, 'Hall');
+      expect(draft.placeFor(bottom.id, 0)!.name, 'Hall');
       final (map, error) = draft.tryBuild();
       expect(error, isNull);
       expect(map!.floor(0).hasGeneratedMap, isTrue);
@@ -189,7 +189,7 @@ void main() {
 
       draft.setRegionKind(0, room.id, RegionKind.corridor);
 
-      expect(draft.placeFor(room.id), isNull);
+      expect(draft.placeFor(room.id, 0), isNull);
       expect(draft.floor(0).region(room.id)!.paths, isNotEmpty);
     });
 
