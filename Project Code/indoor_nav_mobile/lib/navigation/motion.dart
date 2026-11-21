@@ -58,7 +58,7 @@ double? compassHeading(Vec3 accel, Vec3 mag) {
   hx /= hNorm;
   hy /= hNorm;
   hz /= hNorm;
-  final ax = accel.x / aNorm, ay = accel.y / aNorm, az = accel.z / aNorm;
+  final ax = accel.x / aNorm, az = accel.z / aNorm;
   final my = az * hx - ax * hz;
   return normaliseAngle(math.atan2(hy, my));
 }
