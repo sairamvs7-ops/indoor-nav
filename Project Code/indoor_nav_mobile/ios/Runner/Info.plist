@@ -4,6 +4,8 @@
 <dict>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Choose a floor blueprint image when setting up a building.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Your steps and the air pressure move you along the route and notice when you change floors.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>The camera scans the navigation markers on the walls, and can photograph a printed floor plan when setting up a building.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>

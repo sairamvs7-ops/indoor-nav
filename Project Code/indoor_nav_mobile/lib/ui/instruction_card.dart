@@ -5,10 +5,21 @@ import 'node_style.dart';
 
 /// Where you are going, what to do next, and where you are now.
 class InstructionCard extends StatelessWidget {
-  const InstructionCard({super.key, required this.nav, required this.onPickDestination});
+  const InstructionCard({
+    super.key,
+    required this.nav,
+    required this.onPickDestination,
+    this.livePrompt,
+    this.liveRemaining,
+  });
 
   final NavigationController nav;
   final VoidCallback onPickDestination;
+
+  /// While walking: the next turn ("In 12 m, turn left") instead of the
+  /// next stop, and how far is left.
+  final String? livePrompt;
+  final double? liveRemaining;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +48,7 @@ class InstructionCard extends StatelessWidget {
                 const SizedBox(width: 14),
                 Expanded(
                   child: Text(
-                    nav.instruction,
+                    (livePrompt?.isNotEmpty ?? false) ? livePrompt! : nav.instruction,
                     key: const Key('instruction'),
                     style: theme.textTheme.titleLarge?.copyWith(
                       color: scheme.onPrimaryContainer,
@@ -59,6 +70,13 @@ class InstructionCard extends StatelessWidget {
                   label: Text(destination == null ? 'Choose a destination' : 'Going to ${destination.name}'),
                   style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
                 ),
+                if (liveRemaining != null) ...[
+                  Text(
+                    '${liveRemaining!.round()} m to go',
+                    style: theme.textTheme.titleSmall?.copyWith(color: scheme.primary),
+                  ),
+                  const SizedBox(height: 8),
+                ],
                 if (current != null) ...[
                   const SizedBox(height: 12),
                   Row(

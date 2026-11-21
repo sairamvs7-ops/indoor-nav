@@ -17,6 +17,7 @@ class FloorPlanView extends StatelessWidget {
     required this.route,
     this.currentId,
     this.destinationId,
+    this.live,
     this.onNodeTap,
   });
 
@@ -26,6 +27,9 @@ class FloorPlanView extends StatelessWidget {
   final List<int> route;
   final int? currentId;
   final int? destinationId;
+
+  /// Where you are while walking, between places (drawing pixels).
+  final Offset? live;
   final ValueChanged<MapNode>? onNodeTap;
 
   @override
@@ -67,6 +71,7 @@ class FloorPlanView extends StatelessWidget {
         colors: colors,
         currentId: currentId,
         destinationId: destinationId,
+        live: live,
       ),
     );
   }

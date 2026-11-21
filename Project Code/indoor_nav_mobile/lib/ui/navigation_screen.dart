@@ -1,7 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../map/building_map.dart';
+import '../navigation/device_sensors.dart';
+import '../navigation/live_walk.dart';
 import '../navigation/navigation_controller.dart';
 import '../scanner/marker_detector.dart';
 import '../scanner/scanner_screen.dart';
@@ -21,17 +26,33 @@ class NavigationScreen extends StatelessWidget {
     required this.map,
     required this.images,
     this.createDetector = MarkerDetector.new,
+    this.motionSensors = DeviceMotionSensors.new,
+    this.speaker = DeviceSpeaker.new,
   });
 
   final BuildingMap map;
   final FloorImages images;
   final FrameDetector Function() createDetector;
 
+  /// Sensors and voice for "Start walking"; injected so tests can fake them.
+  final MotionSensors Function() motionSensors;
+  final Speaker Function() speaker;
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => NavigationController(map),
-      child: _NavigationView(images: images, createDetector: createDetector),
+      child: Builder(
+        builder: (context) => ChangeNotifierProvider(
+          create: (context) => LiveWalk(
+            nav: context.read<NavigationController>(),
+            sensors: motionSensors,
+            speaker: LazySpeaker(speaker),
+            onTurn: () => unawaited(HapticFeedback.heavyImpact()),
+          ),
+          child: _NavigationView(images: images, createDetector: createDetector),
+        ),
+      ),
     );
   }
 }
@@ -127,11 +148,46 @@ class _NavigationViewState extends State<_NavigationView> {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
+  Future<void> _startWalking(BuildContext context) async {
+    final walk = context.read<LiveWalk>();
+    final go = await showModalBottomSheet<bool>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('Walk with the phone', style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 12),
+              const Text(
+                'Hold the phone in front of you and face the way the route leaves your dot. '
+                'Your steps then move you along the route, places tick off as you pass them, '
+                'and turns are spoken. Scan any marker to correct your position.',
+              ),
+              const SizedBox(height: 20),
+              FilledButton.icon(
+                onPressed: () => Navigator.of(context).pop(true),
+                icon: const Icon(Icons.directions_walk),
+                label: const Text("I'm facing the route, start"),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (go ?? false) walk.start();
+  }
+
   @override
   Widget build(BuildContext context) {
     final nav = context.watch<NavigationController>();
+    final walk = context.watch<LiveWalk>();
     final map = nav.map;
     final floor = map.floor(nav.viewFloor);
+    final live = walk.position;
     final theme = Theme.of(context);
     final hasFloorLinks = map.edges.any((e) => e.kind != EdgeKind.walk);
 
@@ -150,7 +206,23 @@ class _NavigationViewState extends State<_NavigationView> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 104),
         children: [
-          InstructionCard(nav: nav, onPickDestination: () => _pickDestination(context)),
+          InstructionCard(
+            nav: nav,
+            onPickDestination: () => _pickDestination(context),
+            livePrompt: walk.active ? walk.prompt : null,
+            liveRemaining: walk.active ? walk.remainingMetres : null,
+          ),
+          if (walk.active) ...[
+            const SizedBox(height: 10),
+            _WalkBar(walk: walk, map: map),
+          ] else if (nav.currentNode != null && nav.steps.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            FilledButton.icon(
+              onPressed: () => _startWalking(context),
+              icon: const Icon(Icons.directions_walk),
+              label: const Text('Start walking'),
+            ),
+          ],
           if (hasFloorLinks) ...[
             const SizedBox(height: 12),
             Wrap(
@@ -192,6 +264,7 @@ class _NavigationViewState extends State<_NavigationView> {
             route: nav.routeNodes,
             currentId: nav.currentNode?.id,
             destinationId: nav.destinationNode?.id,
+            live: live != null && live.$1 == floor.level ? Offset(live.$2, live.$3) : null,
             onNodeTap: (node) => _onNodeTap(context, node),
           ),
           const SizedBox(height: 6),
@@ -206,6 +279,52 @@ class _NavigationViewState extends State<_NavigationView> {
         onPressed: () => _scan(context),
         icon: const Icon(Icons.qr_code_scanner),
         label: const Text('Scan marker'),
+      ),
+    );
+  }
+}
+
+/// While walking: progress, the floor-change fallback, and Stop.
+class _WalkBar extends StatelessWidget {
+  const _WalkBar({required this.walk, required this.map});
+
+  final LiveWalk walk;
+  final BuildingMap map;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final leg = walk.waitingForFloorChange ? walk.next : null;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Icon(walk.offRoute ? Icons.wrong_location_outlined : Icons.directions_walk, color: theme.colorScheme.primary),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    walk.offRoute ? 'Off the route' : 'Following your steps · ${walk.stepCount} steps',
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                ),
+                TextButton.icon(onPressed: walk.stop, icon: const Icon(Icons.stop_circle_outlined), label: const Text('Stop')),
+              ],
+            ),
+            if (leg != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4, right: 8),
+                child: OutlinedButton.icon(
+                  onPressed: walk.arrivedOnFloor,
+                  icon: const Icon(Icons.check),
+                  label: const Text("I've changed floor"),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

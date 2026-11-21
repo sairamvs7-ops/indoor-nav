@@ -13,6 +13,7 @@ class RoutePainter extends CustomPainter {
     required this.colors,
     this.currentId,
     this.destinationId,
+    this.live,
   });
 
   final BuildingMap map;
@@ -21,6 +22,9 @@ class RoutePainter extends CustomPainter {
   final MapColors colors;
   final int? currentId;
   final int? destinationId;
+
+  /// Your position while walking, between places (drawing pixels).
+  final Offset? live;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -59,6 +63,15 @@ class RoutePainter extends CustomPainter {
     if (destination != null && destination.floor == floor.level) {
       _drawMarker(canvas, at(destination), colors.destination);
     }
+    final walking = live;
+    if (walking != null) {
+      final at = walking * scale;
+      canvas
+        ..drawCircle(at, 20, Paint()..color = colors.current.withValues(alpha: 0.22))
+        ..drawCircle(at, 10, Paint()..color = Colors.white)
+        ..drawCircle(at, 8, Paint()..color = colors.current);
+      return; // the live dot replaces the "last place reached" pin
+    }
     final current = currentId == null ? null : map.node(currentId!);
     if (current != null && current.floor == floor.level) {
       canvas.drawCircle(at(current), 16, Paint()..color = colors.current.withValues(alpha: 0.25));
@@ -92,5 +105,6 @@ class RoutePainter extends CustomPainter {
       old.route != route ||
       old.currentId != currentId ||
       old.destinationId != destinationId ||
+      old.live != live ||
       old.colors.route != colors.route;
 }
