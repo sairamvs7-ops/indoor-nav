@@ -127,6 +127,24 @@ class _BuildingsScreenState extends State<BuildingsScreen> {
       for (final floor in sample.floors) {
         final bytes = (await rootBundle.load(floor.image)).buffer.asUint8List();
         draft.setGeneratedMap(floor.level, await generateRegions(bytes));
+        // The sample's hand-made links on this floor are straight lines that
+        // ignore walls; with a generated corridor, routes follow it instead.
+        // (Floors where no corridor was found keep their links.) Lift and
+        // stairs links between floors always stay.
+        if (draft.floor(floor.level).regions.any((r) => r.kind == RegionKind.corridor)) {
+          for (final e in sample.edges) {
+            final a = sample.node(e.from), b = sample.node(e.to);
+            if (!e.automatic && a.floor == floor.level && b.floor == floor.level && draft.isConnected(a.id, b.id)) {
+              draft.togglePath(a.id, b.id);
+            }
+          }
+        }
+        // Hatched areas no stairs place claims aren't stairs in this plan.
+        for (final region in [...draft.floor(floor.level).regions]) {
+          if (region.kind == RegionKind.stairs && draft.placeFor(region.id, floor.level) == null) {
+            draft.setRegionKind(floor.level, region.id, RegionKind.ignored);
+          }
+        }
       }
       return BuildingMap.fromJson(draft.toJson());
     } finally {

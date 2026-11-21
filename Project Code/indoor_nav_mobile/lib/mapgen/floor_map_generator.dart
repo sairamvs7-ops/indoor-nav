@@ -269,6 +269,40 @@ List<DetectedRegion> detectRegions(Uint8List walls, int width, int height, {doub
     }
   }
 
+  // 6b. Which regions sit next to each other across a wall. Plans that draw
+  //     doors as solid blocks have no gaps, so a corridor is also told by
+  //     how many areas line it.
+  final nextTo = <int, Set<int>>{for (final id in areas.keys) id: <int>{}};
+  {
+    final owner = Int32List.fromList(labels);
+    final reach = Int32List(n);
+    final wave = Queue<int>();
+    for (var i = 0; i < n; i++) {
+      if (owner[i] != 0) wave.add(i);
+    }
+    final limit = 3 * r;
+    while (wave.isNotEmpty) {
+      final i = wave.removeFirst();
+      final x = i % w, y = i ~/ w;
+      for (final (dx, dy) in const [(1, 0), (-1, 0), (0, 1), (0, -1)]) {
+        final nx = x + dx, ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+        final j = ny * w + nx;
+        if (outside[j] == 1) continue;
+        final other = owner[j];
+        if (other == 0) {
+          if (reach[i] >= limit) continue;
+          owner[j] = owner[i];
+          reach[j] = reach[i] + 1;
+          wave.add(j);
+        } else if (other != owner[i]) {
+          nextTo[owner[i]]!.add(other);
+          nextTo[other]!.add(owner[i]);
+        }
+      }
+    }
+  }
+
   // 6. Which regions meet at doorways (they grew into the same gap). A
   //    corridor is what many rooms open onto.
   final neighbours = <int, Set<int>>{for (final id in areas.keys) id: <int>{}};
@@ -298,7 +332,10 @@ List<DetectedRegion> detectRegions(Uint8List walls, int width, int height, {doub
     final bh = maxY - minY + 1 + 2 * r;
     final aspect = math.max(bw, bh) / math.max(1, math.min(bw, bh));
     final fill = areas[id]! / (bw * bh);
-    final corridor = aspect > 3.2 || (fill < 0.45 && areas[id]! > minRoom * 4) || neighbours[id]!.length >= 3;
+    final corridor = aspect > 3.2 ||
+        (fill < 0.45 && areas[id]! > minRoom * 4) ||
+        neighbours[id]!.length >= 3 ||
+        nextTo[id]!.length >= 5;
     regions.add(
       DetectedRegion(
         outline: outline,
@@ -466,7 +503,7 @@ List<(double, double, double, double)> _hatchedAreas(Uint8List walls, int w, int
 
   // A label written across a staircase splits its hatching; join pieces
   // that nearly touch.
-  final gap = k ~/ 3;
+  final gap = k ~/ 2;
   var merged = true;
   while (merged) {
     merged = false;

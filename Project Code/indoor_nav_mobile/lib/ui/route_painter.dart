@@ -14,7 +14,9 @@ class RoutePainter extends CustomPainter {
     this.currentId,
     this.destinationId,
     this.live,
-  });
+    this.guide = const [],
+    this.guideProgress,
+  }) : super(repaint: guideProgress);
 
   final BuildingMap map;
   final Floor floor;
@@ -25,6 +27,11 @@ class RoutePainter extends CustomPainter {
 
   /// Your position while walking, between places (drawing pixels).
   final Offset? live;
+
+  /// The way to the next stop (drawing pixels), shown by a moving dot as
+  /// [guideProgress] runs from 0 to 1.
+  final List<Offset> guide;
+  final Animation<double>? guideProgress;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -63,6 +70,8 @@ class RoutePainter extends CustomPainter {
     if (destination != null && destination.floor == floor.level) {
       _drawMarker(canvas, at(destination), colors.destination);
     }
+    _drawGuide(canvas, scale);
+
     final walking = live;
     if (walking != null) {
       final at = walking * scale;
@@ -77,6 +86,41 @@ class RoutePainter extends CustomPainter {
       canvas.drawCircle(at(current), 16, Paint()..color = colors.current.withValues(alpha: 0.25));
       _drawMarker(canvas, at(current), colors.current);
     }
+  }
+
+  /// A glowing dot with a fading trail, travelling from you to the next stop.
+  void _drawGuide(Canvas canvas, double scale) {
+    final progress = guideProgress;
+    if (progress == null || guide.length < 2 || progress.isDismissed) return;
+    final points = [for (final p in guide) p * scale];
+    final lengths = [for (var i = 0; i + 1 < points.length; i++) (points[i + 1] - points[i]).distance];
+    final total = lengths.fold<double>(0, (a, b) => a + b);
+    if (total < 1) return;
+    Offset at(double d) {
+      var left = d.clamp(0.0, total);
+      for (var i = 0; i < lengths.length; i++) {
+        if (left <= lengths[i] || i == lengths.length - 1) {
+          final t = lengths[i] == 0 ? 0.0 : (left / lengths[i]).clamp(0.0, 1.0);
+          return Offset.lerp(points[i], points[i + 1], t)!;
+        }
+        left -= lengths[i];
+      }
+      return points.last;
+    }
+
+    final t = Curves.easeInOut.transform(progress.value);
+    final head = t * total;
+    // Fade in at the start and out at the stop.
+    final fade = (t < 0.1 ? t / 0.1 : (t > 0.9 ? (1 - t) / 0.1 : 1.0)).clamp(0.0, 1.0);
+    for (var k = 6; k >= 1; k--) {
+      final trail = at(head - k * 6);
+      canvas.drawCircle(trail, 5 - k * 0.5, Paint()..color = colors.route.withValues(alpha: fade * (0.5 - k * 0.07)));
+    }
+    final dot = at(head);
+    canvas
+      ..drawCircle(dot, 13, Paint()..color = colors.route.withValues(alpha: fade * 0.3))
+      ..drawCircle(dot, 7, Paint()..color = Colors.white.withValues(alpha: fade))
+      ..drawCircle(dot, 5, Paint()..color = colors.route.withValues(alpha: fade));
   }
 
   void _drawMarker(Canvas canvas, Offset center, Color color) {
@@ -106,5 +150,6 @@ class RoutePainter extends CustomPainter {
       old.currentId != currentId ||
       old.destinationId != destinationId ||
       old.live != live ||
+      old.guide != guide ||
       old.colors.route != colors.route;
 }
