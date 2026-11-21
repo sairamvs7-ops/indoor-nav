@@ -177,7 +177,7 @@ void main() {
     await pickPlace(tester, button: 'Choose a destination', place: 'Room 104');
     await pickPlace(tester, button: 'Set my location', place: 'Entry 1');
 
-    await tester.scrollUntilVisible(find.text('Re-locate'), 300);
+    await tester.scrollUntilVisible(find.text('Re-locate'), 300, scrollable: find.byType(Scrollable).first);
     await tester.tap(find.text('Re-locate'));
     for (var i = 0; i < 10; i++) {
       await tester.pump(const Duration(milliseconds: 50));
