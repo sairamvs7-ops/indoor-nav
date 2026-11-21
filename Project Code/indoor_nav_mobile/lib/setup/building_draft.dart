@@ -366,8 +366,41 @@ class BuildingDraft extends ChangeNotifier {
     final id = addNode(name: name, type: type, floor: level, x: c.x, y: c.y, withMarker: withMarker, link: link);
     if (marker != null && withMarker) updateNode(id, marker: marker);
     nodes[id]!.region = regionId;
+    if (type.isVertical && (link == null || link.trim().isEmpty)) autoLink(id);
     _changed();
     return id;
+  }
+
+  /// Links stairs or a lift to the same kind on another floor at roughly the
+  /// same spot (within 8% of the floor's size), sharing or creating a link
+  /// name. Returns the place it was linked to, if any.
+  int? autoLink(int nodeId) {
+    final node = nodes[nodeId]!;
+    if (!node.type.isVertical) return null;
+    double nx(DraftNode n) => n.x / floor(n.floor).width;
+    double ny(DraftNode n) => n.y / floor(n.floor).height;
+    final order = {for (final (i, f) in floors.indexed) f.level: i};
+    DraftNode? best;
+    var bestScore = double.infinity;
+    for (final other in nodes.values) {
+      if (other.id == nodeId || other.floor == node.floor || other.type != node.type) continue;
+      final d = math.sqrt(math.pow(nx(other) - nx(node), 2) + math.pow(ny(other) - ny(node), 2));
+      if (d > 0.08) continue;
+      // Prefer the nearest floor, then the closest spot.
+      final score = (order[other.floor]! - order[node.floor]!).abs() + d;
+      if (score < bestScore) {
+        best = other;
+        bestScore = score;
+      }
+    }
+    if (best == null) return null;
+    final name = best.link ?? node.link ?? best.name;
+    // Don't reuse a name another stairs/lift on this floor already has.
+    final taken = nodesOn(node.floor).any((n) => n.id != nodeId && n.type == node.type && n.link == name);
+    if (taken) return null;
+    best.link ??= name;
+    node.link = name;
+    return best.id;
   }
 
   /// Adds a region traced by hand (tapping its corners), for areas the

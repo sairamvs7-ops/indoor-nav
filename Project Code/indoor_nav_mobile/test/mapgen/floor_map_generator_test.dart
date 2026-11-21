@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -10,7 +11,7 @@ import 'package:indoor_nav_mobile/storage/building_repository.dart';
 /// A 400x300 plan: two rooms on top, a corridor across the middle, two rooms
 /// below, doorways drawn as 8 px gaps, a 20 px entrance on the left, and a
 /// "text" speck in the top-left room.
-Uint8List planPng({bool blueprint = false}) {
+Uint8List planPng({bool blueprint = false, bool hatchedStairs = false}) {
   final paper = blueprint ? img.ColorRgb8(20, 60, 160) : img.ColorRgb8(255, 255, 255);
   final ink = blueprint ? img.ColorRgb8(240, 240, 255) : img.ColorRgb8(0, 0, 0);
   final image = img.Image(width: 400, height: 300);
@@ -31,6 +32,15 @@ Uint8List planPng({bool blueprint = false}) {
   // Walls between the two top rooms and the two bottom rooms.
   wall(199, 10, 202, 120);
   wall(199, 180, 202, 290);
+  if (hatchedStairs) {
+    // A staircase drawn as diagonal hatching in the bottom-left room.
+    // Lines y = 270 - (x - c), clipped to the box x 30..130, y 200..270.
+    for (var c = -40; c < 130; c += 7) {
+      final xa = math.max(30, c), xb = math.min(130, c + 70);
+      if (xb <= xa) continue;
+      img.drawLine(image, x1: xa, y1: 270 - (xa - c), x2: xb, y2: 270 - (xb - c), color: ink, thickness: 2);
+    }
+  }
   // A word of text in the top-left room.
   wall(60, 60, 64, 64);
   wall(68, 60, 72, 64);
@@ -47,6 +57,7 @@ void main() {
     expect(rooms, hasLength(4));
     expect(corridors, hasLength(1));
     expect(corridors.single.paths, isNotEmpty);
+    expect(map.regions.where((r) => r.kind == RegionKind.stairs), isEmpty); // plain walls aren't stairs
 
     // The top-left room fills the space between its walls.
     final topLeft = rooms.firstWhere((r) => r.outline.every((p) => p.x < 200 && p.y < 120));
@@ -82,6 +93,18 @@ void main() {
     expect(map.regions.where((r) => r.kind == RegionKind.room), hasLength(3));
     final hall = map.regions.singleWhere((r) => r.kind == RegionKind.corridor);
     expect(hall.outline.every((p) => p.y > 140), isTrue);
+  });
+
+  test('hatching is offered as stairs', () {
+    final map = generateFloorMap(planPng(hatchedStairs: true));
+
+    final stairs = map.regions.where((r) => r.kind == RegionKind.stairs).toList();
+    expect(stairs, hasLength(1));
+    final xs = stairs.single.outline.map((p) => p.x), ys = stairs.single.outline.map((p) => p.y);
+    expect(xs.reduce((a, b) => a < b ? a : b), closeTo(30, 15));
+    expect(xs.reduce((a, b) => a > b ? a : b), closeTo(130, 15));
+    expect(ys.reduce((a, b) => a < b ? a : b), closeTo(200, 15));
+    expect(ys.reduce((a, b) => a > b ? a : b), closeTo(270, 15));
   });
 
   test('reads a white-on-blue blueprint the same way', () {
@@ -203,6 +226,28 @@ void main() {
       final region = draft.floor(0).region(draft.nodes[door]!.region!)!;
       expect(region.kind, RegionKind.room);
       expect(region.contains((x: 100.0, y: 60.0)), isTrue); // the top-left room
+    });
+
+    test('stairs in the same spot on two floors link up by themselves', () {
+      final draft = BuildingDraft.fromJson(
+        emptyBuildingJson(id: 'abcdef0123456789', name: 'Two floors'),
+        save: (_) async {},
+        saveDelay: Duration.zero,
+      );
+      final square = [(x: 10.0, y: 10.0), (x: 40.0, y: 10.0), (x: 40.0, y: 40.0), (x: 10.0, y: 40.0)];
+      draft
+        ..addFloor(name: 'Ground', image: 'g.png', width: 400, height: 300)
+        ..addFloor(name: 'First', image: 'f.png', width: 400, height: 300);
+      final g = draft.addRegion(0, square);
+      final f = draft.addRegion(1, [for (final p in square) (x: p.x + 4, y: p.y + 3)]);
+
+      final a = draft.assignPlace(0, g, name: 'Main stairs', type: NodeType.stairs);
+      final b = draft.assignPlace(1, f, name: 'Main stairs (1st)', type: NodeType.stairs);
+
+      expect(draft.nodes[a]!.link, isNotNull);
+      expect(draft.nodes[b]!.link, draft.nodes[a]!.link);
+      final map = draft.tryBuild().$1!;
+      expect(map.edges.any((e) => e.kind == EdgeKind.stairs), isTrue);
     });
 
     test('traced areas can become stairs with a link name', () {

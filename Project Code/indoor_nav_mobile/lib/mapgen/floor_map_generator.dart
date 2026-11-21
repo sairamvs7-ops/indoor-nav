@@ -308,6 +308,20 @@ List<DetectedRegion> detectRegions(Uint8List walls, int width, int height, {doub
       ),
     );
   }
+  // 8. Hatched areas: stairs (and often lift symbols) are drawn as many
+  //    closely spaced lines, which come out as wall, not as an area. Find
+  //    them by line density and offer them as stairs.
+  for (final box in _hatchedAreas(clean, w, h, longest)) {
+    final (x0, y0, x1, y1) = box;
+    regions.add(
+      DetectedRegion(
+        outline: [(x: x0, y: y0), (x: x1, y: y0), (x: x1, y: y1), (x: x0, y: y1)],
+        kind: RegionKind.stairs,
+        area: ((x1 - x0) * (y1 - y0)).round(),
+      ),
+    );
+  }
+
   regions.sort((a, b) => b.area.compareTo(a.area));
   Pt unpad(Pt p) => (x: p.x - pad, y: p.y - pad);
   return [
@@ -391,6 +405,85 @@ Uint8List _dilate(Uint8List mask, int w, int h, int r) {
     }
   }
   return out;
+}
+
+/// Boxes around hatched areas of the wall mask: where lines are dense
+/// (more than ~22% ink over a window 4% of the drawing wide) and striped,
+/// not solid (door blocks), and big enough to be a staircase.
+List<(double, double, double, double)> _hatchedAreas(Uint8List walls, int w, int h, int longest) {
+  final k = math.max(5, (longest * 0.04).round()) | 1;
+  final half = k ~/ 2;
+  // Integral image for fast window sums.
+  final sum = Int32List((w + 1) * (h + 1));
+  for (var y = 0; y < h; y++) {
+    var row = 0;
+    for (var x = 0; x < w; x++) {
+      row += walls[y * w + x];
+      sum[(y + 1) * (w + 1) + x + 1] = sum[y * (w + 1) + x + 1] + row;
+    }
+  }
+  final dense = Uint8List(w * h);
+  for (var y = 0; y < h; y++) {
+    for (var x = 0; x < w; x++) {
+      final xa = math.max(0, x - half), xb = math.min(w, x + half + 1);
+      final ya = math.max(0, y - half), yb = math.min(h, y + half + 1);
+      final ink = sum[yb * (w + 1) + xb] - sum[ya * (w + 1) + xb] - sum[yb * (w + 1) + xa] + sum[ya * (w + 1) + xa];
+      if (ink > 0.22 * (xb - xa) * (yb - ya)) dense[y * w + x] = 1;
+    }
+  }
+  // Open (shrink then grow) so the band along an ordinary wall line goes.
+  final open = half;
+  final notDense = Uint8List(w * h);
+  for (var i = 0; i < dense.length; i++) {
+    notDense[i] = dense[i] == 1 ? 0 : 1;
+  }
+  final grownHoles = _dilate(notDense, w, h, open);
+  final shrunk = Uint8List(w * h);
+  for (var i = 0; i < shrunk.length; i++) {
+    shrunk[i] = grownHoles[i] == 1 ? 0 : 1;
+  }
+  final opened = _dilate(shrunk, w, h, open);
+
+  final n = (w * h).toDouble();
+  final boxes = <List<int>>[];
+  _components(opened, w, h, eight: true, onComponent: (pixels, minX, minY, maxX, maxY) {
+    if (pixels.length < n * 0.005) return;
+    // Stripes have many light/dark changes; a solid block has few.
+    var changes = 0;
+    for (var y = minY; y <= maxY; y++) {
+      for (var x = minX; x < maxX; x++) {
+        if (walls[y * w + x] != walls[y * w + x + 1]) changes++;
+      }
+    }
+    for (var x = minX; x <= maxX; x++) {
+      for (var y = minY; y < maxY; y++) {
+        if (walls[y * w + x] != walls[(y + 1) * w + x]) changes++;
+      }
+    }
+    final cells = (maxX - minX + 1) * (maxY - minY + 1);
+    if (changes / (2 * cells) > 0.08) boxes.add([minX, minY, maxX + 1, maxY + 1]);
+  });
+
+  // A label written across a staircase splits its hatching; join pieces
+  // that nearly touch.
+  final gap = k ~/ 3;
+  var merged = true;
+  while (merged) {
+    merged = false;
+    outer:
+    for (var i = 0; i < boxes.length; i++) {
+      for (var j = i + 1; j < boxes.length; j++) {
+        final a = boxes[i], b = boxes[j];
+        if (a[0] - gap <= b[2] && b[0] - gap <= a[2] && a[1] - gap <= b[3] && b[1] - gap <= a[3]) {
+          boxes[i] = [math.min(a[0], b[0]), math.min(a[1], b[1]), math.max(a[2], b[2]), math.max(a[3], b[3])];
+          boxes.removeAt(j);
+          merged = true;
+          break outer;
+        }
+      }
+    }
+  }
+  return [for (final b in boxes) (b[0].toDouble(), b[1].toDouble(), b[2].toDouble(), b[3].toDouble())];
 }
 
 /// Outline of region [id] after filling dents narrower than about 2 x
