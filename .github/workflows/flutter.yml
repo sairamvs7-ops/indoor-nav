@@ -74,7 +74,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: indoor-nav-apk
+          name: via-apk
           path: "Project Code/indoor_nav_mobile/build/app/outputs/flutter-apk/*.apk"
           if-no-files-found: error
           retention-days: 30
