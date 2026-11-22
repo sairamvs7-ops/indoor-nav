@@ -1,6 +1,6 @@
-# Indoor Nav (mobile)
+# Via (mobile)
 
-Offline indoor navigation. Point the camera at an ArUco marker on the wall, choose a destination, and follow the route drawn on the floor plan. Routes are computed on the phone with bidirectional Dijkstra, the same algorithm the ESP32 version ran, with its shortest-path bug fixed.
+Via (formerly Indoor Nav) is offline indoor navigation. Point the camera at an ArUco marker on the wall, choose a destination, and follow the route drawn on the floor plan. Routes are computed on the phone with bidirectional Dijkstra, the same algorithm the ESP32 version ran, with its shortest-path bug fixed.
 
 ## Run it
 
@@ -26,7 +26,7 @@ The first Android build downloads Gradle and the prebuilt OpenCV libraries, so i
 5. Optional: in **Scale** mode, tap two points a known distance apart and enter the metres, so routes compare real walking distances.
 6. The **checklist** on the building screen lists anything that would break navigation (unreachable places, lifts linked to nothing).
 7. **Print and place markers**: share or print the PDF (one marker per page), stick each marker at the place listed, and use **Test scan** to confirm each one.
-8. **Share building** sends one `.indoornav` file. Anyone with the app taps **Import** to get the whole building, blueprints included.
+8. **Share building** sends one `.via` file (older `.indoornav` files still import). Anyone with the app taps **Import** to get the whole building, blueprints included.
 
 ### Navigate
 
@@ -56,7 +56,7 @@ lib/
   routing/      bidirectional_dijkstra.dart (the "double Dijkstra"), directions.dart
   navigation/   NavigationController: location, destination, preference, route; reroutes on every scan
   scanner/      camera + OpenCV ArUco detection (DICT_4X4_250), 2-frame confirmation
-  storage/      buildings on the phone, .indoornav export/import
+  storage/      buildings on the phone, .via export/import
   setup/        building and floor editors, path suggestions, setup checks, marker guide and PDF
   ui/           home, navigation screen, floor plans, theme and light/dark setting
 ```

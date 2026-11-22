@@ -103,8 +103,10 @@ void main() {
         }
       }
 
-      expect(await importError('not json'), contains('not an Indoor Nav building'));
-      expect(await importError({'hello': 1}), contains('not an Indoor Nav building'));
+      expect(await importError('not json'), contains('not a Via building'));
+      expect(await importError({'hello': 1}), contains('not a Via building'));
+      expect(await importError({'viaPackage': 99, 'building': {}, 'images': {}}), contains('newer version'));
+      // Files shared by the app before it was renamed Via are still read.
       expect(await importError({'indoorNavPackage': 99, 'building': {}, 'images': {}}), contains('newer version'));
 
       final id = await savedBuilding(repo);
@@ -115,8 +117,8 @@ void main() {
     });
 
     test('names exported files after the building', () {
-      expect(packageFileName('Main Block (RVU)'), 'Main_Block_RVU.indoornav');
-      expect(packageFileName('  '), 'building.indoornav');
+      expect(packageFileName('Main Block (RVU)'), 'Main_Block_RVU.via');
+      expect(packageFileName('  '), 'building.via');
     });
 
     test('only complete buildings can be exported', () async {

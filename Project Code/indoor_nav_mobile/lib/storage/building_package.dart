@@ -5,7 +5,12 @@ import '../map/building_map.dart';
 import 'building_repository.dart';
 
 /// Extension used for shared building files.
-const String packageExtension = 'indoornav';
+const String packageExtension = 'via';
+
+/// The package key, and the one older (Indoor Nav) builds wrote, which
+/// are still read so earlier shared files keep importing.
+const String _packageKey = 'viaPackage';
+const String _oldPackageKey = 'indoorNavPackage';
 
 /// Version of the package wrapper written by [exportBuilding].
 const int packageVersion = 1;
@@ -13,7 +18,7 @@ const int packageVersion = 1;
 /// A whole building in one file, so it can be shared on WhatsApp, Drive or
 /// email and imported on another phone:
 ///
-///     {"indoorNavPackage": 1, "building": {...building.json...},
+///     {"viaPackage": 1, "building": {...building.json...},
 ///      "images": {"floor_1.jpg": "<base64>", ...}}
 ///
 /// Plain JSON keeps it dependency-free and easy to inspect.
@@ -24,10 +29,10 @@ Future<Uint8List> exportBuilding(BuildingRepository repository, String id) async
   for (final floor in map.floors) {
     images[floor.image] = base64Encode(await repository.fileIn(id, floor.image).readAsBytes());
   }
-  return utf8.encode(jsonEncode({'indoorNavPackage': packageVersion, 'building': json, 'images': images}));
+  return utf8.encode(jsonEncode({_packageKey: packageVersion, 'building': json, 'images': images}));
 }
 
-/// A safe file name for an exported building, like "Main_Block.indoornav".
+/// A safe file name for an exported building, like "Main_Block.via".
 String packageFileName(String buildingName) {
   final cleaned = buildingName.trim().replaceAll(RegExp(r'[^A-Za-z0-9]+'), '_').replaceAll(RegExp(r'^_+|_+$'), '');
   return '${cleaned.isEmpty ? 'building' : cleaned}.$packageExtension';
@@ -44,12 +49,13 @@ Future<String> importBuilding(BuildingRepository repository, Uint8List bytes) as
   try {
     decoded = jsonDecode(utf8.decode(bytes));
   } on FormatException {
-    throw const MapFormatException('This file is not an Indoor Nav building.');
+    throw const MapFormatException('This file is not a Via building.');
   }
-  if (decoded is! Map<String, dynamic> || decoded['indoorNavPackage'] is! int) {
-    throw const MapFormatException('This file is not an Indoor Nav building.');
+  final version = decoded is Map<String, dynamic> ? decoded[_packageKey] ?? decoded[_oldPackageKey] : null;
+  if (decoded is! Map<String, dynamic> || version is! int) {
+    throw const MapFormatException('This file is not a Via building.');
   }
-  if ((decoded['indoorNavPackage'] as int) > packageVersion) {
+  if (version > packageVersion) {
     throw const MapFormatException('This building was made with a newer version of the app. Update the app to open it.');
   }
   final building = decoded['building'];

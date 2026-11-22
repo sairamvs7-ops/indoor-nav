@@ -30,7 +30,7 @@ class BrandPalette {
 }
 
 abstract final class Brand {
-  static const String appName = 'Indoor Nav';
+  static const String appName = 'Via';
 
   /// Light mode: olive, deep green, soft sand.
   static const light = BrandPalette(

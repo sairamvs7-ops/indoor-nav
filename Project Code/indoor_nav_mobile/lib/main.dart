@@ -15,7 +15,7 @@ Future<void> main() async {
   final separator = Platform.pathSeparator;
   final settings = await AppSettings.load(File('${documents.path}${separator}settings.json'));
   runApp(
-    IndoorNavApp(
+    ViaApp(
       repository: BuildingRepository(Directory('${documents.path}${separator}buildings')),
       settings: settings,
       loadSample: () => loadBuildingMap(rootBundle),

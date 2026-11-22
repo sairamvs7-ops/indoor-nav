@@ -208,7 +208,7 @@ String describeCameraError(CameraException e) {
     case 'CameraAccessDenied':
     case 'CameraAccessDeniedWithoutPrompt':
     case 'CameraAccessRestricted':
-      return 'Camera access is turned off. Allow camera access for Indoor Nav in Settings, then try again.';
+      return 'Camera access is turned off. Allow camera access for Via in Settings, then try again.';
     default:
       return 'The camera could not start (${e.description ?? e.code}).';
   }

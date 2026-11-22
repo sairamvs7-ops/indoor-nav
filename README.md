@@ -1,6 +1,6 @@
-# Indoor Nav
+# Via
 
-Indoor navigation for a two-floor building, using ArUco markers stuck on the walls. Scan the marker nearest to you, pick where you want to go, and the app shows the route on the building's floor plan.
+**Via** (formerly Indoor Nav) is indoor navigation for a two-floor building, using ArUco markers stuck on the walls. Scan the marker nearest to you, pick where you want to go, and the app shows the route on the building's floor plan.
 
 This started as a college subject project where an ESP32 computed the routes. The current version is a phone app that does everything offline.
 

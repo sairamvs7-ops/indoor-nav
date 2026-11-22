@@ -29,7 +29,7 @@ void main() {
     addTearDown(tester.view.reset);
     final settings = AppSettings(file: File('${temp.path}/settings.json'));
     await tester.pumpWidget(
-      IndoorNavApp(repository: repo, settings: settings, loadSample: loadSample ?? () async => loadRealMap()),
+      ViaApp(repository: repo, settings: settings, loadSample: loadSample ?? () async => loadRealMap()),
     );
     // The building list is read from disk; give the real file reads time to
     // finish (the spinner shown meanwhile would never let pumpAndSettle end).
@@ -46,7 +46,7 @@ void main() {
 
     expect(find.text(Brand.appName), findsOneWidget);
     expect(find.text('Set up your first building'), findsOneWidget);
-    expect(find.text('Indoor Nav demo building'), findsOneWidget);
+    expect(find.text('Via demo building'), findsOneWidget);
     expect(find.text('Copy to edit'), findsOneWidget);
     // Only the card's buttons: no floating button covering Import.
     expect(find.byType(FloatingActionButton), findsNothing);

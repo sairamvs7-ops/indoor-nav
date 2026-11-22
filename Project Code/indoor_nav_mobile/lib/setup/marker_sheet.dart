@@ -62,7 +62,7 @@ List<MapNode> placesWithMarkers(BuildingMap map) {
 /// A printable PDF with one marker per A4 page, labelled with where it goes.
 /// Markers print 15 cm wide, readable from a few metres away.
 Future<Uint8List> buildMarkerPdf(BuildingMap map) async {
-  final doc = pw.Document(title: '${map.name} markers', creator: 'Indoor Nav');
+  final doc = pw.Document(title: '${map.name} markers', creator: 'Via');
   const markerSide = 15 * PdfPageFormat.cm;
   for (final place in placesWithMarkers(map)) {
     final id = place.markerId!;

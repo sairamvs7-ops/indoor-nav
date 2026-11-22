@@ -1,5 +1,5 @@
 {
-  "building": "Indoor Nav demo building",
+  "building": "Via demo building",
   "source": "Hand-drawn floor plan (Floor Plan/New Floor Plan New.jpeg); edges from the original ESP32 firmware (see the first commit)",
   "floors": [
     {

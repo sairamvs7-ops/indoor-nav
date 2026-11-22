@@ -27,7 +27,7 @@ Future<void> _shareBytes(Uint8List bytes, {required String fileName, required St
   );
 }
 
-/// Shares the whole building as one .indoornav file, so anyone with the app
+/// Shares the whole building as one .via file, so anyone with the app
 /// can import it and navigate.
 Future<void> shareBuilding(BuildContext context, BuildingRepository repository, String id) async {
   try {
@@ -37,7 +37,7 @@ Future<void> shareBuilding(BuildContext context, BuildingRepository repository, 
       bytes,
       fileName: packageFileName(name),
       mimeType: 'application/json',
-      text: 'Indoor Nav map of $name. Open the Indoor Nav app, tap Import, and pick this file.',
+      text: 'Via map of $name. Open the Via app, tap Import, and pick this file.',
     );
   } on MapFormatException catch (e) {
     if (context.mounted) _toast(context, 'Finish setting up the building before sharing it: ${e.message}');
@@ -52,7 +52,7 @@ Future<void> shareMarkerPdf(BuildContext context, BuildingMap map) async {
   await _shareBytes(bytes, fileName: fileName, mimeType: 'application/pdf');
 }
 
-/// Lets the user pick a shared .indoornav file and imports it.
+/// Lets the user pick a shared .via (or older .indoornav) file and imports it.
 /// Returns the new building's id, or null if cancelled or invalid.
 Future<String?> importBuildingFile(BuildContext context, BuildingRepository repository) async {
   final result = await FilePicker.platform.pickFiles(type: FileType.any, withData: true);

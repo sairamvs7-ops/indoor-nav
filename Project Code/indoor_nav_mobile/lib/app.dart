@@ -7,8 +7,8 @@ import 'ui/app_settings.dart';
 import 'ui/app_theme.dart';
 import 'ui/buildings_screen.dart';
 
-class IndoorNavApp extends StatelessWidget {
-  const IndoorNavApp({
+class ViaApp extends StatelessWidget {
+  const ViaApp({
     super.key,
     required this.repository,
     required this.settings,
