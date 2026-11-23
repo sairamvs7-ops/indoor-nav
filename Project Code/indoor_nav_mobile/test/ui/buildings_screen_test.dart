@@ -8,6 +8,7 @@ import 'package:indoor_nav_mobile/map/building_map.dart';
 import 'package:indoor_nav_mobile/storage/building_repository.dart';
 import 'package:indoor_nav_mobile/ui/app_settings.dart';
 import 'package:indoor_nav_mobile/ui/app_theme.dart';
+import 'package:indoor_nav_mobile/ui/via_logo.dart';
 
 import '../support/test_map.dart';
 
@@ -44,7 +45,8 @@ void main() {
   testWidgets('a first launch offers to set up a building and shows the sample', (tester) async {
     await pumpHome(tester);
 
-    expect(find.text(Brand.appName), findsOneWidget);
+    expect(find.byType(ViaLogo), findsOneWidget);
+    expect(find.bySemanticsLabel(Brand.appName), findsOneWidget);
     expect(find.text('Set up your first building'), findsOneWidget);
     expect(find.text('Via demo building'), findsOneWidget);
     expect(find.text('Copy to edit'), findsOneWidget);

@@ -12,9 +12,9 @@ import '../setup/building_editor_screen.dart';
 import '../setup/share_actions.dart';
 import '../storage/building_repository.dart';
 import 'app_settings.dart';
-import 'app_theme.dart';
 import 'blueprint_view.dart';
 import 'navigation_screen.dart';
+import 'via_logo.dart';
 
 /// Home: the buildings on this phone, the bundled sample, and ways to add
 /// more (set one up, or import a shared file).
@@ -219,10 +219,7 @@ class _BuildingsScreenState extends State<BuildingsScreen> {
     final buildings = _buildings;
     return Scaffold(
       appBar: AppBar(
-        title: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [Icon(Icons.explore_outlined), SizedBox(width: 10), Text(Brand.appName)],
-        ),
+        title: const ViaLogo(height: 26),
         actions: [
           IconButton(tooltip: 'Import a building', icon: const Icon(Icons.file_download_outlined), onPressed: _import),
           ThemeModeButton(settings: widget.settings),
