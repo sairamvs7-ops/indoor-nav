@@ -1,0 +1,87 @@
+<template>
+  <style>
+
+#root { position: absolute; inset: 0; overflow: hidden; font-family: Roboto, sans-serif; color: #22301A; }
+.bg { position: absolute; inset: 0; background-color: #E5D9C2;
+  background-image: linear-gradient(rgba(88,107,69,0.075) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(88,107,69,0.075) 1px, transparent 1px);
+  background-size: 54px 54px; }
+.kicker { font-size: 28px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #586B45; }
+.h1 { font-size: 104px; font-weight: 900; letter-spacing: -0.04em; line-height: 0.98; color: #22301A; }
+.h2 { font-size: 64px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.04; color: #22301A; }
+.body { font-size: 30px; font-weight: 400; line-height: 1.35; color: #4A5340; }
+.green { color: #005A32; }
+.olive { color: #586B45; }
+.phone { position: absolute; width: 468px; height: 1006px; }
+.phone .bezel { position: absolute; inset: 0; border-radius: 60px; background: #161A12;
+  box-shadow: 0 40px 80px rgba(34,48,26,0.28), 0 8px 18px rgba(34,48,26,0.18); }
+.phone .screen { position: absolute; left: 14px; top: 14px; width: 440px; height: 978px;
+  border-radius: 46px; overflow: hidden; background: #E5D9C2; }
+.phone .screen > img, .phone .screen > video { position: absolute; left: 0; top: 0; width: 440px; height: 978px; object-fit: cover; }
+.chip { display: inline-flex; align-items: center; gap: 14px; padding: 16px 28px; border-radius: 999px;
+  border: 2px solid #586B45; background: #F4EDDF; font-size: 30px; font-weight: 700; color: #586B45; }
+.chip.on { background: #586B45; color: #FFFFFF; }
+.pill { display: inline-block; padding: 8px 18px; border-radius: 999px; font-size: 28px; font-weight: 800;
+  letter-spacing: 0.12em; text-transform: uppercase; }
+.w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.1em; margin-bottom: -0.1em; }
+.wi { display: inline-block; }
+.card { position: absolute; background: #F4EDDF; border-radius: 28px; box-shadow: 0 18px 40px rgba(34,48,26,0.16); }
+
+
+  </style>
+  <div id="root" data-composition-id="campus" data-width="1920" data-height="1080" data-duration="11.82">
+    <div class="bg"></div>
+    <div id="bl1" data-layout-ignore style="position:absolute; left:-200px; top:-260px; width:1100px; height:1100px; border-radius:50%; background:radial-gradient(circle, rgba(88,107,69,0.16), rgba(88,107,69,0) 65%)"></div>
+    <div id="bl2" data-layout-ignore style="position:absolute; left:1100px; top:380px; width:1100px; height:1100px; border-radius:50%; background:radial-gradient(circle, rgba(0,90,50,0.10), rgba(0,90,50,0) 65%)"></div>
+
+    <div id="c-city" style="position:absolute; inset:0"><svg width="1920" height="1080" viewBox="0 0 1920 1080"><rect width="1920" height="1080" fill="#E5D9C2"/><g fill="#CFD9B5"><ellipse cx="1740" cy="330" rx="110" ry="60"/><ellipse cx="250" cy="980" rx="150" ry="50"/><ellipse cx="1100" cy="985" rx="140" ry="45"/></g><g stroke="#FBF6EC" stroke-width="54" fill="none" stroke-linecap="round"><path d="M60 450 H1860 M60 880 H1860 M490 60 V1020 M940 60 V1020 M1270 60 V1020"/></g><g id="c-b0"><rect x="80" y="110" width="360" height="210" rx="12" fill="#F4EDDF" stroke="#C9B993" stroke-width="4"/><text x="260.0" y="225.0" text-anchor="middle" font-family="Roboto" font-weight="700" font-size="28" fill="#8A8064">Block A</text></g><g id="c-b1"><rect x="550" y="110" width="330" height="240" rx="12" fill="#F4EDDF" stroke="#C9B993" stroke-width="4"/><text x="715.0" y="240.0" text-anchor="middle" font-family="Roboto" font-weight="700" font-size="28" fill="#8A8064">Block B</text></g><rect x="990" y="150" width="230" height="230" rx="12" fill="#E3E8D3" stroke="#586B45" stroke-width="5"/><text x="1105.0" y="276.0" text-anchor="middle" font-family="Roboto" font-weight="800" font-size="32" fill="#22301A">Our block</text><g id="c-b3"><rect x="1320" y="120" width="300" height="220" rx="12" fill="#F4EDDF" stroke="#C9B993" stroke-width="4"/><text x="1470.0" y="240.0" text-anchor="middle" font-family="Roboto" font-weight="700" font-size="28" fill="#8A8064">Library</text></g><g id="c-b4"><rect x="90" y="530" width="330" height="260" rx="12" fill="#F4EDDF" stroke="#C9B993" stroke-width="4"/><text x="255.0" y="670.0" text-anchor="middle" font-family="Roboto" font-weight="700" font-size="28" fill="#8A8064">Labs</text></g><g id="c-b5"><rect x="560" y="590" width="320" height="180" rx="12" fill="#F4EDDF" stroke="#C9B993" stroke-width="4"/><text x="720.0" y="690.0" text-anchor="middle" font-family="Roboto" font-weight="700" font-size="28" fill="#8A8064">Block D</text></g><g id="c-b6"><rect x="990" y="540" width="230" height="280" rx="12" fill="#F4EDDF" stroke="#C9B993" stroke-width="4"/><text x="1105.0" y="690.0" text-anchor="middle" font-family="Roboto" font-weight="700" font-size="28" fill="#8A8064">Admin</text></g><g id="c-b7"><rect x="1320" y="590" width="320" height="190" rx="12" fill="#F4EDDF" stroke="#C9B993" stroke-width="4"/><text x="1480.0" y="695.0" text-anchor="middle" font-family="Roboto" font-weight="700" font-size="28" fill="#8A8064">Hostel</text></g></svg>
+      <div id="c-cdot" style="position:absolute; left:0; top:0; width:44px; height:44px"><div style="position:absolute; inset:-22px; border-radius:50%; background:rgba(29,78,216,0.18)"></div><div style="position:absolute; inset:0; border-radius:50%; background:#1D4ED8; border:5px solid #fff; box-shadow:0 4px 10px rgba(0,0,0,0.25)"></div></div></div>
+    <div id="c-gpsok" class="card" style="left:120px; top:960px; padding:14px 24px; display:flex; align-items:center; gap:14px">
+      <div style="width:16px; height:16px; border-radius:50%; background:#005A32"></div><div style="font-size:30px; font-weight:800; color:#005A32">GPS · accurate outdoors</div></div>
+    <div id="c-floor" style="position:absolute; inset:0; opacity:0">
+      <div class="bg"></div>
+      <div id="c-card" class="card" style="left:720px; top:230px; width:1120px; height:648px; padding:20px; overflow:hidden">
+        <img src="assets/ui/start_map.png" alt="" style="width:1080px; height:608px; display:block"></div>
+      <div class="kicker" style="position:absolute; left:740px; top:898px">Our block · Ground Floor (the app's own map)</div>
+      <div id="c-dot" style="position:absolute; left:0; top:0; width:44px; height:44px"><div style="position:absolute; inset:-22px; border-radius:50%; background:rgba(29,78,216,0.18)"></div><div style="position:absolute; inset:0; border-radius:50%; background:#1D4ED8; border:5px solid #fff; box-shadow:0 4px 10px rgba(0,0,0,0.25)"></div><div id="c-q" style="position:absolute; left:40px; top:-62px; width:56px; height:56px; border-radius:50%; background:#F4EDDF; color:#DC2626; font-size:38px; font-weight:900; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 14px rgba(0,0,0,0.18); opacity:0">?</div></div>
+      <div id="c-gps" class="card" style="left:120px; top:200px; padding:18px 28px; display:flex; align-items:center; gap:14px; opacity:0">
+        <div style="width:16px; height:16px; border-radius:50%; background:#DC2626"></div><div style="font-size:32px; font-weight:800; color:#DC2626">No GPS signal indoors</div></div>
+      <div id="c-head" class="h1" style="position:absolute; left:120px; top:400px; width:600px; opacity:0"><span class="w"><span class="wi">GPS</span></span> <span class="w"><span class="wi">stops</span></span> <br><span class="w"><span class="wi">at</span></span> <span class="w"><span class="wi">the</span></span> <span class="w"><span class="wi green">door.</span></span></div>
+      <div id="c-who" style="position:absolute; left:120px; top:690px; width:560px; display:flex; flex-wrap:wrap; gap:14px; opacity:0">
+        <span class="chip">New students</span><span class="chip">Visitors</span><span class="chip">Room 104?</span></div>
+    </div>
+
+    <div id="wipe-out" style="position:absolute; inset:0; background:#005A32; z-index:50"></div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#bl1", { x: -60, y: 0 }, { x: 80, y: 40, duration: 11.82, ease: "sine.inOut" }, 0);
+    tl.fromTo("#bl2", { x: 40, y: 20 }, { x: -70, y: -30, duration: 11.82, ease: "sine.inOut" }, 0);
+    tl.fromTo("#wipe-out", { xPercent: -101 }, { xPercent: 0, duration: 0.4, ease: "expo.in" }, 11.40);
+    tl.set("#c-cdot", { x: 138, y: 428 }, 0);
+    tl.to("#c-cdot", { x: 468, y: 428, duration: 0.52, ease: "none" }, 0.20);
+    tl.to("#c-cdot", { x: 678, y: 428, duration: 0.52, ease: "none" }, 0.75);
+    tl.to("#c-cdot", { x: 918, y: 428, duration: 0.52, ease: "none" }, 1.30);
+    tl.to("#c-cdot", { x: 1083, y: 428, duration: 0.52, ease: "none" }, 1.85);
+    tl.to("#c-cdot", { x: 1083, y: 378, duration: 0.52, ease: "none" }, 2.40);
+    tl.to("#c-city", { scale: 5, transformOrigin: "1105.0px 265.0px", duration: 1.1, ease: "expo.in" }, 2.95);
+    tl.to("#c-gpsok", { opacity: 0, duration: 0.3, ease: "power2.in" }, 2.9499999999999997);
+    tl.to("#c-city", { opacity: 0, duration: 0.3, ease: "power2.in" }, 3.7);
+    tl.fromTo("#c-floor", { opacity: 0 }, { opacity: 1, duration: 0.45 }, 3.85);
+    tl.fromTo("#c-card", { scale: 0.6 }, { scale: 1, duration: 0.9, ease: "expo.out" }, 3.85);
+    tl.set("#c-dot", { x: 918, y: 386 }, 0);
+    tl.to("#c-dot", { x: 994, y: 536, duration: 0.8, ease: "power1.inOut" }, 4.45);
+    tl.to("#c-dot", { x: 1193, y: 539, duration: 0.8, ease: "power1.inOut" }, 5.40);
+    tl.to("#c-dot", { x: 1098, y: 537, duration: 0.8, ease: "power1.inOut" }, 6.35);
+    tl.to("#c-dot", { x: 1372, y: 539, duration: 0.8, ease: "power1.inOut" }, 7.30);
+    tl.to("#c-dot", { x: 1541, y: 538, duration: 0.8, ease: "power1.inOut" }, 8.25);
+    tl.to("#c-dot", { x: 1309, y: 539, duration: 0.8, ease: "power1.inOut" }, 9.20);
+    tl.fromTo("#c-q", { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, 5.15);
+    tl.fromTo("#c-gps", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, 5.64);
+    tl.set("#c-head", { opacity: 1 }, 5.83);
+    tl.fromTo("#c-head .wi", { yPercent: 115 }, { yPercent: 0, duration: 0.7, ease: "expo.out", stagger: 0.07 }, 5.83);
+    tl.fromTo("#c-who", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 8.96);
+
+    window.__timelines["campus"] = tl;
+  </script>
+</template>

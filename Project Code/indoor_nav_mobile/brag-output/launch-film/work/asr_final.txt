@@ -1,0 +1,31 @@
+== ../indoor-nav-launch-film.mp4
+   0.00- 5.58  Outside, your phone always knows where you are, but step inside a big building and GPS
+   5.58- 6.38  goes quiet.
+   7.06-11.20  On our own campus, new students and visitors can easily lose their way.
+  12.14-14.22  So we're building indoor nav for our college.
+  14.88-19.50  It gives you directions inside a building, using just your phone, in three simple steps.
+  20.12-21.42  Pick, scan, and follow.
+  22.62-23.96  First, pick where you want to go.
+  25.14-26.76  Then scan the nearest marker.
+  26.76-31.68  It's just a printed sticker on the wall, and the phone instantly knows where you are.
+  32.96-37.78  Now follow your route, drawn on the building's own floor plan, and worked out right on the
+  37.78-38.06  phone.
+  39.20-41.66  If you need a route without stairs, choose step free.
+  42.24-44.80  If you would rather take the stairs, choose avoid lifts.
+  46.12-50.92  And when your route changes floors, the app shows you exactly how you get there, in 3D.
+  51.76-53.88  Clear steps guide you all the way to the door.
+  53.88-59.36  And if you take a wrong turn, just scan any marker, and your route starts again from there.
+  59.98-63.90  And in beta, scan once, then simply walk with every turn read aloud.
+  65.14-68.58  Under the hood is a corrected, bidirectional Dijkstra search.
+  69.24-75.86  Our first ESP32 version took a longer route on 36 of 756 trips.
+  76.64-82.76  Today, every pair of places gets the shortest route, and 192 automated tests keep it that
+  82.76-82.98  way.
+  84.22-89.34  And it all works offline, with no GPS, no Wi-Fi, no beacons, and no server.
+  90.34-94.46  Each block is set up from its own floor plan, and shared as a single file.
+  96.04-100.64  Next, we want to map every block on our campus, in one shared map library.
+  101.66-105.90  Beyond campus, it can help hospitals, malls, airports, and exam halls.
+  106.62-109.86  And one day, you could walk through a building once, and let it map itself.
+  110.88-113.90  It started with a microcontroller and a cloud database.
+  114.70-116.78  Now, all it takes is a phone and a sticker.
+  117.40-118.00  Indoor Nav.
+  118.60-120.02  Find your way anywhere indoors.

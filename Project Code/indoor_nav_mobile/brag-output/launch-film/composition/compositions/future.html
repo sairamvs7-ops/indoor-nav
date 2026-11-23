@@ -1,0 +1,73 @@
+<template>
+  <style>
+
+#root { position: absolute; inset: 0; overflow: hidden; font-family: Roboto, sans-serif; color: #22301A; }
+.bg { position: absolute; inset: 0; background-color: #E5D9C2;
+  background-image: linear-gradient(rgba(88,107,69,0.075) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(88,107,69,0.075) 1px, transparent 1px);
+  background-size: 54px 54px; }
+.kicker { font-size: 28px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #586B45; }
+.h1 { font-size: 104px; font-weight: 900; letter-spacing: -0.04em; line-height: 0.98; color: #22301A; }
+.h2 { font-size: 64px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.04; color: #22301A; }
+.body { font-size: 30px; font-weight: 400; line-height: 1.35; color: #4A5340; }
+.green { color: #005A32; }
+.olive { color: #586B45; }
+.phone { position: absolute; width: 468px; height: 1006px; }
+.phone .bezel { position: absolute; inset: 0; border-radius: 60px; background: #161A12;
+  box-shadow: 0 40px 80px rgba(34,48,26,0.28), 0 8px 18px rgba(34,48,26,0.18); }
+.phone .screen { position: absolute; left: 14px; top: 14px; width: 440px; height: 978px;
+  border-radius: 46px; overflow: hidden; background: #E5D9C2; }
+.phone .screen > img, .phone .screen > video { position: absolute; left: 0; top: 0; width: 440px; height: 978px; object-fit: cover; }
+.chip { display: inline-flex; align-items: center; gap: 14px; padding: 16px 28px; border-radius: 999px;
+  border: 2px solid #586B45; background: #F4EDDF; font-size: 30px; font-weight: 700; color: #586B45; }
+.chip.on { background: #586B45; color: #FFFFFF; }
+.pill { display: inline-block; padding: 8px 18px; border-radius: 999px; font-size: 28px; font-weight: 800;
+  letter-spacing: 0.12em; text-transform: uppercase; }
+.w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.1em; margin-bottom: -0.1em; }
+.wi { display: inline-block; }
+.card { position: absolute; background: #F4EDDF; border-radius: 28px; box-shadow: 0 18px 40px rgba(34,48,26,0.16); }
+
+
+  </style>
+  <div id="root" data-composition-id="future" data-width="1920" data-height="1080" data-duration="5.57">
+    <div class="bg"></div>
+    <div id="bl1" data-layout-ignore style="position:absolute; left:-200px; top:-260px; width:1100px; height:1100px; border-radius:50%; background:radial-gradient(circle, rgba(88,107,69,0.16), rgba(88,107,69,0) 65%)"></div>
+    <div id="bl2" data-layout-ignore style="position:absolute; left:1100px; top:380px; width:1100px; height:1100px; border-radius:50%; background:radial-gradient(circle, rgba(0,90,50,0.10), rgba(0,90,50,0) 65%)"></div>
+
+    <div id="w-map" style="position:absolute; inset:0"><svg width="1920" height="1080" viewBox="0 0 1920 1080"><rect width="1920" height="1080" fill="#E5D9C2"/><g fill="#CFD9B5"><ellipse cx="1740" cy="330" rx="110" ry="60"/><ellipse cx="250" cy="980" rx="150" ry="50"/><ellipse cx="1100" cy="985" rx="140" ry="45"/></g><g stroke="#FBF6EC" stroke-width="54" fill="none" stroke-linecap="round"><path d="M60 450 H1860 M60 880 H1860 M490 60 V1020 M940 60 V1020 M1270 60 V1020"/></g><g id="w-b0"><rect x="80" y="110" width="360" height="210" rx="12" fill="#F4EDDF" stroke="#C9B993" stroke-width="4" stroke-dasharray="14 10"/><text x="260.0" y="225.0" text-anchor="middle" font-family="Roboto" font-weight="700" font-size="28" fill="#8A8064">Block A</text></g><g id="w-b1"><rect x="550" y="110" width="330" height="240" rx="12" fill="#F4EDDF" stroke="#C9B993" stroke-width="4" stroke-dasharray="14 10"/><text x="715.0" y="240.0" text-anchor="middle" font-family="Roboto" font-weight="700" font-size="28" fill="#8A8064">Block B</text></g><rect x="990" y="150" width="230" height="230" rx="12" fill="#586B45" stroke="#586B45" stroke-width="5"/><text x="1105.0" y="259.0" text-anchor="middle" font-family="Roboto" font-weight="800" font-size="32" fill="#fff">Our block</text><text x="1105.0" y="295.0" text-anchor="middle" font-family="Roboto" font-weight="700" font-size="24" fill="#C7E9C0">mapped today</text><g id="w-b3"><rect x="1320" y="120" width="300" height="220" rx="12" fill="#F4EDDF" stroke="#C9B993" stroke-width="4" stroke-dasharray="14 10"/><text x="1470.0" y="240.0" text-anchor="middle" font-family="Roboto" font-weight="700" font-size="28" fill="#8A8064">Library</text></g><g id="w-b4"><rect x="90" y="530" width="330" height="260" rx="12" fill="#F4EDDF" stroke="#C9B993" stroke-width="4" stroke-dasharray="14 10"/><text x="255.0" y="670.0" text-anchor="middle" font-family="Roboto" font-weight="700" font-size="28" fill="#8A8064">Labs</text></g><g id="w-b5"><rect x="560" y="590" width="320" height="180" rx="12" fill="#F4EDDF" stroke="#C9B993" stroke-width="4" stroke-dasharray="14 10"/><text x="720.0" y="690.0" text-anchor="middle" font-family="Roboto" font-weight="700" font-size="28" fill="#8A8064">Block D</text></g><g id="w-b6"><rect x="990" y="540" width="230" height="280" rx="12" fill="#F4EDDF" stroke="#C9B993" stroke-width="4" stroke-dasharray="14 10"/><text x="1105.0" y="690.0" text-anchor="middle" font-family="Roboto" font-weight="700" font-size="28" fill="#8A8064">Admin</text></g><g id="w-b7"><rect x="1320" y="590" width="320" height="190" rx="12" fill="#F4EDDF" stroke="#C9B993" stroke-width="4" stroke-dasharray="14 10"/><text x="1480.0" y="695.0" text-anchor="middle" font-family="Roboto" font-weight="700" font-size="28" fill="#8A8064">Hostel</text></g></svg></div>
+    <div id="w-h" class="card" style="left:120px; top:40px; padding:22px 34px; opacity:0">
+      <div class="kicker">Our next step</div>
+      <div id="w-hh" class="h2" style="margin-top:8px; font-size:56px"><span class="w"><span class="wi">One</span></span> <span class="w"><span class="wi">block</span></span> <span class="w"><span class="wi">today.</span></span> <span class="w"><span class="wi green">Every</span></span> <span class="w"><span class="wi green">block</span></span> <span class="w"><span class="wi green">next.</span></span></div></div>
+    <div id="w-lib" class="card" style="left:1300px; top:60px; padding:16px 26px; display:flex; align-items:center; gap:18px; opacity:0">
+      <span class="pill" style="background:#F59E0B; color:#22301A">Planned</span><div style="font-size:32px; font-weight:800">One shared map library</div></div>
+
+    <div id="wipe-in" style="position:absolute; inset:0; background:#005A32; z-index:50"></div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#bl1", { x: -60, y: 0 }, { x: 80, y: 40, duration: 5.57, ease: "sine.inOut" }, 0);
+    tl.fromTo("#bl2", { x: 40, y: 20 }, { x: -70, y: -30, duration: 5.57, ease: "sine.inOut" }, 0);
+    tl.fromTo("#wipe-in", { xPercent: 0 }, { xPercent: 101, duration: 0.55, ease: "expo.inOut" }, 0);
+    tl.fromTo("#w-map", { opacity: 0, scale: 0.86, transformOrigin: "50% 100%" }, { opacity: 1, scale: 0.82, duration: 0.7, ease: "expo.out" }, 0);
+    tl.fromTo("#w-h", { opacity: 0, y: 0 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, 0.15);
+    tl.set("#w-hh", { opacity: 1 }, 0.2);
+    tl.fromTo("#w-hh .wi", { yPercent: 115 }, { yPercent: 0, duration: 0.7, ease: "expo.out", stagger: 0.06 }, 0.2);
+    tl.to("#w-b0 rect", { fill: "#E3E8D3", stroke: "#586B45", duration: 0.3 }, 1.43);
+    tl.to("#w-b0 text", { fill: "#22301A", duration: 0.3 }, 1.43);
+    tl.to("#w-b1 rect", { fill: "#E3E8D3", stroke: "#586B45", duration: 0.3 }, 1.71);
+    tl.to("#w-b1 text", { fill: "#22301A", duration: 0.3 }, 1.71);
+    tl.to("#w-b3 rect", { fill: "#E3E8D3", stroke: "#586B45", duration: 0.3 }, 1.99);
+    tl.to("#w-b3 text", { fill: "#22301A", duration: 0.3 }, 1.99);
+    tl.to("#w-b4 rect", { fill: "#E3E8D3", stroke: "#586B45", duration: 0.3 }, 2.27);
+    tl.to("#w-b4 text", { fill: "#22301A", duration: 0.3 }, 2.27);
+    tl.to("#w-b5 rect", { fill: "#E3E8D3", stroke: "#586B45", duration: 0.3 }, 2.55);
+    tl.to("#w-b5 text", { fill: "#22301A", duration: 0.3 }, 2.55);
+    tl.to("#w-b6 rect", { fill: "#E3E8D3", stroke: "#586B45", duration: 0.3 }, 2.83);
+    tl.to("#w-b6 text", { fill: "#22301A", duration: 0.3 }, 2.83);
+    tl.to("#w-b7 rect", { fill: "#E3E8D3", stroke: "#586B45", duration: 0.3 }, 3.11);
+    tl.to("#w-b7 text", { fill: "#22301A", duration: 0.3 }, 3.11);
+    tl.fromTo("#w-lib", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 3.76);
+
+    window.__timelines["future"] = tl;
+  </script>
+</template>

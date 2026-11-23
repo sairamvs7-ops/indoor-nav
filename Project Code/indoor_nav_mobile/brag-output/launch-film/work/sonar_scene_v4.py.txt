@@ -1,0 +1,44 @@
+# ======================================================================= 7 sonar (narrated throughout, synced to the words)
+vo, end = place([("g1", 0), ("g2", 0.25)], 0.1)
+SYN = json.loads((W / "sonar_sync.json").read_text())   # from retime_sonar.py
+L0 = vo["g1"][0]
+SON = round(L0 + SYN["son"], 2)      # "the app shows you..."
+P1 = round(L0 + SYN["p1"], 2)        # "as your dot rides the lift up"
+BACK = round(L0 + SYN["end"], 2)     # just after "...to the next floor."
+DIVE = round(SON - 0.6, 2)
+D = round(BACK + 1.4, 2)
+rings = "".join(f'<div id="n-ring{i}" style="position:absolute; left:960px; top:540px; width:400px; height:400px; margin:-200px 0 0 -200px; border-radius:50%; border:3px solid #89E900; opacity:0"></div>' for i in range(3))
+mask = "radial-gradient(ellipse 46% 52% at 50% 50%, #000 70%, transparent 100%)"
+vs = f"position:absolute; left:555px; top:0; width:810px; height:1080px; object-fit:cover; -webkit-mask-image:{mask}; mask-image:{mask}"
+body = f"""
+    <div id="n-night" style="position:absolute; inset:0; background:radial-gradient(ellipse 900px 700px at 960px 540px, #0B1408, #040704 70%); opacity:0"></div>
+    {rings}
+    <div id="n-glow" style="position:absolute; left:960px; top:540px; width:1200px; height:1200px; margin:-600px 0 0 -600px; border-radius:50%; background:radial-gradient(circle, rgba(137,233,0,0.22), rgba(137,233,0,0) 62%); opacity:0"></div>
+    <div id="n-view" style="position:absolute; inset:0; opacity:0">
+      <img id="n-first" class="clip" data-start="{SON:.2f}" data-duration="0.6" data-track-index="3" src="assets/ui/sonar_first.png" alt="" style="{vs}">
+      <video id="n-big" class="clip" data-start="{SON:.2f}" data-duration="{round(BACK - SON, 2)}" data-track-index="4" muted playsinline src="assets/clips/sonar_sync.mp4" style="{vs}"></video>
+      <img id="n-last" class="clip" data-start="{round(BACK - 0.3, 2)}" data-duration="0.9" data-track-index="3" src="assets/ui/sonar_last.png" alt="" style="{vs}"></div>
+    {phone("n-phone", 726, 37, [("n-lift", "assets/ui/at_lift.png", 0, round(SON + 0.1, 2), "img")])}
+    <div id="n-title" style="position:absolute; left:0; width:1920px; top:56px; text-align:center; font-size:30px; font-weight:800; color:#89E900; opacity:0">Lift up to First Floor</div>
+    <div id="n-note" style="position:absolute; left:0; width:1920px; top:120px; text-align:center; letter-spacing:0.14em; text-transform:uppercase; color:#C7E9C0; font-size:24px; font-weight:700; opacity:0">The app's own 3D floor-change view · slowed to the narration</div>
+    <div id="n-ff" class="card" style="left:240px; top:220px; width:1440px; height:759px; overflow:hidden; opacity:0">
+      <img src="assets/ui/first_floor_map_last.png" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover"></div>
+    <div id="n-head" style="position:absolute; left:240px; top:110px; width:1500px; opacity:0"><div class="kicker">First Floor · on to Room 104</div></div>
+"""
+s = '    tl.fromTo("#n-phone", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.35, ease: "expo.out" }, 0);\n'
+s += f'    tl.fromTo("#n-phone", {{ scale: 1 }}, {{ scale: 1.06, duration: {DIVE - 0.2:.2f}, ease: "sine.inOut" }}, 0.1);\n'
+s += f'    tl.fromTo("#n-night", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.5, ease: "power2.in" }}, {DIVE - 0.05:.2f});\n'
+s += f'    tl.to("#n-phone", {{ scale: 2.8, opacity: 0, duration: 0.6, ease: "expo.in" }}, {DIVE:.2f});  // dive into the screen\n'
+s += f'    tl.fromTo("#n-view", {{ opacity: 0, scale: 1.12 }}, {{ opacity: 1, scale: 1, duration: 0.5, ease: "expo.out" }}, {SON:.2f});  // beat-locked music drop\n'
+s += f'    tl.fromTo("#n-glow", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.5 }}, {SON:.2f});\n'
+s += show("#n-title", SON + 0.2, 0, 0.4) + show("#n-note", SON + 0.5, 0, 0.5) + hide("#n-title", BACK - 0.4, 0.3) + hide("#n-note", BACK - 0.4, 0.3)
+for i, dt in enumerate([0, 0.8, 1.6]):
+    s += f'    tl.fromTo("#n-ring{i}", {{ opacity: 0.7, scale: 0.4 }}, {{ opacity: 0, scale: 4.2, duration: 2.4, ease: "power2.out" }}, {SON + dt:.2f});\n'
+s += f'    tl.to(["#n-glow", "#n-view"], {{ opacity: 0, duration: 0.45 }}, {BACK - 0.15:.2f});\n'
+s += f'    tl.to("#n-night", {{ opacity: 0, duration: 0.6, ease: "power2.out" }}, {BACK - 0.1:.2f});\n'
+s += f'    tl.fromTo("#n-ff", {{ opacity: 0, scale: 1.08 }}, {{ opacity: 1, scale: 1, duration: 0.7, ease: "expo.out" }}, {BACK:.2f});\n'
+s += show("#n-head", BACK + 0.2, 0, 0.4)
+scene("sonar", D, body, s)
+SONAR_DROP_ABS = T0[0] + SON
+add_scene("sonar", D, vo, [(DIVE, "card-shove-1", 0.25), (SON, "impactSoft_heavy_003", 0.55), (SON, "bong_001", 0.45), (P1, "bong_001", 0.25), (BACK, "card-slide-1", 0.28)])
+

@@ -1,0 +1,64 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; pointer-events: none; font-family: Roboto, sans-serif; }
+    .cap { position: absolute; left: 0; width: 1920px; top: 1000px; text-align: center; }
+    .cap span { display: inline-block; padding: 10px 24px; border-radius: 12px; background: rgba(34,48,26,0.86); color: #F4EDDF; font-size: 32px; font-weight: 600; letter-spacing: 0.005em; }
+  </style>
+  <div id="root" data-composition-id="captions" data-width="1920" data-height="1080" data-duration="121.98" data-layout-allow-caption-zone>
+    <div id="cap000" class="clip cap" data-start="0.25" data-duration="3.11" data-track-index="1"><span>Outside, your phone always knows where you are.</span></div>
+    <div id="cap001" class="clip cap" data-start="3.38" data-duration="1.98" data-track-index="1"><span>But step inside a big building,</span></div>
+    <div id="cap002" class="clip cap" data-start="5.38" data-duration="1.22" data-track-index="1"><span>and GPS goes quiet.</span></div>
+    <div id="cap003" class="clip cap" data-start="6.91" data-duration="0.98" data-track-index="1"><span>On our own campus,</span></div>
+    <div id="cap004" class="clip cap" data-start="7.91" data-duration="3.36" data-track-index="1"><span>new students and visitors can easily lose their way.</span></div>
+    <div id="cap005" class="clip cap" data-start="12.02" data-duration="2.48" data-track-index="1"><span>So we're building Via for our college.</span></div>
+    <div id="cap006" class="clip cap" data-start="14.52" data-duration="2.46" data-track-index="1"><span>It gives you directions inside a building,</span></div>
+    <div id="cap007" class="clip cap" data-start="17.0" data-duration="1.16" data-track-index="1"><span>using just your phone,</span></div>
+    <div id="cap008" class="clip cap" data-start="18.18" data-duration="1.59" data-track-index="1"><span>in three simple steps:</span></div>
+    <div id="cap009" class="clip cap" data-start="19.79" data-duration="1.38" data-track-index="1"><span>pick, scan, and follow.</span></div>
+    <div id="cap010" class="clip cap" data-start="21.82" data-duration="1.85" data-track-index="1"><span>First, pick where you want to go.</span></div>
+    <div id="cap011" class="clip cap" data-start="24.72" data-duration="1.44" data-track-index="1"><span>Then scan the nearest marker.</span></div>
+    <div id="cap012" class="clip cap" data-start="26.18" data-duration="2.51" data-track-index="1"><span>It's just a printed sticker on the wall,</span></div>
+    <div id="cap013" class="clip cap" data-start="28.71" data-duration="2.54" data-track-index="1"><span>and the phone instantly knows where you are.</span></div>
+    <div id="cap014" class="clip cap" data-start="32.18" data-duration="1.09" data-track-index="1"><span>Now follow your route,</span></div>
+    <div id="cap015" class="clip cap" data-start="33.29" data-duration="2.29" data-track-index="1"><span>drawn on the building's own floor plan,</span></div>
+    <div id="cap016" class="clip cap" data-start="35.6" data-duration="2.15" data-track-index="1"><span>and worked out right on the phone.</span></div>
+    <div id="cap017" class="clip cap" data-start="38.48" data-duration="1.75" data-track-index="1"><span>If you need a route without stairs,</span></div>
+    <div id="cap018" class="clip cap" data-start="40.25" data-duration="3.23" data-track-index="1"><span>choose Step-free. If you would rather take the stairs,</span></div>
+    <div id="cap019" class="clip cap" data-start="43.5" data-duration="1.11" data-track-index="1"><span>choose Avoid lifts.</span></div>
+    <div id="cap020" class="clip cap" data-start="45.48" data-duration="2.13" data-track-index="1"><span>And when your route changes floors,</span></div>
+    <div id="cap021" class="clip cap" data-start="47.63" data-duration="2.99" data-track-index="1"><span>the app shows you exactly how you get there, in 3D.</span></div>
+    <div id="cap022" class="clip cap" data-start="51.05" data-duration="2.26" data-track-index="1"><span>Clear steps guide you all the way to the door.</span></div>
+    <div id="cap023" class="clip cap" data-start="53.33" data-duration="1.96" data-track-index="1"><span>And if you take a wrong turn,</span></div>
+    <div id="cap024" class="clip cap" data-start="55.31" data-duration="1.32" data-track-index="1"><span>just scan any marker,</span></div>
+    <div id="cap025" class="clip cap" data-start="56.65" data-duration="2.35" data-track-index="1"><span>and your route starts again from there.</span></div>
+    <div id="cap026" class="clip cap" data-start="59.31" data-duration="0.68" data-track-index="1"><span>And in beta:</span></div>
+    <div id="cap027" class="clip cap" data-start="60.01" data-duration="1.92" data-track-index="1"><span>scan once, then simply walk,</span></div>
+    <div id="cap028" class="clip cap" data-start="61.95" data-duration="1.72" data-track-index="1"><span>with every turn read aloud.</span></div>
+    <div id="cap029" class="clip cap" data-start="64.44" data-duration="2.71" data-track-index="1"><span>Under the hood is a corrected,</span></div>
+    <div id="cap030" class="clip cap" data-start="67.17" data-duration="2.99" data-track-index="1"><span>bidirectional Dijkstra search.</span></div>
+    <div id="cap031" class="clip cap" data-start="70.18" data-duration="3.72" data-track-index="1"><span>Our first ESP32 version took a longer route</span></div>
+    <div id="cap032" class="clip cap" data-start="73.92" data-duration="1.71" data-track-index="1"><span>on 36 of 756 trips.</span></div>
+    <div id="cap033" class="clip cap" data-start="75.95" data-duration="3.92" data-track-index="1"><span>Today, every pair of places gets the shortest route,</span></div>
+    <div id="cap034" class="clip cap" data-start="79.89" data-duration="2.77" data-track-index="1"><span>and 192 automated tests keep it that way.</span></div>
+    <div id="cap035" class="clip cap" data-start="83.59" data-duration="1.9" data-track-index="1"><span>And it all works offline,</span></div>
+    <div id="cap036" class="clip cap" data-start="85.51" data-duration="1.03" data-track-index="1"><span>with no GPS,</span></div>
+    <div id="cap037" class="clip cap" data-start="86.56" data-duration="1.38" data-track-index="1"><span>no Wi-Fi, no beacons,</span></div>
+    <div id="cap038" class="clip cap" data-start="87.96" data-duration="1.09" data-track-index="1"><span>and no server.</span></div>
+    <div id="cap039" class="clip cap" data-start="89.68" data-duration="2.44" data-track-index="1"><span>Each block is set up from its own floor plan,</span></div>
+    <div id="cap040" class="clip cap" data-start="92.14" data-duration="2.02" data-track-index="1"><span>and shared as a single file.</span></div>
+    <div id="cap041" class="clip cap" data-start="95.51" data-duration="2.77" data-track-index="1"><span>Next, we want to map every block on our campus,</span></div>
+    <div id="cap042" class="clip cap" data-start="98.3" data-duration="2.04" data-track-index="1"><span>in one shared map library.</span></div>
+    <div id="cap043" class="clip cap" data-start="101.08" data-duration="2.03" data-track-index="1"><span>Beyond campus, it can help hospitals,</span></div>
+    <div id="cap044" class="clip cap" data-start="103.13" data-duration="1.75" data-track-index="1"><span>malls, airports, and exam halls.</span></div>
+    <div id="cap045" class="clip cap" data-start="104.9" data-duration="1.21" data-track-index="1"><span>And one day,</span></div>
+    <div id="cap046" class="clip cap" data-start="106.13" data-duration="2.14" data-track-index="1"><span>you could walk through a building once,</span></div>
+    <div id="cap047" class="clip cap" data-start="108.29" data-duration="1.37" data-track-index="1"><span>and let it map itself.</span></div>
+    <div id="cap048" class="clip cap" data-start="110.66" data-duration="3.48" data-track-index="1"><span>It started with a microcontroller and a cloud database.</span></div>
+    <div id="cap049" class="clip cap" data-start="114.16" data-duration="1.6" data-track-index="1"><span>Now, all it takes is a phone,</span></div>
+    <div id="cap050" class="clip cap" data-start="115.78" data-duration="1.23" data-track-index="1"><span>and a sticker.</span></div>
+    <div id="cap051" class="clip cap" data-start="117.03" data-duration="2.53" data-track-index="1"><span>Via. Find your way, anywhere indoors.</span></div>
+  </div>
+  <script>
+    window.__timelines["captions"] = gsap.timeline({ paused: true });
+  </script>
+</template>

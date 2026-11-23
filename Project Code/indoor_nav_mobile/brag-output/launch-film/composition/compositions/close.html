@@ -1,0 +1,87 @@
+<template>
+  <style>
+
+#root { position: absolute; inset: 0; overflow: hidden; font-family: Roboto, sans-serif; color: #22301A; }
+.bg { position: absolute; inset: 0; background-color: #E5D9C2;
+  background-image: linear-gradient(rgba(88,107,69,0.075) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(88,107,69,0.075) 1px, transparent 1px);
+  background-size: 54px 54px; }
+.kicker { font-size: 28px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #586B45; }
+.h1 { font-size: 104px; font-weight: 900; letter-spacing: -0.04em; line-height: 0.98; color: #22301A; }
+.h2 { font-size: 64px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.04; color: #22301A; }
+.body { font-size: 30px; font-weight: 400; line-height: 1.35; color: #4A5340; }
+.green { color: #005A32; }
+.olive { color: #586B45; }
+.phone { position: absolute; width: 468px; height: 1006px; }
+.phone .bezel { position: absolute; inset: 0; border-radius: 60px; background: #161A12;
+  box-shadow: 0 40px 80px rgba(34,48,26,0.28), 0 8px 18px rgba(34,48,26,0.18); }
+.phone .screen { position: absolute; left: 14px; top: 14px; width: 440px; height: 978px;
+  border-radius: 46px; overflow: hidden; background: #E5D9C2; }
+.phone .screen > img, .phone .screen > video { position: absolute; left: 0; top: 0; width: 440px; height: 978px; object-fit: cover; }
+.chip { display: inline-flex; align-items: center; gap: 14px; padding: 16px 28px; border-radius: 999px;
+  border: 2px solid #586B45; background: #F4EDDF; font-size: 30px; font-weight: 700; color: #586B45; }
+.chip.on { background: #586B45; color: #FFFFFF; }
+.pill { display: inline-block; padding: 8px 18px; border-radius: 999px; font-size: 28px; font-weight: 800;
+  letter-spacing: 0.12em; text-transform: uppercase; }
+.w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.1em; margin-bottom: -0.1em; }
+.wi { display: inline-block; }
+.card { position: absolute; background: #F4EDDF; border-radius: 28px; box-shadow: 0 18px 40px rgba(34,48,26,0.16); }
+
+
+  </style>
+  <div id="root" data-composition-id="close" data-width="1920" data-height="1080" data-duration="11.42">
+    <div class="bg"></div>
+    <div id="bl1" data-layout-ignore style="position:absolute; left:-200px; top:-260px; width:1100px; height:1100px; border-radius:50%; background:radial-gradient(circle, rgba(88,107,69,0.16), rgba(88,107,69,0) 65%)"></div>
+    <div id="bl2" data-layout-ignore style="position:absolute; left:1100px; top:380px; width:1100px; height:1100px; border-radius:50%; background:radial-gradient(circle, rgba(0,90,50,0.10), rgba(0,90,50,0) 65%)"></div>
+
+    <div id="z-k" style="position:absolute; left:150px; top:170px; opacity:0"><div class="kicker">Where it started</div></div>
+    <div id="z-1" class="card" style="left:150px; top:330px; width:400px; height:340px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; opacity:0"><svg width="110" height="110" viewBox="0 0 24 24"><path fill="#586B45" d="M15 9H9v6h6V9zm-2 4h-2v-2h2v2zm8-2V9h-2V7c0-1.1-.9-2-2-2h-2V3h-2v2h-2V3H9v2H7c-1.1 0-2 .9-2 2v2H3v2h2v2H3v2h2v2c0 1.1.9 2 2 2h2v2h2v-2h2v2h2v-2h2c1.1 0 2-.9 2-2v-2h2v-2h-2v-2h2zm-4 6H7V7h10v10z"/></svg><div style="font-size:40px; font-weight:800">ESP32</div><div class="olive" style="font-size:28px">microcontroller</div></div>
+    <div id="z-2" class="card" style="left:760px; top:330px; width:400px; height:340px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; opacity:0"><svg width="110" height="110" viewBox="0 0 24 24"><path fill="#586B45" d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg><div style="font-size:40px; font-weight:800">Wi-Fi</div><div class="olive" style="font-size:28px">to reach the board</div></div>
+    <div id="z-3" class="card" style="left:1370px; top:330px; width:400px; height:340px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; opacity:0"><svg width="110" height="110" viewBox="0 0 24 24"><path fill="#586B45" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4s1.79-4 4-4h.71C7.37 7.69 9.48 6 12 6c3.04 0 5.5 2.46 5.5 5.5v.5H19c1.66 0 3 1.34 3 3s-1.34 3-3 3z"/></svg><div style="font-size:40px; font-weight:800">Cloud database</div><div class="olive" style="font-size:28px">Firebase Realtime DB</div></div>
+    <div id="z-phone" class="phone" style="left:560px; top:37px"><div id="z-phone-f" style="position:absolute; inset:0"><div id="z-phone-bezel" class="bezel"></div><div class="screen"><img id="z-loc" class="clip" data-start="3.5" data-duration="2.65" data-track-index="2" src="assets/ui/located_end.png" alt=""></div></div></div>
+    <div id="z-paper" style="position:absolute; left:1060px; top:560px; width:250px; height:250px; background:#fff; padding:6px; box-sizing:border-box; box-shadow:0 18px 36px rgba(34,48,26,0.22); opacity:0">
+      <img src="assets/img/marker13.svg" alt="" style="width:100%; height:100%; display:block"></div>
+    <div id="z-now" style="position:absolute; left:1060px; top:230px; width:760px; opacity:0">
+      <div id="z-nh" class="h2"><span class="w"><span class="wi">Today:</span></span> <span class="w"><span class="wi">a</span></span> <span class="w"><span class="wi">phone,</span></span> <br><span class="w"><span class="wi green">and</span></span> <span class="w"><span class="wi green">a</span></span> <span class="w"><span class="wi green">sticker.</span></span></div>
+      <div class="body" style="margin-top:18px; font-size:28px">Flutter · OpenCV ArUco · on-device Dijkstra · offline</div></div>
+    <div id="z-end" style="position:absolute; left:0; width:1920px; top:330px; display:flex; flex-direction:column; align-items:center; opacity:0">
+      <div class="kicker">Built for our college</div>
+      <svg viewBox="-19.09 -19.80 297.00 140.50" width="680" height="321.7" style="display:block; overflow:visible"><defs><mask id="z-m" maskUnits="userSpaceOnUse" x="-19.09" y="-19.80" width="297.0" height="140.5"><path id="z-ms" d="M21.712 24 L50 84 L78.288 24" fill="none" stroke="#fff" stroke-width="34" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1.02" stroke-dashoffset="0"/></mask></defs><g mask="url(#z-m)"><path fill-rule="evenodd" d="M16.091 34.147L41.461 86.165A9.500 9.500 0 0 0 58.539 86.165L81.967 38.129A14.600 14.600 0 1 0 64.890 29.800L50.000 60.329L33.168 25.818A11.600 11.600 0 1 0 16.091 34.147ZM16.112 24.000A5.600 5.600 0 1 0 27.312 24.000A5.600 5.600 0 1 0 16.112 24.000Z" fill="#005A32"/></g><path id="z-dot" d="M63.688 24.000A14.600 14.600 0 1 1 92.888 24.000A14.600 14.600 0 1 1 63.688 24.000Z" fill="#586B45"/><g id="z-word" transform="translate(119.77 35.50) scale(0.112)"><path d="M4.872 73.976L189.530 469.976A52.000 52.000 0 0 0 283.786 469.976L468.444 73.976A52.000 52.000 0 1 0 374.188 30.024L236.658 324.958L99.128 30.024A52.000 52.000 0 1 0 4.872 73.976ZM513.316 52.000A52.000 52.000 0 0 1 617.316 52.000V448.000A52.000 52.000 0 0 1 513.316 448.000ZM1047.316 52.000A52.000 52.000 0 0 1 1151.316 52.000V448.000A52.000 52.000 0 0 1 1047.316 448.000Z" fill="#222222"/><path fill-rule="evenodd" d="M679.316 264.000A236.000 236.000 0 1 1 1151.316 264.000A236.000 236.000 0 1 1 679.316 264.000ZM783.316 264.000A132.000 132.000 0 1 0 1047.316 264.000A132.000 132.000 0 1 0 783.316 264.000Z" fill="#222222"/><path d="M492.516 -112.800A72.800 72.800 0 1 1 638.116 -112.800A72.800 72.800 0 1 1 492.516 -112.800Z" fill="#005A32"/></g></svg>
+      <div id="z-tag" class="h2" style="margin-top:0; font-size:56px; opacity:0"><span class="w"><span class="wi">Find</span></span> <span class="w"><span class="wi">your</span></span> <span class="w"><span class="wi">way.</span></span> <span class="w"><span class="wi">Anywhere</span></span> <span class="w"><span class="wi">indoors.</span></span></div></div>
+    <div id="z-credit" data-layout-ignore style="position:absolute; left:0; width:1920px; top:1040px; text-align:center; font-size:22px; color:#586B45; opacity:0">Music: Sascha Ende, ende.app (CC BY 4.0) · App screens rendered from the Via app</div>
+
+    <div id="wipe-in" style="position:absolute; inset:0; background:#005A32; z-index:50"></div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#bl1", { x: -60, y: 0 }, { x: 80, y: 40, duration: 11.42, ease: "sine.inOut" }, 0);
+    tl.fromTo("#bl2", { x: 40, y: 20 }, { x: -70, y: -30, duration: 11.42, ease: "sine.inOut" }, 0);
+    tl.fromTo("#z-phone-f", { y: 0 }, { y: -12, duration: 2.4, ease: "sine.inOut", yoyo: true, repeat: 3 }, 0);
+    tl.fromTo("#wipe-in", { xPercent: 0 }, { xPercent: 101, duration: 0.55, ease: "expo.inOut" }, 0);
+    tl.fromTo("#z-k", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, 0.1);
+    tl.fromTo("#z-1", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.5, ease: "expo.out" }, 0.2);
+    tl.fromTo("#z-2", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.5, ease: "expo.out" }, 0.6);
+    tl.fromTo("#z-3", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.5, ease: "expo.out" }, 1.0);
+    tl.to("#z-1", { opacity: 0, scale: 0.3, x: 560, duration: 0.5, ease: "power3.in" }, 3.20);
+    tl.to("#z-2", { opacity: 0, scale: 0.3, x: -50, duration: 0.5, ease: "power3.in" }, 3.20);
+    tl.to("#z-3", { opacity: 0, scale: 0.3, x: -660, duration: 0.5, ease: "power3.in" }, 3.20);
+    tl.to("#z-k", { opacity: 0, duration: 0.35, ease: "power2.in" }, 3.1);
+    tl.fromTo("#z-phone", { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.6, ease: "expo.out" }, 3.5);
+    tl.fromTo("#z-paper", { opacity: 0, scale: 1.4, rotation: -12 }, { opacity: 1, scale: 1, rotation: -4, duration: 0.3, ease: "power4.in" }, 4.90);
+    tl.fromTo("#z-now", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 3.7);
+    tl.set("#z-nh", { opacity: 1 }, 3.7);
+    tl.fromTo("#z-nh .wi", { yPercent: 115 }, { yPercent: 0, duration: 0.7, ease: "expo.out", stagger: 0.06 }, 3.7);
+    tl.to("#z-phone", { opacity: 0, duration: 0.3, ease: "power2.in" }, 5.7);
+    tl.to("#z-paper", { opacity: 0, duration: 0.3, ease: "power2.in" }, 5.7);
+    tl.to("#z-now", { opacity: 0, duration: 0.3, ease: "power2.in" }, 5.7);
+    tl.fromTo("#z-end", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 6.00);
+    tl.fromTo("#z-ms", { attr: { "stroke-dashoffset": 1.02 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.6, ease: "power2.inOut" }, 6.05);
+    tl.fromTo("#z-dot", { scale: 0, svgOrigin: "78.288 24" }, { scale: 1, svgOrigin: "78.288 24", duration: 0.45, ease: "back.out(2.2)" }, 6.55);
+    tl.fromTo("#z-word", { opacity: 0 }, { opacity: 1, duration: 0.45, ease: "power2.out" }, 6.60);
+    tl.set("#z-tag", { opacity: 1 }, 7.4);
+    tl.fromTo("#z-tag .wi", { yPercent: 115 }, { yPercent: 0, duration: 0.7, ease: "expo.out", stagger: 0.06 }, 7.4);
+    tl.fromTo("#z-credit", { opacity: 0, y: 0 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, 9.32);
+
+    window.__timelines["close"] = tl;
+  </script>
+</template>

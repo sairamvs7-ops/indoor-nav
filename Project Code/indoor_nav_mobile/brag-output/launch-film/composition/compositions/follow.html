@@ -1,0 +1,60 @@
+<template>
+  <style>
+
+#root { position: absolute; inset: 0; overflow: hidden; font-family: Roboto, sans-serif; color: #22301A; }
+.bg { position: absolute; inset: 0; background-color: #E5D9C2;
+  background-image: linear-gradient(rgba(88,107,69,0.075) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(88,107,69,0.075) 1px, transparent 1px);
+  background-size: 54px 54px; }
+.kicker { font-size: 28px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #586B45; }
+.h1 { font-size: 104px; font-weight: 900; letter-spacing: -0.04em; line-height: 0.98; color: #22301A; }
+.h2 { font-size: 64px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.04; color: #22301A; }
+.body { font-size: 30px; font-weight: 400; line-height: 1.35; color: #4A5340; }
+.green { color: #005A32; }
+.olive { color: #586B45; }
+.phone { position: absolute; width: 468px; height: 1006px; }
+.phone .bezel { position: absolute; inset: 0; border-radius: 60px; background: #161A12;
+  box-shadow: 0 40px 80px rgba(34,48,26,0.28), 0 8px 18px rgba(34,48,26,0.18); }
+.phone .screen { position: absolute; left: 14px; top: 14px; width: 440px; height: 978px;
+  border-radius: 46px; overflow: hidden; background: #E5D9C2; }
+.phone .screen > img, .phone .screen > video { position: absolute; left: 0; top: 0; width: 440px; height: 978px; object-fit: cover; }
+.chip { display: inline-flex; align-items: center; gap: 14px; padding: 16px 28px; border-radius: 999px;
+  border: 2px solid #586B45; background: #F4EDDF; font-size: 30px; font-weight: 700; color: #586B45; }
+.chip.on { background: #586B45; color: #FFFFFF; }
+.pill { display: inline-block; padding: 8px 18px; border-radius: 999px; font-size: 28px; font-weight: 800;
+  letter-spacing: 0.12em; text-transform: uppercase; }
+.w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.1em; margin-bottom: -0.1em; }
+.wi { display: inline-block; }
+.card { position: absolute; background: #F4EDDF; border-radius: 28px; box-shadow: 0 18px 40px rgba(34,48,26,0.16); }
+
+
+  </style>
+  <div id="root" data-composition-id="follow" data-width="1920" data-height="1080" data-duration="6.3">
+    <div class="bg"></div>
+    <div id="bl1" data-layout-ignore style="position:absolute; left:-200px; top:-260px; width:1100px; height:1100px; border-radius:50%; background:radial-gradient(circle, rgba(88,107,69,0.16), rgba(88,107,69,0) 65%)"></div>
+    <div id="bl2" data-layout-ignore style="position:absolute; left:1100px; top:380px; width:1100px; height:1100px; border-radius:50%; background:radial-gradient(circle, rgba(0,90,50,0.10), rgba(0,90,50,0) 65%)"></div>
+
+    <div id="f-rail" style="position:absolute; left:120px; top:300px; display:flex; flex-direction:column; gap:26px"><div id="f-rail0" style="display:flex; align-items:center; gap:22px; opacity:0.9"><svg width="58" height="58" viewBox="0 0 24 24"><path fill="rgba(88,107,69,0.38)" d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg><div style="font-size:84px; font-weight:900; letter-spacing:-0.04em; color:rgba(88,107,69,0.38)">Pick</div></div><div id="f-rail1" style="display:flex; align-items:center; gap:22px; opacity:0.9"><svg width="58" height="58" viewBox="0 0 24 24"><path fill="rgba(88,107,69,0.38)" d="M9.5 6.5v3h-3v-3h3M11 5H5v6h6V5zm-1.5 9.5v3h-3v-3h3M11 13H5v6h6v-6zm6.5-6.5v3h-3v-3h3M19 5h-6v6h6V5zm-6 8h1.5v1.5H13V13zm1.5 1.5H16V16h-1.5v-1.5zM16 13h1.5v1.5H16V13zm-3 3h1.5v1.5H13V16zm1.5 1.5H16V19h-1.5v-1.5zM16 16h1.5v1.5H16V16zm1.5-1.5H19V16h-1.5v-1.5zm0 3H19V19h-1.5v-1.5zM22 7h-2V4h-3V2h5v5zm0 15v-5h-2v3h-3v2h5zM2 22h5v-2H4v-3H2v5zM2 2v5h2V4h3V2H2z"/></svg><div style="font-size:84px; font-weight:900; letter-spacing:-0.04em; color:rgba(88,107,69,0.38)">Scan</div></div><div id="f-rail2" style="display:flex; align-items:center; gap:22px; opacity:1"><svg width="58" height="58" viewBox="0 0 24 24"><path fill="#005A32" d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg><div style="font-size:84px; font-weight:900; letter-spacing:-0.04em; color:#005A32">Follow</div></div></div>
+    <div id="f-phone" class="phone" style="left:1100px; top:37px"><div id="f-phone-f" style="position:absolute; inset:0"><div id="f-phone-bezel" class="bezel"></div><div class="screen"><img id="f-loc0" class="clip" data-start="0" data-duration="1.4" data-track-index="2" src="assets/ui/located_toast.png" alt=""></div></div></div>
+    <div id="f-big" class="card" style="left:240px; top:210px; width:1440px; height:810px; overflow:hidden; opacity:0"><video id="f-loc" class="clip" data-start="0.5" data-duration="4.0" data-track-index="3" muted playsinline src="assets/clips/located_map.mp4" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover"></video><img id="f-hold" class="clip" data-start="4.5" data-duration="1.8" data-track-index="3" src="assets/ui/located_map_last.png" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover"></div>
+    <div id="f-h" style="position:absolute; left:240px; top:70px; width:1500px; opacity:0">
+      <div class="kicker">Rooms · corridors · stairs · lifts</div>
+      <div id="f-hh" class="h2" style="margin-top:10px; font-size:62px"><span class="w"><span class="wi">Your</span></span> <span class="w"><span class="wi">route,</span></span> <span class="w"><span class="wi">worked</span></span> <span class="w"><span class="wi">out</span></span> <span class="w"><span class="wi green">on</span></span> <span class="w"><span class="wi green">the</span></span> <span class="w"><span class="wi green">phone.</span></span></div></div>
+
+    
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#bl1", { x: -60, y: 0 }, { x: 80, y: 40, duration: 6.3, ease: "sine.inOut" }, 0);
+    tl.fromTo("#bl2", { x: 40, y: 20 }, { x: -70, y: -30, duration: 6.3, ease: "sine.inOut" }, 0);
+    tl.fromTo("#f-phone-f", { y: 0 }, { y: -12, duration: 2.4, ease: "sine.inOut", yoyo: true, repeat: 1 }, 0);
+    tl.fromTo("#f-big", { opacity: 0, x: 885.4, y: 362.5, scale: 0.2897, transformOrigin: "0 0" }, { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.95, ease: "expo.inOut" }, 0.5);
+    tl.to("#f-phone", { opacity: 0, scale: 1.25, duration: 0.7, ease: "power2.in" }, 0.5);
+    tl.to("#f-rail", { opacity: 0, x: -40, duration: 0.4 }, 0.5);
+    tl.fromTo("#f-h", { opacity: 0, y: 0 }, { opacity: 1, y: 0, duration: 0.01, ease: "power3.out" }, 1.3);
+    tl.set("#f-hh", { opacity: 1 }, 1.35);
+    tl.fromTo("#f-hh .wi", { yPercent: 115 }, { yPercent: 0, duration: 0.7, ease: "expo.out", stagger: 0.05 }, 1.35);
+
+    window.__timelines["follow"] = tl;
+  </script>
+</template>

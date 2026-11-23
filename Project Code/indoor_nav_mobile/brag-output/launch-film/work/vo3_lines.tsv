@@ -1,0 +1,18 @@
+a1	Outside, your phone always knows where you are. But step inside a big building, and GPS goes quiet.
+a2	On our own campus, new students and visitors can easily lose their way.
+b1	So we're building Via for our college. It gives you directions inside a building, using just your phone, in three simple steps: pick, scan, and follow.
+c1	First, pick where you want to go.
+d1	Then scan the nearest marker. It's just a printed sticker on the wall, and the phone instantly knows where you are.
+e1	Now follow your route, drawn on the building's own floor plan, and worked out right on the phone.
+f1	If you need a route without stairs, choose step-free. If you would rather take the stairs, choose avoid lifts.
+g1	And when your route changes floors, the app shows you exactly how you get there, in three D.
+h1	Clear steps guide you all the way to the door. And if you take a wrong turn, just scan any marker, and your route starts again from there.
+h2	And in beta: scan once, then simply walk, with every turn read aloud.
+i1	Under the hood is a corrected, bidirectional Dike-struh search. Our first E S P thirty-two version took a longer route on thirty-six of seven hundred and fifty-six trips.
+i2	Today, every pair of places gets the shortest route, and a hundred and ninety-two automated tests keep it that way.
+j1	And it all works offline, with no GPS, no Wi-Fi, no beacons, and no server.
+k1	Each block is set up from its own floor plan, and shared as a single file.
+m1	Next, we want to map every block on our campus, in one shared map library.
+m2	Beyond campus, it can help hospitals, malls, airports, and exam halls. And one day, you could walk through a building once, and let it map itself.
+l1	It started with a microcontroller and a cloud database. Now, all it takes is a phone, and a sticker. Via. Find your way, anywhere indoors.
+g2	Watch the floor map rise into three D, as your dot rides the lift up to the next floor.

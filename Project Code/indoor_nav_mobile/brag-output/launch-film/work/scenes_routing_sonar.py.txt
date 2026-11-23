@@ -1,0 +1,139 @@
+# ---------------------------------------------------------------- 4 routing
+# The phone's own map region (x 28-1052, y 1280-1856 of the 1080x2400 render)
+# flies out of the phone to fill the frame, so the real route is legible.
+PX, PY = 726, 37                     # phone position in this scene
+RS = 440 / 1080                      # render px -> screen px
+MAPX, MAPY = PX + 14 + 28 * RS, PY + 14 + 1280 * RS
+MAPW = 1024 * RS
+BX, BY, BW, BH = 240, 210, 1440, 810  # the big map panel
+screens = [
+    ("r-p0", "assets/ui/picker_open.png", 0, 0.6, "img"), ("r-p1", "assets/ui/picker_1.png", 0.6, 0.4, "img"),
+    ("r-p2", "assets/ui/picker_10.png", 1.0, 0.4, "img"), ("r-p3", "assets/ui/picker_104.png", 1.4, 0.8, "img"),
+    ("r-dest", "assets/ui/destination.png", 2.2, 1.4, "img"),
+]
+nodes = {"S": (60, 230), "a": (170, 120), "b": (180, 300), "c": (300, 210), "d": (310, 60), "e": (420, 300),
+         "f": (440, 140), "g": (560, 220), "G": (660, 110)}
+edges = [("S", "a"), ("S", "b"), ("a", "c"), ("b", "c"), ("a", "d"), ("c", "f"), ("c", "e"), ("d", "f"), ("e", "g"), ("f", "g"), ("f", "G"), ("g", "G")]
+best = [("S", "a"), ("a", "c"), ("c", "f"), ("f", "G")]
+svg = ['<svg width="1440" height="720" viewBox="0 0 720 360">',
+       '<defs><clipPath id="r-clip"><rect x="0" y="0" width="720" height="360"/></clipPath></defs><g clip-path="url(#r-clip)">',
+       '<circle id="r-fs" cx="60" cy="230" r="10" fill="rgba(29,78,216,0.10)" stroke="#1D4ED8" stroke-width="1.5"/>',
+       '<circle id="r-fg" cx="660" cy="110" r="10" fill="rgba(220,38,38,0.08)" stroke="#DC2626" stroke-width="1.5"/></g>']
+for a, b in edges:
+    (x1, y1), (x2, y2) = nodes[a], nodes[b]
+    svg.append(f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="#C9B993" stroke-width="3" stroke-linecap="round"/>')
+for i, (a, b) in enumerate(best):
+    (x1, y1), (x2, y2) = nodes[a], nodes[b]
+    L = ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
+    svg.append(f'<line id="r-b{i}" x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="#005A32" stroke-width="7" stroke-linecap="round" '
+               f'stroke-dasharray="{L:.1f}" stroke-dashoffset="{L:.1f}"/>')
+for n, (x, y) in nodes.items():
+    fill = "#1D4ED8" if n == "S" else "#DC2626" if n == "G" else "#F4EDDF"
+    svg.append(f'<circle cx="{x}" cy="{y}" r="{13 if n in "SG" else 9}" fill="{fill}" stroke="#586B45" stroke-width="2.5"/>')
+svg.append('<text x="60" y="275" text-anchor="middle" font-family="Roboto" font-weight="800" font-size="16" fill="#1D4ED8">YOU</text>')
+svg.append('<text x="660" y="80" text-anchor="middle" font-family="Roboto" font-weight="800" font-size="16" fill="#DC2626">ROOM 104</text>')
+svg.append("</svg>")
+chips = "".join(f'<span id="r-c{i}" class="chip" style="font-size:28px; padding:12px 24px">{t}</span>'
+                for i, t in enumerate(["Fastest", "Step-free", "Avoid lifts"]))
+body = f"""
+    {phone("r-phone", PX, PY, screens)}
+    <div id="r-a" style="position:absolute; left:120px; top:380px; width:560px; opacity:0">
+      <div class="kicker">Destination</div>
+      <div id="r-ah" class="h2" style="margin-top:16px; font-size:72px">{K("Search for|where you're|going.")}</div>
+    </div>
+    <div id="r-big" class="card" style="left:{BX}px; top:{BY}px; width:{BW}px; height:{BH}px; overflow:hidden; opacity:0">
+      <video id="r-loc" class="clip" data-start="2.6" data-duration="4.0" data-track-index="3" muted playsinline src="assets/clips/located_map.mp4" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover"></video>
+      <video id="r-sf" class="clip" data-start="10.4" data-duration="2.5" data-track-index="3" muted playsinline src="assets/clips/pref_stepfree_map.mp4" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover"></video>
+      <video id="r-al" class="clip" data-start="12.9" data-duration="2.5" data-track-index="3" muted playsinline src="assets/clips/pref_avoidlifts_map.mp4" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover"></video>
+      <video id="r-fa" class="clip" data-start="15.4" data-duration="2.5" data-track-index="3" muted playsinline src="assets/clips/pref_fastest_map.mp4" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover"></video>
+      <img id="r-hold" class="clip" data-start="6.6" data-duration="3.8" data-track-index="3" src="assets/ui/fastest_map_last.png" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover">
+    </div>
+    <div id="r-graph" class="card" style="left:{BX}px; top:{BY}px; width:{BW}px; height:{BH}px; opacity:0; display:flex; flex-direction:column; align-items:center; justify-content:center">
+      {''.join(svg)}
+    </div>
+    <div id="r-b" style="position:absolute; left:{BX}px; top:70px; width:1500px; opacity:0">
+      <div class="kicker">Routing · on the device</div>
+      <div id="r-bh" class="h2" style="margin-top:10px; font-size:60px">{K("The shortest way, *worked* *out* *on* *the* *phone.*")}</div>
+    </div>
+    <div id="r-g" style="position:absolute; left:{BX}px; top:70px; width:1500px; opacity:0">
+      <div class="kicker">Corrected bidirectional Dijkstra</div>
+      <div id="r-gh" class="h2" style="margin-top:10px; font-size:60px">{K("One search from you. One from the room. *They* *meet.*")}</div>
+    </div>
+    <div id="r-c" style="position:absolute; left:{BX}px; top:70px; width:1500px; opacity:0; display:flex; align-items:flex-end; justify-content:space-between">
+      <div><div class="kicker">Route preferences</div>
+        <div id="r-q" class="h2" style="margin-top:10px; font-size:60px">{K("Can everyone find their way?")}</div></div>
+      <div style="display:flex; gap:14px; margin-bottom:6px">{chips}</div>
+    </div>
+    <div id="r-note" class="card" style="left:{BX + BW - 560}px; top:{BY + BH - 110}px; padding:16px 26px; font-size:28px; font-weight:700; opacity:0">Avoid lifts → the route takes Stairs 2</div>
+    <div id="r-d" style="position:absolute; left:{BX}px; top:70px; width:1500px; opacity:0">
+      <div id="r-dh" class="h2" style="font-size:64px">{K("One building. Multiple floors. *Intelligent* *routing.*")}</div>
+    </div>
+"""
+k0 = MAPW / BW
+script = '    tl.fromTo("#r-phone", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "expo.out" }, 0);\n'
+script += show("#r-a", 0.1, 0, 0.01) + kin("#r-ah", 0.15)
+script += hide("#r-a", 2.3, 0.3)
+# the map flies out of the phone (beat: the route starts drawing)
+script += f'    tl.fromTo("#r-big", {{ opacity: 0, x: {MAPX - BX:.1f}, y: {MAPY - BY:.1f}, scale: {k0:.4f}, transformOrigin: "0 0", borderRadius: 4 }}, ' \
+          f'{{ opacity: 1, x: 0, y: 0, scale: 1, borderRadius: 28, duration: 0.9, ease: "expo.inOut" }}, 2.6);\n'
+script += '    tl.to("#r-phone", { opacity: 0, scale: 1.25, duration: 0.7, ease: "power2.in" }, 2.6);\n'
+script += show("#r-b", 3.2, 0, 0.01) + kin("#r-bh", 3.25, 0.05)
+script += '    tl.fromTo("#r-big", { scale: 1 }, { scale: 1.035, duration: 3.6, ease: "none" }, 3.5);\n'
+script += hide("#r-b", 6.6, 0.3) + hide("#r-big", 6.7, 0.4)
+script += '    tl.fromTo("#r-graph", { opacity: 0, scale: 0.97 }, { opacity: 1, scale: 1, duration: 0.5, ease: "expo.out" }, 6.8);\n'
+script += show("#r-g", 6.9, 0, 0.01) + kin("#r-gh", 6.95, 0.05)
+script += '    tl.fromTo("#r-fs", { attr: { r: 10 } }, { attr: { r: 330 }, duration: 2.0, ease: "power1.out" }, 7.2);\n'
+script += '    tl.fromTo("#r-fg", { attr: { r: 10 } }, { attr: { r: 330 }, duration: 2.0, ease: "power1.out" }, 7.2);\n'
+for i in range(4):
+    script += f'    tl.to("#r-b{i}", {{ strokeDashoffset: 0, duration: 0.3, ease: "power1.inOut" }}, {8.6 + i * 0.3:.2f});\n'
+script += hide("#r-g", 10.0, 0.3) + hide("#r-graph", 10.0, 0.3)
+script += '    tl.to("#r-big", { opacity: 1, scale: 1, duration: 0.4, ease: "expo.out" }, 10.2);\n'
+script += show("#r-c", 10.2, 0, 0.01) + kin("#r-q", 10.25, 0.05)
+script += '    tl.set("#r-c0", { backgroundColor: "#586B45", color: "#FFFFFF" }, 10.2);\n'
+for t, on, off in [(10.4, "#r-c1", "#r-c0"), (12.9, "#r-c2", "#r-c1"), (15.4, "#r-c0", "#r-c2")]:
+    script += f'    tl.to("{on}", {{ backgroundColor: "#586B45", color: "#FFFFFF", scale: 1.06, duration: 0.18 }}, {t});\n'
+    script += f'    tl.to("{on}", {{ scale: 1, duration: 0.25 }}, {t + 0.18:.2f});\n'
+    script += f'    tl.to("{off}", {{ backgroundColor: "#F4EDDF", color: "#586B45", duration: 0.18 }}, {t});\n'
+script += show("#r-note", 13.4, 16, 0.4) + hide("#r-note", 15.2, 0.25)
+script += hide("#r-c", 15.4, 0.3)
+script += show("#r-d", 15.6, 0, 0.01) + kin("#r-dh", 15.65, 0.06)
+scene("routing", 18.0, body, script, wipe_in=True)
+
+# ---------------------------------------------------------------- 5 sonar
+# The camera dives into the phone; the app's own floor-change view, cropped
+# to its content (y 520-1960 of the render), fills the frame height.
+rings = "".join(f'<div id="s-ring{i}" style="position:absolute; left:960px; top:540px; width:400px; height:400px; margin:-200px 0 0 -200px; border-radius:50%; border:3px solid #89E900; opacity:0"></div>' for i in range(3))
+body = f"""
+    <div id="s-night" style="position:absolute; inset:0; background:radial-gradient(ellipse 900px 700px at 960px 540px, #0B1408, #040704 70%); opacity:0"></div>
+    {rings}
+    <div id="s-glow" style="position:absolute; left:960px; top:540px; width:1200px; height:1200px; margin:-600px 0 0 -600px; border-radius:50%; background:radial-gradient(circle, rgba(137,233,0,0.22), rgba(137,233,0,0) 62%); opacity:0"></div>
+    <video id="s-big" class="clip" data-start="2.8" data-duration="4.67" data-track-index="3" muted playsinline src="assets/clips/sonar_big.mp4"
+      style="position:absolute; left:555px; top:0; width:810px; height:1080px; object-fit:cover"></video>
+    {phone("s-phone", 726, 37, [("s-lift", "assets/ui/at_lift.png", 0, 2.9, "img")])}
+    <div id="s-title" style="position:absolute; left:0; width:1920px; top:56px; text-align:center; font-size:30px; font-weight:800; letter-spacing:0.02em; color:#89E900; opacity:0">Lift up to First Floor</div>
+    <div id="s-note" style="position:absolute; left:0; width:1920px; top:1012px; text-align:center; letter-spacing:0.14em; text-transform:uppercase; color:#C7E9C0; font-size:24px; font-weight:700; opacity:0">The app's own 3D floor-change view</div>
+    <div id="s-ff" class="card" style="left:240px; top:210px; width:1440px; height:810px; overflow:hidden; opacity:0">
+      <video id="s-ffv" class="clip" data-start="7.47" data-duration="2.0" data-track-index="3" muted playsinline src="assets/clips/first_floor_map.mp4" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover"></video>
+      <img id="s-ffl" class="clip" data-start="9.47" data-duration="3.53" data-track-index="3" src="assets/ui/first_floor_map_last.png" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover">
+    </div>
+    <div id="s-head" style="position:absolute; left:240px; top:70px; width:1500px; opacity:0">
+      <div class="kicker">First Floor · Room 104</div>
+      <div id="s-hh" class="h2" style="margin-top:10px; font-size:64px">{K("Navigation doesn't stop at the *next* *floor.*")}</div>
+    </div>
+"""
+script = '    tl.fromTo("#s-phone", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.5, ease: "expo.out" }, 0);\n'
+script += '    tl.fromTo("#s-phone", { scale: 1 }, { scale: 1.08, duration: 2.1, ease: "sine.inOut" }, 0.1);\n'
+script += '    tl.fromTo("#s-night", { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power2.in" }, 2.2);\n'
+script += '    tl.to("#s-phone", { scale: 2.8, opacity: 0, duration: 0.6, ease: "expo.in" }, 2.25);  // dive into the screen\n'
+script += '    tl.fromTo("#s-big", { opacity: 0, scale: 1.15 }, { opacity: 1, scale: 1, duration: 0.5, ease: "expo.out" }, 2.8);  // beat-locked: 46.80s\n'
+script += '    tl.fromTo("#s-glow", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 2.8);\n'
+script += show("#s-title", 3.0, 0, 0.4) + hide("#s-title", 7.0, 0.3)
+for i, t in enumerate([2.8, 3.5, 4.2]):
+    script += f'    tl.fromTo("#s-ring{i}", {{ opacity: 0.7, scale: 0.4 }}, {{ opacity: 0, scale: 4.2, duration: 2.2, ease: "power2.out" }}, {t});\n'
+script += show("#s-note", 3.4, 0, 0.5) + hide("#s-note", 7.0)
+script += '    tl.to(["#s-glow", "#s-big"], { opacity: 0, duration: 0.4 }, 7.2);\n'
+script += '    tl.to("#s-night", { opacity: 0, duration: 0.7, ease: "power2.out" }, 7.3);\n'
+script += '    tl.fromTo("#s-ff", { opacity: 0, scale: 1.12 }, { opacity: 1, scale: 1, duration: 0.8, ease: "expo.out" }, 7.4);\n'
+script += show("#s-head", 8.6, 0, 0.01) + kin("#s-hh", 8.65, 0.06)
+scene("sonar", 13.0, body, script)
+

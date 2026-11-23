@@ -1,0 +1,65 @@
+<template>
+  <style>
+
+#root { position: absolute; inset: 0; overflow: hidden; font-family: Roboto, sans-serif; color: #22301A; }
+.bg { position: absolute; inset: 0; background-color: #E5D9C2;
+  background-image: linear-gradient(rgba(88,107,69,0.075) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(88,107,69,0.075) 1px, transparent 1px);
+  background-size: 54px 54px; }
+.kicker { font-size: 28px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #586B45; }
+.h1 { font-size: 104px; font-weight: 900; letter-spacing: -0.04em; line-height: 0.98; color: #22301A; }
+.h2 { font-size: 64px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.04; color: #22301A; }
+.body { font-size: 30px; font-weight: 400; line-height: 1.35; color: #4A5340; }
+.green { color: #005A32; }
+.olive { color: #586B45; }
+.phone { position: absolute; width: 468px; height: 1006px; }
+.phone .bezel { position: absolute; inset: 0; border-radius: 60px; background: #161A12;
+  box-shadow: 0 40px 80px rgba(34,48,26,0.28), 0 8px 18px rgba(34,48,26,0.18); }
+.phone .screen { position: absolute; left: 14px; top: 14px; width: 440px; height: 978px;
+  border-radius: 46px; overflow: hidden; background: #E5D9C2; }
+.phone .screen > img, .phone .screen > video { position: absolute; left: 0; top: 0; width: 440px; height: 978px; object-fit: cover; }
+.chip { display: inline-flex; align-items: center; gap: 14px; padding: 16px 28px; border-radius: 999px;
+  border: 2px solid #586B45; background: #F4EDDF; font-size: 30px; font-weight: 700; color: #586B45; }
+.chip.on { background: #586B45; color: #FFFFFF; }
+.pill { display: inline-block; padding: 8px 18px; border-radius: 999px; font-size: 28px; font-weight: 800;
+  letter-spacing: 0.12em; text-transform: uppercase; }
+.w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.1em; margin-bottom: -0.1em; }
+.wi { display: inline-block; }
+.card { position: absolute; background: #F4EDDF; border-radius: 28px; box-shadow: 0 18px 40px rgba(34,48,26,0.16); }
+
+
+  </style>
+  <div id="root" data-composition-id="sonar" data-width="1920" data-height="1080" data-duration="5.67">
+    <div class="bg"></div>
+    <div id="bl1" data-layout-ignore style="position:absolute; left:-200px; top:-260px; width:1100px; height:1100px; border-radius:50%; background:radial-gradient(circle, rgba(88,107,69,0.16), rgba(88,107,69,0) 65%)"></div>
+    <div id="bl2" data-layout-ignore style="position:absolute; left:1100px; top:380px; width:1100px; height:1100px; border-radius:50%; background:radial-gradient(circle, rgba(0,90,50,0.10), rgba(0,90,50,0) 65%)"></div>
+
+    <div id="n-night" style="position:absolute; inset:0; background:radial-gradient(ellipse 900px 700px at 960px 540px, #0B1408, #040704 70%); opacity:0"></div>
+    <div id="n-ring0" style="position:absolute; left:960px; top:540px; width:400px; height:400px; margin:-200px 0 0 -200px; border-radius:50%; border:3px solid #89E900; opacity:0"></div><div id="n-ring1" style="position:absolute; left:960px; top:540px; width:400px; height:400px; margin:-200px 0 0 -200px; border-radius:50%; border:3px solid #89E900; opacity:0"></div><div id="n-ring2" style="position:absolute; left:960px; top:540px; width:400px; height:400px; margin:-200px 0 0 -200px; border-radius:50%; border:3px solid #89E900; opacity:0"></div>
+    <div id="n-glow" style="position:absolute; left:960px; top:540px; width:1200px; height:1200px; margin:-600px 0 0 -600px; border-radius:50%; background:radial-gradient(circle, rgba(137,233,0,0.22), rgba(137,233,0,0) 62%); opacity:0"></div>
+    <div id="n-view" style="position:absolute; inset:0; opacity:0">
+      <img id="n-first" class="clip" data-start="1.15" data-duration="0.5" data-track-index="3" src="assets/ui/sonar_first.png" alt="" style="position:absolute; left:555px; top:0; width:810px; height:1080px; object-fit:cover; -webkit-mask-image:radial-gradient(ellipse 46% 52% at 50% 50%, #000 70%, transparent 100%); mask-image:radial-gradient(ellipse 46% 52% at 50% 50%, #000 70%, transparent 100%)">
+      <video id="n-big" class="clip" data-start="1.15" data-duration="4.0" data-track-index="4" muted playsinline src="assets/clips/sonar_clean.mp4" style="position:absolute; left:555px; top:0; width:810px; height:1080px; object-fit:cover; -webkit-mask-image:radial-gradient(ellipse 46% 52% at 50% 50%, #000 70%, transparent 100%); mask-image:radial-gradient(ellipse 46% 52% at 50% 50%, #000 70%, transparent 100%)"></video>
+      <img id="n-last" class="clip" data-start="5.11" data-duration="0.56" data-track-index="5" src="assets/ui/sonar_last.png" alt="" style="position:absolute; left:555px; top:0; width:810px; height:1080px; object-fit:cover; -webkit-mask-image:radial-gradient(ellipse 46% 52% at 50% 50%, #000 70%, transparent 100%); mask-image:radial-gradient(ellipse 46% 52% at 50% 50%, #000 70%, transparent 100%)"></div>
+    <div id="n-phone" class="phone" style="left:726px; top:37px"><div id="n-phone-f" style="position:absolute; inset:0"><div id="n-phone-bezel" class="bezel"></div><div class="screen"><img id="n-lift" class="clip" data-start="0" data-duration="1.25" data-track-index="2" src="assets/ui/at_lift.png" alt=""></div></div></div>
+
+    <div id="wipe-out" style="position:absolute; inset:0; background:#005A32; z-index:50"></div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#bl1", { x: -60, y: 0 }, { x: 80, y: 40, duration: 5.67, ease: "sine.inOut" }, 0);
+    tl.fromTo("#bl2", { x: 40, y: 20 }, { x: -70, y: -30, duration: 5.67, ease: "sine.inOut" }, 0);
+    tl.fromTo("#n-phone-f", { y: 0 }, { y: -12, duration: 2.4, ease: "sine.inOut", yoyo: true, repeat: 1 }, 0);
+    tl.fromTo("#wipe-out", { xPercent: -101 }, { xPercent: 0, duration: 0.4, ease: "expo.in" }, 5.25);
+    tl.fromTo("#n-phone", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.35, ease: "expo.out" }, 0);
+    tl.fromTo("#n-night", { opacity: 0 }, { opacity: 1, duration: 0.45, ease: "power2.in" }, 0.50);
+    tl.to("#n-phone", { scale: 2.8, opacity: 0, duration: 0.55, ease: "expo.in" }, 0.55);  // dive into the screen
+    tl.fromTo("#n-view", { opacity: 0, scale: 1.1 }, { opacity: 1, scale: 1, duration: 0.4, ease: "expo.out" }, 1.15);  // beat-locked music drop
+    tl.fromTo("#n-glow", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 1.15);
+    tl.fromTo("#n-ring0", { opacity: 0.7, scale: 0.4 }, { opacity: 0, scale: 4.2, duration: 2.2, ease: "power2.out" }, 1.15);
+    tl.fromTo("#n-ring1", { opacity: 0.7, scale: 0.4 }, { opacity: 0, scale: 4.2, duration: 2.2, ease: "power2.out" }, 1.85);
+    tl.fromTo("#n-ring2", { opacity: 0.7, scale: 0.4 }, { opacity: 0, scale: 4.2, duration: 2.2, ease: "power2.out" }, 2.55);
+
+    window.__timelines["sonar"] = tl;
+  </script>
+</template>

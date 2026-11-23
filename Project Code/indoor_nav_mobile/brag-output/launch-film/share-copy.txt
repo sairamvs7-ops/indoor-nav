@@ -1,0 +1,5 @@
+Via: directions inside a building, with nothing but your phone.
+
+Scan a printed marker on the wall, pick a room, and the phone works out the route across floors and stairs and lifts, fully offline. Our first version needed an ESP32, Wi-Fi and a cloud database. Now it takes a phone and a sticker.
+
+Music: Sascha Ende, ende.app (CC BY 4.0)

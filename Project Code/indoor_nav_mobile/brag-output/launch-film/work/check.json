@@ -1,0 +1,1414 @@
+{
+  "ok": true,
+  "strict": false,
+  "browserSkipped": false,
+  "lint": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 10,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "timeline_track_too_dense",
+        "severity": "warning",
+        "message": "This HTML file has 53 timed elements. Smaller sub-compositions keep timelines easier to read, iterate on, and diff.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "C:\\Users\\Sai\\Desktop\\Files\\2025 - RVU\\Projects\\Indoor Nav\\Project Code\\indoor_nav_mobile\\brag-output\\launch-film\\composition\\compositions\\captions.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move coherent scene groups into smaller .html files and mount them from the parent with data-composition-src so the timeline stays easier to inspect, revise, and validate."
+      },
+      {
+        "code": "nested_media_start_basis_ambiguous",
+        "severity": "warning",
+        "message": "<video id=\"f-loc\"> has data-start=\"0.5\" inside a sub-composition. Nested media timing is local to its composition by default; a nonzero value can be confused with a legacy root-global timestamp.",
+        "selector": "#f-loc",
+        "dataAttributes": {},
+        "sourceFile": "C:\\Users\\Sai\\Desktop\\Files\\2025 - RVU\\Projects\\Indoor Nav\\Project Code\\indoor_nav_mobile\\brag-output\\launch-film\\composition\\compositions\\follow.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Keep data-start=\"0.5\" if it is composition-local. If this is a legacy root-global timestamp, add data-hf-media-start-basis=\"global\"; otherwise convert it to local time by subtracting the host start."
+      },
+      {
+        "code": "nested_media_start_basis_ambiguous",
+        "severity": "warning",
+        "message": "<video id=\"g-walk\"> has data-start=\"9.26\" inside a sub-composition. Nested media timing is local to its composition by default; a nonzero value can be confused with a legacy root-global timestamp.",
+        "selector": "#g-walk",
+        "dataAttributes": {},
+        "sourceFile": "C:\\Users\\Sai\\Desktop\\Files\\2025 - RVU\\Projects\\Indoor Nav\\Project Code\\indoor_nav_mobile\\brag-output\\launch-film\\composition\\compositions\\guide.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Keep data-start=\"9.26\" if it is composition-local. If this is a legacy root-global timestamp, add data-hf-media-start-basis=\"global\"; otherwise convert it to local time by subtracting the host start."
+      },
+      {
+        "code": "timeline_track_too_dense",
+        "severity": "warning",
+        "message": "This HTML file has 4 timed elements. Smaller sub-compositions keep timelines easier to read, iterate on, and diff.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "C:\\Users\\Sai\\Desktop\\Files\\2025 - RVU\\Projects\\Indoor Nav\\Project Code\\indoor_nav_mobile\\brag-output\\launch-film\\composition\\compositions\\guide.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move coherent scene groups into smaller .html files and mount them from the parent with data-composition-src so the timeline stays easier to inspect, revise, and validate."
+      },
+      {
+        "code": "timeline_track_too_dense",
+        "severity": "warning",
+        "message": "This HTML file has 5 timed elements. Smaller sub-compositions keep timelines easier to read, iterate on, and diff.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "C:\\Users\\Sai\\Desktop\\Files\\2025 - RVU\\Projects\\Indoor Nav\\Project Code\\indoor_nav_mobile\\brag-output\\launch-film\\composition\\compositions\\pick.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move coherent scene groups into smaller .html files and mount them from the parent with data-composition-src so the timeline stays easier to inspect, revise, and validate."
+      },
+      {
+        "code": "nested_media_start_basis_ambiguous",
+        "severity": "warning",
+        "message": "<video id=\"p-sf\"> has data-start=\"2.25\" inside a sub-composition. Nested media timing is local to its composition by default; a nonzero value can be confused with a legacy root-global timestamp.",
+        "selector": "#p-sf",
+        "dataAttributes": {},
+        "sourceFile": "C:\\Users\\Sai\\Desktop\\Files\\2025 - RVU\\Projects\\Indoor Nav\\Project Code\\indoor_nav_mobile\\brag-output\\launch-film\\composition\\compositions\\prefs.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Keep data-start=\"2.25\" if it is composition-local. If this is a legacy root-global timestamp, add data-hf-media-start-basis=\"global\"; otherwise convert it to local time by subtracting the host start."
+      },
+      {
+        "code": "nested_media_start_basis_ambiguous",
+        "severity": "warning",
+        "message": "<video id=\"p-al\"> has data-start=\"5.15\" inside a sub-composition. Nested media timing is local to its composition by default; a nonzero value can be confused with a legacy root-global timestamp.",
+        "selector": "#p-al",
+        "dataAttributes": {},
+        "sourceFile": "C:\\Users\\Sai\\Desktop\\Files\\2025 - RVU\\Projects\\Indoor Nav\\Project Code\\indoor_nav_mobile\\brag-output\\launch-film\\composition\\compositions\\prefs.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Keep data-start=\"5.15\" if it is composition-local. If this is a legacy root-global timestamp, add data-hf-media-start-basis=\"global\"; otherwise convert it to local time by subtracting the host start."
+      },
+      {
+        "code": "duplicate_media_discovery_risk",
+        "severity": "warning",
+        "message": "Detected 2 matching img entries with the same source/start/duration.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "C:\\Users\\Sai\\Desktop\\Files\\2025 - RVU\\Projects\\Indoor Nav\\Project Code\\indoor_nav_mobile\\brag-output\\launch-film\\composition\\compositions\\scan.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Avoid duplicated media nodes that can be discovered twice during compilation."
+      },
+      {
+        "code": "timeline_track_too_dense",
+        "severity": "warning",
+        "message": "This HTML file has 4 timed elements. Smaller sub-compositions keep timelines easier to read, iterate on, and diff.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "C:\\Users\\Sai\\Desktop\\Files\\2025 - RVU\\Projects\\Indoor Nav\\Project Code\\indoor_nav_mobile\\brag-output\\launch-film\\composition\\compositions\\scan.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move coherent scene groups into smaller .html files and mount them from the parent with data-composition-src so the timeline stays easier to inspect, revise, and validate."
+      },
+      {
+        "code": "nested_media_start_basis_ambiguous",
+        "severity": "warning",
+        "message": "<video id=\"n-big\"> has data-start=\"1.15\" inside a sub-composition. Nested media timing is local to its composition by default; a nonzero value can be confused with a legacy root-global timestamp.",
+        "selector": "#n-big",
+        "dataAttributes": {},
+        "sourceFile": "C:\\Users\\Sai\\Desktop\\Files\\2025 - RVU\\Projects\\Indoor Nav\\Project Code\\indoor_nav_mobile\\brag-output\\launch-film\\composition\\compositions\\sonar.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Keep data-start=\"1.15\" if it is composition-local. If this is a legacy root-global timestamp, add data-hf-media-start-basis=\"global\"; otherwise convert it to local time by subtracting the host start."
+      }
+    ],
+    "filesScanned": 16
+  },
+  "runtime": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": []
+  },
+  "layout": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 23,
+    "findings": [
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 6.829,
+        "selector": "#campus > div:nth-of-type(1) > div:nth-of-type(7)",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": -1939.2,
+          "top": 0,
+          "right": -19.2,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "containerSelector": "#campus > div:nth-of-type(1)",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "left": 1939.2
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/campus.html",
+        "bbox": {
+          "x": -1939.2,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "firstSeen": 6.829,
+        "lastSeen": 6.829,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          6.829
+        ]
+      },
+      {
+        "code": "escaped_container",
+        "severity": "info",
+        "time": 6.829,
+        "selector": "#c-dot > div:nth-of-type(1)",
+        "message": "Positioned element renders far outside its offset parent — its coordinates were likely computed in a different frame (canvas/viewport pixels).",
+        "rect": {
+          "left": 1112.37,
+          "top": 515.77,
+          "right": 1200.37,
+          "bottom": 603.77,
+          "width": 88,
+          "height": 88
+        },
+        "containerSelector": "#c-dot",
+        "text": "",
+        "fixHint": "Compute left/top in the offset parent's frame (subtract its rect), or mark intentional placement with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 1134.37,
+          "top": 537.77,
+          "right": 1178.37,
+          "bottom": 581.77,
+          "width": 44,
+          "height": 44
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/campus.html",
+        "bbox": {
+          "x": 1112.37,
+          "y": 515.77,
+          "width": 88,
+          "height": 88
+        },
+        "firstSeen": 6.829,
+        "lastSeen": 6.829,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          6.829
+        ]
+      },
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 20.487,
+        "selector": "#title > div:nth-of-type(1) > div:nth-of-type(9)",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": 1939.2,
+          "top": 0,
+          "right": 3859.2,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "containerSelector": "#title > div:nth-of-type(1)",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "right": 1939.2
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/title.html",
+        "bbox": {
+          "x": 1939.2,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "firstSeen": 20.487,
+        "lastSeen": 20.487,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          20.487
+        ]
+      },
+      {
+        "code": "text_box_overflow",
+        "severity": "info",
+        "time": 34.144,
+        "selector": "#f-hh > span:nth-of-type(2) > span:nth-of-type(1)",
+        "message": "Text extends outside its nearest visual/container box.",
+        "rect": {
+          "left": 375.77,
+          "top": 140.79,
+          "right": 527.3,
+          "bottom": 193.79,
+          "width": 151.53,
+          "height": 53
+        },
+        "containerSelector": "#f-hh > span:nth-of-type(2)",
+        "text": "route,",
+        "fixHint": "Text is 152px x 53px inside 152px x 71px and overflows by up to 9px; increase the container height to at least ~80px, or allow wrapping with max-width/fitTextFontSize.",
+        "containerRect": {
+          "left": 375.77,
+          "top": 114,
+          "right": 527.3,
+          "bottom": 184.66,
+          "width": 151.53,
+          "height": 70.66
+        },
+        "overflow": {
+          "bottom": 9.13
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/follow.html",
+        "bbox": {
+          "x": 375.77,
+          "y": 140.79,
+          "width": 151.53,
+          "height": 53
+        },
+        "firstSeen": 34.144,
+        "lastSeen": 34.144,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          34.144
+        ]
+      },
+      {
+        "code": "text_box_overflow",
+        "severity": "info",
+        "time": 34.144,
+        "selector": "#f-hh > span:nth-of-type(3) > span:nth-of-type(1)",
+        "message": "Text extends outside its nearest visual/container box.",
+        "rect": {
+          "left": 540.89,
+          "top": 144.39,
+          "right": 734.45,
+          "bottom": 192.39,
+          "width": 193.56,
+          "height": 48
+        },
+        "containerSelector": "#f-hh > span:nth-of-type(3)",
+        "text": "worked",
+        "fixHint": "Text is 194px x 48px inside 194px x 71px and overflows by up to 8px; increase the container height to at least ~78px, or allow wrapping with max-width/fitTextFontSize.",
+        "containerRect": {
+          "left": 540.89,
+          "top": 114,
+          "right": 734.45,
+          "bottom": 184.66,
+          "width": 193.56,
+          "height": 70.66
+        },
+        "overflow": {
+          "bottom": 7.73
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/follow.html",
+        "bbox": {
+          "x": 540.89,
+          "y": 144.39,
+          "width": 193.56,
+          "height": 48
+        },
+        "firstSeen": 34.144,
+        "lastSeen": 34.144,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          34.144
+        ]
+      },
+      {
+        "code": "text_occluded",
+        "severity": "info",
+        "time": 34.144,
+        "selector": "#f-hh > span:nth-of-type(3) > span:nth-of-type(1)",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 540.89,
+          "top": 132.39,
+          "right": 734.45,
+          "bottom": 207.39,
+          "width": 193.56,
+          "height": 75
+        },
+        "containerSelector": "#follow > div:nth-of-type(1) > div:nth-of-type(1)",
+        "text": "worked",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 0.33,
+        "dataAttributes": {},
+        "sourceFile": "compositions/follow.html",
+        "bbox": {
+          "x": 540.89,
+          "y": 132.39,
+          "width": 193.56,
+          "height": 75
+        },
+        "firstSeen": 34.144,
+        "lastSeen": 34.144,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          34.144
+        ]
+      },
+      {
+        "code": "text_box_overflow",
+        "severity": "info",
+        "time": 34.144,
+        "selector": "#f-hh > span:nth-of-type(4) > span:nth-of-type(1)",
+        "message": "Text extends outside its nearest visual/container box.",
+        "rect": {
+          "left": 748.05,
+          "top": 165.81,
+          "right": 833.45,
+          "bottom": 207.81,
+          "width": 85.4,
+          "height": 42
+        },
+        "containerSelector": "#f-hh > span:nth-of-type(4)",
+        "text": "out",
+        "fixHint": "Text is 85px x 42px inside 85px x 71px and overflows by up to 23px; increase the container height to at least ~94px, or allow wrapping with max-width/fitTextFontSize.",
+        "containerRect": {
+          "left": 748.05,
+          "top": 114,
+          "right": 833.45,
+          "bottom": 184.66,
+          "width": 85.41,
+          "height": 70.66
+        },
+        "overflow": {
+          "bottom": 23.15
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/follow.html",
+        "bbox": {
+          "x": 748.05,
+          "y": 165.81,
+          "width": 85.4,
+          "height": 42
+        },
+        "firstSeen": 34.144,
+        "lastSeen": 34.144,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          34.144
+        ]
+      },
+      {
+        "code": "text_occluded",
+        "severity": "info",
+        "time": 34.144,
+        "selector": "#f-hh > span:nth-of-type(4) > span:nth-of-type(1)",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 748.05,
+          "top": 147.81,
+          "right": 833.45,
+          "bottom": 222.81,
+          "width": 85.41,
+          "height": 75
+        },
+        "containerSelector": "#follow > div:nth-of-type(1) > div:nth-of-type(1)",
+        "text": "out",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 0.67,
+        "dataAttributes": {},
+        "sourceFile": "compositions/follow.html",
+        "bbox": {
+          "x": 748.05,
+          "y": 147.81,
+          "width": 85.41,
+          "height": 75
+        },
+        "firstSeen": 34.144,
+        "lastSeen": 34.144,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          34.144
+        ]
+      },
+      {
+        "code": "text_occluded",
+        "severity": "info",
+        "time": 34.144,
+        "selector": "#f-hh > span:nth-of-type(5) > span:nth-of-type(1)",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 847.05,
+          "top": 172.99,
+          "right": 913.14,
+          "bottom": 247.99,
+          "width": 66.09,
+          "height": 75
+        },
+        "containerSelector": "#follow > div:nth-of-type(1) > div:nth-of-type(1)",
+        "text": "on",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "compositions/follow.html",
+        "bbox": {
+          "x": 847.05,
+          "y": 172.99,
+          "width": 66.09,
+          "height": 75
+        },
+        "firstSeen": 34.144,
+        "lastSeen": 34.144,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          34.144
+        ]
+      },
+      {
+        "code": "text_occluded",
+        "severity": "info",
+        "time": 34.144,
+        "selector": "#f-hh > span:nth-of-type(6) > span:nth-of-type(1)",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 926.73,
+          "top": 182.14,
+          "right": 1010.8,
+          "bottom": 257.14,
+          "width": 84.06,
+          "height": 75
+        },
+        "containerSelector": "#follow > div:nth-of-type(1) > div:nth-of-type(1)",
+        "text": "the",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "compositions/follow.html",
+        "bbox": {
+          "x": 926.73,
+          "y": 182.14,
+          "width": 84.06,
+          "height": 75
+        },
+        "firstSeen": 34.144,
+        "lastSeen": 34.144,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          34.144
+        ]
+      },
+      {
+        "code": "text_occluded",
+        "severity": "info",
+        "time": 34.144,
+        "selector": "#f-hh > span:nth-of-type(7) > span:nth-of-type(1)",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 1024.39,
+          "top": 182.14,
+          "right": 1204.81,
+          "bottom": 257.14,
+          "width": 180.42,
+          "height": 75
+        },
+        "containerSelector": "#follow > div:nth-of-type(1) > div:nth-of-type(1)",
+        "text": "phone.",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "compositions/follow.html",
+        "bbox": {
+          "x": 1024.39,
+          "y": 182.14,
+          "width": 180.42,
+          "height": 75
+        },
+        "firstSeen": 34.144,
+        "lastSeen": 34.144,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          34.144
+        ]
+      },
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 34.144,
+        "selector": "#f-hh > span:nth-of-type(1) > span:nth-of-type(1)",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": 240,
+          "top": 122.79,
+          "right": 362.17,
+          "bottom": 187.25,
+          "width": 122.17,
+          "height": 64.47
+        },
+        "containerSelector": "#f-hh > span:nth-of-type(1)",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 240,
+          "top": 114,
+          "right": 362.17,
+          "bottom": 184.66,
+          "width": 122.17,
+          "height": 70.66
+        },
+        "overflow": {
+          "bottom": 2.59
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/follow.html",
+        "bbox": {
+          "x": 240,
+          "y": 122.79,
+          "width": 122.17,
+          "height": 64.47
+        },
+        "firstSeen": 34.144,
+        "lastSeen": 34.144,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          34.144
+        ]
+      },
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 34.144,
+        "selector": "#f-hh > span:nth-of-type(2) > span:nth-of-type(1)",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": 375.77,
+          "top": 128.79,
+          "right": 527.3,
+          "bottom": 193.26,
+          "width": 151.53,
+          "height": 64.47
+        },
+        "containerSelector": "#f-hh > span:nth-of-type(2)",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 375.77,
+          "top": 114,
+          "right": 527.3,
+          "bottom": 184.66,
+          "width": 151.53,
+          "height": 70.66
+        },
+        "overflow": {
+          "bottom": 8.6
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/follow.html",
+        "bbox": {
+          "x": 375.77,
+          "y": 128.79,
+          "width": 151.53,
+          "height": 64.47
+        },
+        "firstSeen": 34.144,
+        "lastSeen": 34.144,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          34.144
+        ]
+      },
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 34.144,
+        "selector": "#f-hh > span:nth-of-type(3) > span:nth-of-type(1)",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": 540.89,
+          "top": 138.39,
+          "right": 734.45,
+          "bottom": 202.86,
+          "width": 193.56,
+          "height": 64.47
+        },
+        "containerSelector": "#f-hh > span:nth-of-type(3)",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 540.89,
+          "top": 114,
+          "right": 734.45,
+          "bottom": 184.66,
+          "width": 193.56,
+          "height": 70.66
+        },
+        "overflow": {
+          "bottom": 18.2
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/follow.html",
+        "bbox": {
+          "x": 540.89,
+          "y": 138.39,
+          "width": 193.56,
+          "height": 64.47
+        },
+        "firstSeen": 34.144,
+        "lastSeen": 34.144,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          34.144
+        ]
+      },
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 34.144,
+        "selector": "#f-hh > span:nth-of-type(4) > span:nth-of-type(1)",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": 748.05,
+          "top": 153.81,
+          "right": 833.45,
+          "bottom": 218.28,
+          "width": 85.41,
+          "height": 64.47
+        },
+        "containerSelector": "#f-hh > span:nth-of-type(4)",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 748.05,
+          "top": 114,
+          "right": 833.45,
+          "bottom": 184.66,
+          "width": 85.41,
+          "height": 70.66
+        },
+        "overflow": {
+          "bottom": 33.62
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/follow.html",
+        "bbox": {
+          "x": 748.05,
+          "y": 153.81,
+          "width": 85.41,
+          "height": 64.47
+        },
+        "firstSeen": 34.144,
+        "lastSeen": 34.144,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          34.144
+        ]
+      },
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 34.144,
+        "selector": "#f-hh > span:nth-of-type(5) > span:nth-of-type(1)",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": 847.05,
+          "top": 178.99,
+          "right": 913.14,
+          "bottom": 243.46,
+          "width": 66.09,
+          "height": 64.47
+        },
+        "containerSelector": "#f-hh > span:nth-of-type(5)",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 847.05,
+          "top": 114,
+          "right": 913.14,
+          "bottom": 184.66,
+          "width": 66.09,
+          "height": 70.66
+        },
+        "overflow": {
+          "bottom": 58.8
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/follow.html",
+        "bbox": {
+          "x": 847.05,
+          "y": 178.99,
+          "width": 66.09,
+          "height": 64.47
+        },
+        "firstSeen": 34.144,
+        "lastSeen": 34.144,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          34.144
+        ]
+      },
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 34.144,
+        "selector": "#f-hh > span:nth-of-type(6) > span:nth-of-type(1)",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": 926.73,
+          "top": 188.14,
+          "right": 1010.8,
+          "bottom": 252.61,
+          "width": 84.06,
+          "height": 64.47
+        },
+        "containerSelector": "#f-hh > span:nth-of-type(6)",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 926.73,
+          "top": 114,
+          "right": 1010.8,
+          "bottom": 184.66,
+          "width": 84.06,
+          "height": 70.66
+        },
+        "overflow": {
+          "bottom": 67.95
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/follow.html",
+        "bbox": {
+          "x": 926.73,
+          "y": 188.14,
+          "width": 84.06,
+          "height": 64.47
+        },
+        "firstSeen": 34.144,
+        "lastSeen": 34.144,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          34.144
+        ]
+      },
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 34.144,
+        "selector": "#f-hh > span:nth-of-type(7) > span:nth-of-type(1)",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": 1024.39,
+          "top": 188.14,
+          "right": 1204.81,
+          "bottom": 252.61,
+          "width": 180.42,
+          "height": 64.47
+        },
+        "containerSelector": "#f-hh > span:nth-of-type(7)",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 1024.39,
+          "top": 114,
+          "right": 1204.81,
+          "bottom": 184.66,
+          "width": 180.42,
+          "height": 70.66
+        },
+        "overflow": {
+          "bottom": 67.95
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/follow.html",
+        "bbox": {
+          "x": 1024.39,
+          "y": 188.14,
+          "width": 180.42,
+          "height": 64.47
+        },
+        "firstSeen": 34.144,
+        "lastSeen": 34.144,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          34.144
+        ]
+      },
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 47.802,
+        "selector": "#n-ring0",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": 346.72,
+          "top": -73.28,
+          "right": 1573.28,
+          "bottom": 1153.28,
+          "width": 1226.56,
+          "height": 1226.56
+        },
+        "containerSelector": "#sonar > div:nth-of-type(1)",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "top": 73.28,
+          "bottom": 73.28
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/sonar.html",
+        "bbox": {
+          "x": 346.72,
+          "y": -73.28,
+          "width": 1226.56,
+          "height": 1226.56
+        },
+        "firstSeen": 47.802,
+        "lastSeen": 47.802,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          47.802
+        ]
+      },
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 47.802,
+        "selector": "#n-glow",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": 360,
+          "top": -60,
+          "right": 1560,
+          "bottom": 1140,
+          "width": 1200,
+          "height": 1200
+        },
+        "containerSelector": "#sonar > div:nth-of-type(1)",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "top": 60,
+          "bottom": 60
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/sonar.html",
+        "bbox": {
+          "x": 360,
+          "y": -60,
+          "width": 1200,
+          "height": 1200
+        },
+        "firstSeen": 47.802,
+        "lastSeen": 47.802,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          47.802
+        ]
+      },
+      {
+        "code": "panel_out_of_canvas",
+        "severity": "info",
+        "time": 47.802,
+        "selector": "#n-ring0",
+        "message": "Painted panel extends outside the composition canvas.",
+        "rect": {
+          "left": 346.72,
+          "top": -73.28,
+          "right": 1573.28,
+          "bottom": 1153.28,
+          "width": 1226.56,
+          "height": 1226.56
+        },
+        "containerSelector": "#root",
+        "text": "",
+        "fixHint": "Move the panel inward, or mark intentional off-canvas animation with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "top": 73.28,
+          "bottom": 73.28
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/sonar.html",
+        "bbox": {
+          "x": 346.72,
+          "y": -73.28,
+          "width": 1226.56,
+          "height": 1226.56
+        },
+        "firstSeen": 47.802,
+        "lastSeen": 47.802,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          47.802
+        ]
+      },
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 102.433,
+        "selector": "#industries > div:nth-of-type(1) > div:nth-of-type(7)",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": -1939.2,
+          "top": 0,
+          "right": -19.2,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "containerSelector": "#industries > div:nth-of-type(1)",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "left": 1939.2
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/industries.html",
+        "bbox": {
+          "x": -1939.2,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "firstSeen": 102.433,
+        "lastSeen": 102.433,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          102.433
+        ]
+      },
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 116.091,
+        "selector": "#close > div:nth-of-type(1) > div:nth-of-type(13)",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": 1939.2,
+          "top": 0,
+          "right": 3859.2,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "containerSelector": "#close > div:nth-of-type(1)",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "right": 1939.2
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/close.html",
+        "bbox": {
+          "x": 1939.2,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "firstSeen": 116.091,
+        "lastSeen": 116.091,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          116.091
+        ]
+      }
+    ],
+    "duration": 122.92,
+    "samples": [
+      6.829,
+      20.487,
+      34.144,
+      47.802,
+      61.46,
+      75.118,
+      88.776,
+      102.433,
+      116.091
+    ],
+    "transitionSamples": [],
+    "transitionSamplesDropped": 0,
+    "tolerance": 2,
+    "totalIssueCount": 23,
+    "truncated": false,
+    "faceCheck": {
+      "ran": true,
+      "candidates": 1,
+      "faces": 0
+    }
+  },
+  "motion": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": false,
+    "samples": 0
+  },
+  "contrast": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": true,
+    "samples": [
+      6.829,
+      34.144,
+      61.46,
+      88.776,
+      116.091
+    ],
+    "checked": 39,
+    "passed": 39
+  },
+  "craft": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 2,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "text_below_floor",
+        "severity": "warning",
+        "message": "Type floor is 28 px (2.6% of the 1080 px short side, what a phone can read) and 9 text elements stay under it for 0.5 s or more, the smallest \"FIRST FLOOR\" at 20 px: set reading text to at least 28 px, or put data-layout-ignore on text that is texture rather than reading; see references/look.md.",
+        "text": "FIRST FLOOR",
+        "selector": "#q-g > svg:nth-of-type(1) > text:nth-of-type(1)",
+        "dataAttributes": {},
+        "sourceFile": "compositions/proof.html",
+        "bbox": {
+          "x": 190,
+          "y": 261.5,
+          "width": 142.88,
+          "height": 24
+        },
+        "time": 65.872,
+        "times": [
+          65.872,
+          65.872,
+          65.872,
+          65.872,
+          65.872,
+          65.872,
+          72.233,
+          73.259,
+          77.774
+        ],
+        "fontPx": 20,
+        "floorPx": 28,
+        "seconds": 18.263,
+        "elements": [
+          {
+            "selector": "#q-g > svg:nth-of-type(1) > text:nth-of-type(1)",
+            "text": "FIRST FLOOR",
+            "fontPx": 20,
+            "time": 65.872,
+            "seconds": 18.263
+          },
+          {
+            "selector": "#q-g > svg:nth-of-type(1) > text:nth-of-type(2)",
+            "text": "GROUND FLOOR",
+            "fontPx": 20,
+            "time": 65.872,
+            "seconds": 18.263
+          },
+          {
+            "selector": "#q-g > svg:nth-of-type(1) > text:nth-of-type(3)",
+            "text": "Stairs 1",
+            "fontPx": 20,
+            "time": 65.872,
+            "seconds": 18.263
+          },
+          {
+            "selector": "#q-g > svg:nth-of-type(1) > text:nth-of-type(4)",
+            "text": "Stairs 3",
+            "fontPx": 20,
+            "time": 65.872,
+            "seconds": 18.263
+          },
+          {
+            "selector": "#q-g > svg:nth-of-type(1) > text:nth-of-type(5)",
+            "text": "Lift 1",
+            "fontPx": 20,
+            "time": 65.872,
+            "seconds": 18.263
+          },
+          {
+            "selector": "#q-g > svg:nth-of-type(1) > text:nth-of-type(6)",
+            "text": "Lift 3",
+            "fontPx": 20,
+            "time": 65.872,
+            "seconds": 18.263
+          },
+          {
+            "selector": "#q-gr > div:nth-of-type(1)",
+            "text": "FROM ↓ · TO → · 28 PLACES",
+            "fontPx": 22,
+            "time": 73.259,
+            "seconds": 10.876
+          },
+          {
+            "selector": "#q-old-t",
+            "text": "First version: via both lifts · cost 3",
+            "fontPx": 24,
+            "time": 72.233,
+            "seconds": 11.902
+          },
+          {
+            "selector": "#q-new-t",
+            "text": "Now: straight up the stairs · cost 2",
+            "fontPx": 24,
+            "time": 77.774,
+            "seconds": 6.361
+          }
+        ]
+      },
+      {
+        "code": "text_below_floor",
+        "severity": "warning",
+        "message": "Type floor is 28 px (2.6% of the 1080 px short side, what a phone can read) and 9 text elements stay under it for 0.5 s or more, the smallest \"mapped today\" at 20 px: set reading text to at least 28 px, or put data-layout-ignore on text that is texture rather than reading; see references/look.md.",
+        "text": "mapped today",
+        "selector": "#w-map > svg:nth-of-type(1) > text:nth-of-type(2)",
+        "dataAttributes": {},
+        "sourceFile": "compositions/future.html",
+        "bbox": {
+          "x": 1016.56,
+          "y": 414.37,
+          "width": 125.78,
+          "height": 23.89
+        },
+        "time": 96.243,
+        "times": [
+          96.243,
+          96.243,
+          96.243,
+          96.243,
+          96.243,
+          96.243,
+          96.243,
+          96.243,
+          96.243
+        ],
+        "fontPx": 19.68,
+        "floorPx": 28,
+        "seconds": 5.54,
+        "elements": [
+          {
+            "selector": "#w-map > svg:nth-of-type(1) > text:nth-of-type(2)",
+            "text": "mapped today",
+            "fontPx": 19.68,
+            "time": 96.243,
+            "seconds": 5.54
+          },
+          {
+            "selector": "#w-b0 > text:nth-of-type(1)",
+            "text": "Block A",
+            "fontPx": 22.96,
+            "time": 96.243,
+            "seconds": 5.54
+          },
+          {
+            "selector": "#w-b1 > text:nth-of-type(1)",
+            "text": "Block B",
+            "fontPx": 22.96,
+            "time": 96.243,
+            "seconds": 5.54
+          },
+          {
+            "selector": "#w-b3 > text:nth-of-type(1)",
+            "text": "Library",
+            "fontPx": 22.96,
+            "time": 96.243,
+            "seconds": 5.54
+          },
+          {
+            "selector": "#w-b4 > text:nth-of-type(1)",
+            "text": "Labs",
+            "fontPx": 22.96,
+            "time": 96.243,
+            "seconds": 5.54
+          },
+          {
+            "selector": "#w-b5 > text:nth-of-type(1)",
+            "text": "Block D",
+            "fontPx": 22.96,
+            "time": 96.243,
+            "seconds": 5.54
+          },
+          {
+            "selector": "#w-b6 > text:nth-of-type(1)",
+            "text": "Admin",
+            "fontPx": 22.96,
+            "time": 96.243,
+            "seconds": 5.54
+          },
+          {
+            "selector": "#w-b7 > text:nth-of-type(1)",
+            "text": "Hostel",
+            "fontPx": 22.96,
+            "time": 96.243,
+            "seconds": 5.54
+          },
+          {
+            "selector": "#w-map > svg:nth-of-type(1) > text:nth-of-type(1)",
+            "text": "Our block",
+            "fontPx": 26.24,
+            "time": 96.243,
+            "seconds": 5.54
+          }
+        ]
+      }
+    ],
+    "enabled": true,
+    "step": 0.2049999999999983,
+    "samples": 599
+  },
+  "audio": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": []
+  },
+  "hdr": {
+    "autoPromotion": null,
+    "inspection": "available"
+  },
+  "snapshots": {
+    "enabled": false,
+    "files": [],
+    "times": [],
+    "findingFiles": []
+  },
+  "saved": {
+    "id": "58b1e259-7832-4e59-b1fb-dab4e92142e4",
+    "revision": "7fa56e09-ffc1-4cf7-bcb6-0e6310e5ccf2",
+    "report": "C:\\Users\\Sai\\Desktop\\Files\\2025 - RVU\\Projects\\Indoor Nav\\Project Code\\indoor_nav_mobile\\brag-output\\launch-film\\composition\\.hyperframes\\artifacts\\checks\\58b1e259-7832-4e59-b1fb-dab4e92142e4.json",
+    "attribution": "recorded-revision"
+  },
+  "_meta": {
+    "version": "0.9.75",
+    "updateAvailable": false
+  }
+}

@@ -1,0 +1,62 @@
+<template>
+  <style>
+
+#root { position: absolute; inset: 0; overflow: hidden; font-family: Roboto, sans-serif; color: #22301A; }
+.bg { position: absolute; inset: 0; background-color: #E5D9C2;
+  background-image: linear-gradient(rgba(88,107,69,0.075) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(88,107,69,0.075) 1px, transparent 1px);
+  background-size: 54px 54px; }
+.kicker { font-size: 28px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #586B45; }
+.h1 { font-size: 104px; font-weight: 900; letter-spacing: -0.04em; line-height: 0.98; color: #22301A; }
+.h2 { font-size: 64px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.04; color: #22301A; }
+.body { font-size: 30px; font-weight: 400; line-height: 1.35; color: #4A5340; }
+.green { color: #005A32; }
+.olive { color: #586B45; }
+.phone { position: absolute; width: 468px; height: 1006px; }
+.phone .bezel { position: absolute; inset: 0; border-radius: 60px; background: #161A12;
+  box-shadow: 0 40px 80px rgba(34,48,26,0.28), 0 8px 18px rgba(34,48,26,0.18); }
+.phone .screen { position: absolute; left: 14px; top: 14px; width: 440px; height: 978px;
+  border-radius: 46px; overflow: hidden; background: #E5D9C2; }
+.phone .screen > img, .phone .screen > video { position: absolute; left: 0; top: 0; width: 440px; height: 978px; object-fit: cover; }
+.chip { display: inline-flex; align-items: center; gap: 14px; padding: 16px 28px; border-radius: 999px;
+  border: 2px solid #586B45; background: #F4EDDF; font-size: 30px; font-weight: 700; color: #586B45; }
+.chip.on { background: #586B45; color: #FFFFFF; }
+.pill { display: inline-block; padding: 8px 18px; border-radius: 999px; font-size: 28px; font-weight: 800;
+  letter-spacing: 0.12em; text-transform: uppercase; }
+.w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.1em; margin-bottom: -0.1em; }
+.wi { display: inline-block; }
+.card { position: absolute; background: #F4EDDF; border-radius: 28px; box-shadow: 0 18px 40px rgba(34,48,26,0.16); }
+
+
+  </style>
+  <div id="root" data-composition-id="prefs" data-width="1920" data-height="1080" data-duration="7.05">
+    <div class="bg"></div>
+    <div id="bl1" data-layout-ignore style="position:absolute; left:-200px; top:-260px; width:1100px; height:1100px; border-radius:50%; background:radial-gradient(circle, rgba(88,107,69,0.16), rgba(88,107,69,0) 65%)"></div>
+    <div id="bl2" data-layout-ignore style="position:absolute; left:1100px; top:380px; width:1100px; height:1100px; border-radius:50%; background:radial-gradient(circle, rgba(0,90,50,0.10), rgba(0,90,50,0) 65%)"></div>
+
+    <div id="p-big" class="card" style="left:240px; top:220px; width:1440px; height:810px; overflow:hidden; opacity:0"><img id="p-l0" class="clip" data-start="0" data-duration="2.25" data-track-index="3" src="assets/ui/located_map_last.png" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover"><video id="p-sf" class="clip" data-start="2.25" data-duration="2.9" data-track-index="3" muted playsinline src="assets/clips/pref_stepfree_map.mp4" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover"></video><video id="p-al" class="clip" data-start="5.15" data-duration="1.9" data-track-index="3" muted playsinline src="assets/clips/pref_avoidlifts_map.mp4" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover"></video></div>
+    <div id="p-h" style="position:absolute; left:240px; top:70px; width:1440px; display:flex; align-items:flex-end; justify-content:space-between; opacity:0">
+      <div><div class="kicker">Route preferences</div><div id="p-q" class="h2" style="margin-top:10px; font-size:60px"><span class="w"><span class="wi">Can</span></span> <span class="w"><span class="wi">everyone</span></span> <span class="w"><span class="wi">find</span></span> <span class="w"><span class="wi">their</span></span> <span class="w"><span class="wi">way?</span></span></div></div>
+      <div style="display:flex; gap:14px; margin-bottom:6px"><span id="p-c0" class="chip" style="font-size:28px; padding:12px 24px">Fastest</span><span id="p-c1" class="chip" style="font-size:28px; padding:12px 24px">Step-free</span><span id="p-c2" class="chip" style="font-size:28px; padding:12px 24px">Avoid lifts</span></div></div>
+
+    
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#bl1", { x: -60, y: 0 }, { x: 80, y: 40, duration: 7.05, ease: "sine.inOut" }, 0);
+    tl.fromTo("#bl2", { x: 40, y: 20 }, { x: -70, y: -30, duration: 7.05, ease: "sine.inOut" }, 0);
+    tl.set("#p-big", { opacity: 1 }, 0);
+    tl.fromTo("#p-h", { opacity: 0, y: 0 }, { opacity: 1, y: 0, duration: 0.01, ease: "power3.out" }, 0.05);
+    tl.set("#p-q", { opacity: 1 }, 0.1);
+    tl.fromTo("#p-q .wi", { yPercent: 115 }, { yPercent: 0, duration: 0.7, ease: "expo.out", stagger: 0.05 }, 0.1);
+    tl.set("#p-c0", { backgroundColor: "#586B45", color: "#FFFFFF" }, 0);
+    tl.to("#p-c1", { backgroundColor: "#586B45", color: "#FFFFFF", scale: 1.06, duration: 0.18 }, 2.25);
+    tl.to("#p-c1", { scale: 1, duration: 0.25 }, 2.43);
+    tl.to("#p-c0", { backgroundColor: "#F4EDDF", color: "#586B45", duration: 0.18 }, 2.25);
+    tl.to("#p-c2", { backgroundColor: "#586B45", color: "#FFFFFF", scale: 1.06, duration: 0.18 }, 5.15);
+    tl.to("#p-c2", { scale: 1, duration: 0.25 }, 5.33);
+    tl.to("#p-c1", { backgroundColor: "#F4EDDF", color: "#586B45", duration: 0.18 }, 5.15);
+
+    window.__timelines["prefs"] = tl;
+  </script>
+</template>

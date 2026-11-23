@@ -1,0 +1,25 @@
+a1	Outside, your phone always knows where you are.
+a2	But step inside a big building, and GPS goes quiet.
+a3	On our own college campus, new students and visitors can easily lose their way.
+b1	So we're building Indoor Nav for our college. Step-by-step directions inside a building, using just your phone.
+b2	It's as simple as: pick, scan, and follow.
+c1	First, pick where you want to go.
+d1	Then scan the nearest marker. It's simply a printed sticker on the wall.
+d2	The phone reads it right away, and knows exactly where you are.
+e1	Now follow your route, drawn on the building's own floor plan.
+e2	It's worked out right on the phone, through rooms, corridors, stairs and lifts.
+f1	Need a step-free route? That's one tap. Rather take the stairs? Choose avoid lifts.
+g1	And when your route changes floors,
+g2	you see exactly how you get there.
+h1	Clear steps guide you all the way to the door.
+h2	Took a wrong turn? Just scan any marker, and your route starts again from there.
+h3	And in beta: scan once, then simply walk, with every turn read aloud.
+i1	Under the hood is a corrected, bidirectional Dike-struh search.
+i2	Our first version, on an E S P thirty-two, took a longer route on thirty-six of seven hundred and fifty-six trips.
+i3	Today, every pair of places gets the shortest route. And a hundred and ninety-two automated tests keep it that way.
+j1	And it all works offline. No GPS. No Wi-Fi. No beacons. No server.
+k1	Any block can be set up from its own floor plan, and shared as a single file.
+m1	Next, we want to map every block on our campus, so anyone can find any room, in any building.
+m2	And beyond our campus, the same idea can help in hospitals, malls, airports, and exam halls.
+l1	It started with a microcontroller and a cloud database. Today, all it takes is a phone, and a sticker.
+l2	Indoor Nav. Find your way, anywhere indoors.

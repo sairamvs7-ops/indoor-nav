@@ -1,0 +1,68 @@
+<template>
+  <style>
+
+#root { position: absolute; inset: 0; overflow: hidden; font-family: Roboto, sans-serif; color: #22301A; }
+.bg { position: absolute; inset: 0; background-color: #E5D9C2;
+  background-image: linear-gradient(rgba(88,107,69,0.075) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(88,107,69,0.075) 1px, transparent 1px);
+  background-size: 54px 54px; }
+.kicker { font-size: 28px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #586B45; }
+.h1 { font-size: 104px; font-weight: 900; letter-spacing: -0.04em; line-height: 0.98; color: #22301A; }
+.h2 { font-size: 64px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.04; color: #22301A; }
+.body { font-size: 30px; font-weight: 400; line-height: 1.35; color: #4A5340; }
+.green { color: #005A32; }
+.olive { color: #586B45; }
+.phone { position: absolute; width: 468px; height: 1006px; }
+.phone .bezel { position: absolute; inset: 0; border-radius: 60px; background: #161A12;
+  box-shadow: 0 40px 80px rgba(34,48,26,0.28), 0 8px 18px rgba(34,48,26,0.18); }
+.phone .screen { position: absolute; left: 14px; top: 14px; width: 440px; height: 978px;
+  border-radius: 46px; overflow: hidden; background: #E5D9C2; }
+.phone .screen > img, .phone .screen > video { position: absolute; left: 0; top: 0; width: 440px; height: 978px; object-fit: cover; }
+.chip { display: inline-flex; align-items: center; gap: 14px; padding: 16px 28px; border-radius: 999px;
+  border: 2px solid #586B45; background: #F4EDDF; font-size: 30px; font-weight: 700; color: #586B45; }
+.chip.on { background: #586B45; color: #FFFFFF; }
+.pill { display: inline-block; padding: 8px 18px; border-radius: 999px; font-size: 28px; font-weight: 800;
+  letter-spacing: 0.12em; text-transform: uppercase; }
+.w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.1em; margin-bottom: -0.1em; }
+.wi { display: inline-block; }
+.card { position: absolute; background: #F4EDDF; border-radius: 28px; box-shadow: 0 18px 40px rgba(34,48,26,0.16); }
+
+
+  </style>
+  <div id="root" data-composition-id="title" data-width="1920" data-height="1080" data-duration="9.9">
+    <div class="bg"></div>
+    <div id="bl1" data-layout-ignore style="position:absolute; left:-200px; top:-260px; width:1100px; height:1100px; border-radius:50%; background:radial-gradient(circle, rgba(88,107,69,0.16), rgba(88,107,69,0) 65%)"></div>
+    <div id="bl2" data-layout-ignore style="position:absolute; left:1100px; top:380px; width:1100px; height:1100px; border-radius:50%; background:radial-gradient(circle, rgba(0,90,50,0.10), rgba(0,90,50,0) 65%)"></div>
+
+    <div id="t-k" class="kicker" style="position:absolute; left:150px; top:250px; opacity:0">Built for our college</div>
+    <div id="t-mark" style="position:absolute; left:117px; top:270px; opacity:0"><svg viewBox="-19.09 -19.80 297.00 140.50" width="520" height="246.0" style="display:block; overflow:visible"><defs><mask id="t-m" maskUnits="userSpaceOnUse" x="-19.09" y="-19.80" width="297.0" height="140.5"><path id="t-ms" d="M21.712 24 L50 84 L78.288 24" fill="none" stroke="#fff" stroke-width="34" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1.02" stroke-dashoffset="0"/></mask></defs><g mask="url(#t-m)"><path fill-rule="evenodd" d="M16.091 34.147L41.461 86.165A9.500 9.500 0 0 0 58.539 86.165L81.967 38.129A14.600 14.600 0 1 0 64.890 29.800L50.000 60.329L33.168 25.818A11.600 11.600 0 1 0 16.091 34.147ZM16.112 24.000A5.600 5.600 0 1 0 27.312 24.000A5.600 5.600 0 1 0 16.112 24.000Z" fill="#005A32"/></g><path id="t-dot" d="M63.688 24.000A14.600 14.600 0 1 1 92.888 24.000A14.600 14.600 0 1 1 63.688 24.000Z" fill="#586B45"/><g id="t-word" transform="translate(119.77 35.50) scale(0.112)"><path d="M4.872 73.976L189.530 469.976A52.000 52.000 0 0 0 283.786 469.976L468.444 73.976A52.000 52.000 0 1 0 374.188 30.024L236.658 324.958L99.128 30.024A52.000 52.000 0 1 0 4.872 73.976ZM513.316 52.000A52.000 52.000 0 0 1 617.316 52.000V448.000A52.000 52.000 0 0 1 513.316 448.000ZM1047.316 52.000A52.000 52.000 0 0 1 1151.316 52.000V448.000A52.000 52.000 0 0 1 1047.316 448.000Z" fill="#222222"/><path fill-rule="evenodd" d="M679.316 264.000A236.000 236.000 0 1 1 1151.316 264.000A236.000 236.000 0 1 1 679.316 264.000ZM783.316 264.000A132.000 132.000 0 1 0 1047.316 264.000A132.000 132.000 0 1 0 783.316 264.000Z" fill="#222222"/><path d="M492.516 -112.800A72.800 72.800 0 1 1 638.116 -112.800A72.800 72.800 0 1 1 492.516 -112.800Z" fill="#005A32"/></g></svg></div>
+    <div id="t-tag" class="h2" style="position:absolute; left:156px; top:520px; width:900px; opacity:0"><span class="w"><span class="wi">Directions</span></span> <span class="w"><span class="wi">inside</span></span> <span class="w"><span class="wi">a</span></span> <span class="w"><span class="wi">building.</span></span> <br><span class="w"><span class="wi green">Just</span></span> <span class="w"><span class="wi green">your</span></span> <span class="w"><span class="wi green">phone.</span></span></div>
+    <div id="t-steps" style="position:absolute; left:156px; top:740px; display:flex; gap:40px">
+      <div id="t-s0" class="h1" style="font-size:96px; opacity:0">Pick.</div>
+      <div id="t-s1" class="h1" style="font-size:96px; opacity:0">Scan.</div>
+      <div id="t-s2" class="h1 green" style="font-size:96px; opacity:0">Follow.</div></div>
+    <div id="t-phone" class="phone" style="left:1240px; top:37px"><div id="t-phone-f" style="position:absolute; inset:0"><div id="t-phone-bezel" class="bezel"></div><div class="screen"><img id="t-home" class="clip" data-start="0" data-duration="9.9" data-track-index="2" src="assets/ui/home.png" alt=""></div></div></div>
+
+    <div id="wipe-in" style="position:absolute; inset:0; background:#005A32; z-index:50"></div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#bl1", { x: -60, y: 0 }, { x: 80, y: 40, duration: 9.9, ease: "sine.inOut" }, 0);
+    tl.fromTo("#bl2", { x: 40, y: 20 }, { x: -70, y: -30, duration: 9.9, ease: "sine.inOut" }, 0);
+    tl.fromTo("#t-phone-f", { y: 0 }, { y: -12, duration: 2.4, ease: "sine.inOut", yoyo: true, repeat: 3 }, 0);
+    tl.fromTo("#wipe-in", { xPercent: 0 }, { xPercent: 101, duration: 0.55, ease: "expo.inOut" }, 0);
+    tl.fromTo("#t-k", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, 0.3);
+    tl.set("#t-mark", { opacity: 1 }, 0.35);
+    tl.fromTo("#t-ms", { attr: { "stroke-dashoffset": 1.02 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.7, ease: "power2.inOut" }, 0.35);
+    tl.fromTo("#t-dot", { scale: 0, svgOrigin: "78.288 24" }, { scale: 1, svgOrigin: "78.288 24", duration: 0.45, ease: "back.out(2.2)" }, 0.95);
+    tl.fromTo("#t-word", { opacity: 0 }, { opacity: 1, duration: 0.45, ease: "power2.out" }, 1.00);
+    tl.fromTo("#t-phone", { y: 260, opacity: 0, rotation: 4 }, { y: 0, opacity: 1, rotation: 0, duration: 1.0, ease: "expo.out" }, 0.3);
+    tl.set("#t-tag", { opacity: 1 }, 3.15);
+    tl.fromTo("#t-tag .wi", { yPercent: 115 }, { yPercent: 0, duration: 0.7, ease: "expo.out", stagger: 0.07 }, 3.15);
+    tl.fromTo("#t-s0", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.45, ease: "expo.out" }, 7.87);
+    tl.fromTo("#t-s1", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.45, ease: "expo.out" }, 8.37);
+    tl.fromTo("#t-s2", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.45, ease: "expo.out" }, 8.95);
+
+    window.__timelines["title"] = tl;
+  </script>
+</template>

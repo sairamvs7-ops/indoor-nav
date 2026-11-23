@@ -1,0 +1,413 @@
+{
+ "total": 122.82,
+ "scenes": [
+  [
+   "campus",
+   0.0,
+   11.82
+  ],
+  [
+   "title",
+   11.82,
+   10.39
+  ],
+  [
+   "pick",
+   22.21,
+   2.9
+  ],
+  [
+   "scan",
+   25.11,
+   7.46
+  ],
+  [
+   "follow",
+   32.57,
+   6.3
+  ],
+  [
+   "prefs",
+   38.87,
+   7.05
+  ],
+  [
+   "sonar",
+   45.92,
+   5.67
+  ],
+  [
+   "guide",
+   51.59,
+   13.19
+  ],
+  [
+   "proof",
+   64.78,
+   19.2
+  ],
+  [
+   "offline",
+   83.98,
+   6.09
+  ],
+  [
+   "setup",
+   90.07,
+   5.83
+  ],
+  [
+   "future",
+   95.9,
+   5.57
+  ],
+  [
+   "industries",
+   101.47,
+   9.58
+  ],
+  [
+   "close",
+   111.05,
+   11.77
+  ]
+ ],
+ "voice": [
+  [
+   "a1",
+   0.3
+  ],
+  [
+   "a2",
+   6.96
+  ],
+  [
+   "b1",
+   12.07
+  ],
+  [
+   "c1",
+   22.36
+  ],
+  [
+   "d1",
+   25.26
+  ],
+  [
+   "e1",
+   32.72
+  ],
+  [
+   "f1",
+   39.02
+  ],
+  [
+   "g1",
+   46.02
+  ],
+  [
+   "h1",
+   51.59
+  ],
+  [
+   "h2",
+   59.85
+  ],
+  [
+   "i1",
+   64.98
+  ],
+  [
+   "i2",
+   76.49
+  ],
+  [
+   "j1",
+   84.13
+  ],
+  [
+   "k1",
+   90.22
+  ],
+  [
+   "m1",
+   96.05
+  ],
+  [
+   "m2",
+   101.62
+  ],
+  [
+   "l1",
+   111.2
+  ]
+ ],
+ "drop": 47.07,
+ "captions": [
+  [
+   0.25,
+   3.11,
+   "Outside, your phone always knows where you are."
+  ],
+  [
+   3.38,
+   1.98,
+   "But step inside a big building,"
+  ],
+  [
+   5.38,
+   1.22,
+   "and GPS goes quiet."
+  ],
+  [
+   6.91,
+   0.98,
+   "On our own campus,"
+  ],
+  [
+   7.91,
+   3.36,
+   "new students and visitors can easily lose their way."
+  ],
+  [
+   12.02,
+   2.9,
+   "So we're building Indoor Nav for our college."
+  ],
+  [
+   14.94,
+   2.52,
+   "It gives you directions inside a building,"
+  ],
+  [
+   17.48,
+   1.17,
+   "using just your phone,"
+  ],
+  [
+   18.67,
+   1.6,
+   "in three simple steps:"
+  ],
+  [
+   20.29,
+   1.39,
+   "pick, scan, and follow."
+  ],
+  [
+   22.31,
+   1.85,
+   "First, pick where you want to go."
+  ],
+  [
+   25.21,
+   1.44,
+   "Then scan the nearest marker."
+  ],
+  [
+   26.67,
+   2.51,
+   "It's just a printed sticker on the wall,"
+  ],
+  [
+   29.2,
+   2.54,
+   "and the phone instantly knows where you are."
+  ],
+  [
+   32.67,
+   1.09,
+   "Now follow your route,"
+  ],
+  [
+   33.78,
+   2.29,
+   "drawn on the building's own floor plan,"
+  ],
+  [
+   36.09,
+   2.15,
+   "and worked out right on the phone."
+  ],
+  [
+   38.97,
+   1.75,
+   "If you need a route without stairs,"
+  ],
+  [
+   40.74,
+   2.82,
+   "choose Step-free. If you would rather take the"
+  ],
+  [
+   43.58,
+   1.51,
+   "stairs, choose Avoid lifts."
+  ],
+  [
+   45.97,
+   2.16,
+   "And when your route changes floors,"
+  ],
+  [
+   48.15,
+   1.9,
+   "the app shows you exactly how you get"
+  ],
+  [
+   50.07,
+   1.04,
+   "there, in 3D."
+  ],
+  [
+   51.54,
+   1.76,
+   "Clear steps guide you all the way to"
+  ],
+  [
+   53.32,
+   2.16,
+   "the door. And if you take a wrong"
+  ],
+  [
+   55.5,
+   1.62,
+   "turn, just scan any marker,"
+  ],
+  [
+   57.14,
+   2.35,
+   "and your route starts again from there."
+  ],
+  [
+   59.8,
+   0.68,
+   "And in beta:"
+  ],
+  [
+   60.5,
+   1.92,
+   "scan once, then simply walk,"
+  ],
+  [
+   62.44,
+   1.72,
+   "with every turn read aloud."
+  ],
+  [
+   64.93,
+   2.71,
+   "Under the hood is a corrected,"
+  ],
+  [
+   67.66,
+   2.99,
+   "bidirectional Dijkstra search."
+  ],
+  [
+   70.67,
+   3.72,
+   "Our first ESP32 version took a longer route"
+  ],
+  [
+   74.41,
+   1.71,
+   "on 36 of 756 trips."
+  ],
+  [
+   76.44,
+   3.07,
+   "Today, every pair of places gets the shortest"
+  ],
+  [
+   79.53,
+   3.62,
+   "route, and 192 automated tests keep it that way."
+  ],
+  [
+   84.08,
+   1.9,
+   "And it all works offline,"
+  ],
+  [
+   86.0,
+   1.03,
+   "with no GPS,"
+  ],
+  [
+   87.05,
+   1.38,
+   "no Wi-Fi, no beacons,"
+  ],
+  [
+   88.45,
+   1.09,
+   "and no server."
+  ],
+  [
+   90.17,
+   1.78,
+   "Each block is set up from its own"
+  ],
+  [
+   91.97,
+   2.68,
+   "floor plan, and shared as a single file."
+  ],
+  [
+   96.0,
+   2.06,
+   "Next, we want to map every block on"
+  ],
+  [
+   98.08,
+   2.76,
+   "our campus, in one shared map library."
+  ],
+  [
+   101.57,
+   2.03,
+   "Beyond campus, it can help hospitals,"
+  ],
+  [
+   103.62,
+   1.75,
+   "malls, airports, and exam halls."
+  ],
+  [
+   105.39,
+   1.21,
+   "And one day,"
+  ],
+  [
+   106.62,
+   2.14,
+   "you could walk through a building once,"
+  ],
+  [
+   108.78,
+   1.37,
+   "and let it map itself."
+  ],
+  [
+   111.15,
+   2.48,
+   "It started with a microcontroller and a cloud"
+  ],
+  [
+   113.65,
+   2.63,
+   "database. Now, all it takes is a phone,"
+  ],
+  [
+   116.3,
+   1.18,
+   "and a sticker."
+  ],
+  [
+   117.5,
+   2.9,
+   "Indoor Nav. Find your way, anywhere indoors."
+  ]
+ ]
+}

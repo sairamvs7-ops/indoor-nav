@@ -1,0 +1,69 @@
+def patch_sonar(img):
+    """Floor-name labels in the sonar view (FIRST FLOOR above, GROUND FLOOR
+    below). The lift shaft can merge or hide some of the box glyphs, so a
+    label is anchored on its right-most box (always the last letter) and the
+    fixed glyph pitch, then every label pixel on that baseline is cleared."""
+    a = np.asarray(img).astype(np.float32).copy()
+    r, g, b = a[..., 0], a[..., 1], a[..., 2]
+    gs = np.maximum(g, 1)
+    mint = (g > 40) & (r / gs > 0.72) & (b / gs > 0.62) & (r / gs < 0.95)
+    solid = ndimage.binary_opening(mint, structure=np.ones((7, 7)))
+    lab, _ = ndimage.label(solid)
+    boxes = []
+    for sl in ndimage.find_objects(lab):
+        if sl is None:
+            continue
+        hh, ww = sl[0].stop - sl[0].start, sl[1].stop - sl[1].start
+        if 14 <= hh <= 40 and 10 <= ww <= 40:
+            boxes.append((sl[1].start, sl[0].start, sl[1].stop, sl[0].stop))
+    # group by baseline
+    rows = []
+    for q in sorted(boxes, key=lambda q: q[1]):
+        for row in rows:
+            if abs(q[1] - row[0][1]) < 8:
+                row.append(q)
+                break
+        else:
+            rows.append([q])
+    rows = [sorted(rw) for rw in rows if len(rw) >= 3]
+    if not rows:
+        return img
+    rows.sort(key=lambda rw: rw[0][1])  # top first
+    if len(rows) >= 2:
+        names = ["FIRST FLOOR", "GROUND FLOOR"] + [None] * (len(rows) - 2)
+    else:
+        n = len(rows[0])
+        names = ["GROUND FLOOR" if n == 11 else "FIRST FLOOR" if n == 10 else None]
+    draws = []
+    for rw, text in zip(rows, names):
+        if text is None:
+            continue
+        xs = [q[0] for q in rw]
+        steps = [b2 - b1 for b1, b2 in zip(xs, xs[1:]) if 25 < b2 - b1 < 45]
+        pitch = float(np.median(steps)) if steps else 33.6
+        bw = int(np.median([q[2] - q[0] for q in rw]))
+        y0, y1 = min(q[1] for q in rw), max(q[3] for q in rw)
+        last = max(xs)
+        start = int(round(last - (len(text) - 1) * pitch))
+        x0, x1 = max(0, start - 6), min(a.shape[1], last + bw + 6)
+        y0c, y1c = max(0, y0 - 3), min(a.shape[0], y1 + 3)
+        m = mint[y0c:y1c, x0:x1]
+        reg = a[y0c:y1c, x0:x1, :3]
+        if not m.any():
+            continue
+        ink = reg[solid[y0c:y1c, x0:x1]].mean(axis=0) if solid[y0c:y1c, x0:x1].any() else reg[m].mean(axis=0)
+        bg = np.median(reg[~m], axis=0) if (~m).any() else np.array([4, 7, 4])
+        reg[ndimage.binary_dilation(m, iterations=2)] = bg
+        draws.append((text, start, (y0 + y1) / 2, y1 - y0, tuple(int(v) for v in ink)))
+    out = Image.fromarray(a.clip(0, 255).astype(np.uint8))
+    d = ImageDraw.Draw(out)
+    for text, x0, cy, box_h, ink in draws:
+        size = round(box_h / 0.8)
+        font = ImageFont.truetype(str(BOLD), size)
+        x = x0
+        for ch in text:
+            d.text((x, cy), ch, font=font, fill=ink, anchor="lm")
+            x += d.textlength(ch, font=font) + size * 0.125
+    return out
+
+

@@ -1,0 +1,101 @@
+# ---------------------------------------------------------------- 1 problem
+# One floor only: the sample's ground floor, drawn the way the app draws a
+# generated map (GeneratedMapPainter, light MapStyle) from the reviewed
+# regions that dump_test.dart wrote to regions.json. The lost dot wanders
+# along this floor's real corridor centreline.
+REG = json.loads((Path(__file__).parent / "regions.json").read_text())
+g0 = REG["floor0"]
+SC = 1080 / 770
+MAP_H = 445 * SC
+
+
+def poly(o):
+    return " ".join(f"{x * SC:.1f},{y * SC:.1f}" for x, y in o)
+
+
+names = {n["region"]: n["name"] for n in g0["nodes"] if n["region"]}
+msvg = [f'<svg width="1080" height="{MAP_H:.0f}" viewBox="0 0 1080 {MAP_H:.0f}"><rect width="1080" height="{MAP_H:.0f}" fill="#FBF6EC"/>']
+regs = [r for r in g0["regions"] if r["kind"] != "ignored"]
+for r in sorted(regs, key=lambda r: r["kind"] != "corridor"):
+    pts = poly(r["outline"])
+    if r["kind"] == "corridor":
+        msvg.append(f'<polygon points="{pts}" fill="#F1E8D4" stroke="#C9B993" stroke-width="3"/>')
+    elif r["kind"] == "stairs":
+        x0, y0, x1, y1 = [v * SC for v in r["bbox"]]
+        cid = "st-" + r["id"]
+        msvg.append(f'<clipPath id="{cid}"><polygon points="{pts}"/></clipPath>')
+        msvg.append(f'<polygon points="{pts}" fill="rgba(183,121,31,0.14)"/>')
+        steps = "".join(f'<line x1="{x0:.0f}" y1="{y0 + k * 14:.1f}" x2="{x1:.0f}" y2="{y0 + k * 14:.1f}"/>'
+                        for k in range(1, int((y1 - y0) / 14) + 1))
+        msvg.append(f'<g clip-path="url(#{cid})" stroke="#B7791F" stroke-width="3">{steps}</g>')
+        msvg.append(f'<polygon points="{pts}" fill="none" stroke="#B7791F" stroke-width="4"/>')
+    else:
+        msvg.append(f'<polygon points="{pts}" fill="#E3E8D3" stroke="#586B45" stroke-width="4" stroke-linejoin="round"/>')
+for r in regs:
+    nm = names.get(r["id"])
+    if not nm:
+        continue
+    x0, y0, x1, y1 = [v * SC for v in r["bbox"]]
+    fs = min(26, max(15, min(x1 - x0, y1 - y0) / 5))
+    words = nm.split(" ")
+    lines = [nm] if len(nm) * fs * 0.55 < (x1 - x0) * 0.9 else [" ".join(words[:-1]), words[-1]]
+    cy = (y0 + y1) / 2 + 10 - (len(lines) - 1) * fs * 0.6
+    for i, ln in enumerate(lines):
+        msvg.append(f'<text x="{(x0 + x1) / 2:.1f}" y="{cy + i * fs * 1.2:.1f}" text-anchor="middle" font-family="Roboto" '
+                    f'font-weight="700" font-size="{fs:.0f}" fill="#2B3320">{ln}</text>')
+msvg.append("</svg>")
+corr = max((r for r in g0["regions"] if r["kind"] == "corridor"),
+           key=lambda r: (r["bbox"][2] - r["bbox"][0]) * (r["bbox"][3] - r["bbox"][1]))
+main = max(corr["paths"], key=len)
+MX, MY = 740, 250  # the map's top-left on screen (inside its card)
+
+
+def at(f):
+    x, y = main[min(int(len(main) * f), len(main) - 1)]
+    return MX + x * SC - 22, MY + y * SC - 22
+
+
+path = [at(f) for f in (0.15, 0.3, 0.55, 0.42, 0.7, 0.5, 0.85, 0.62, 0.35)]
+body = f"""
+    <div id="p-card" class="card" style="left:{MX - 20}px; top:{MY - 20}px; width:1120px; height:{MAP_H + 40:.0f}px; padding:20px">
+      {''.join(msvg)}
+    </div>
+    <div id="p-floor" class="kicker" style="position:absolute; left:{MX}px; top:{MY + MAP_H + 36:.0f}px">Ground Floor</div>
+    <div id="p-dotwrap" style="position:absolute; left:0; top:0; width:1920px; height:1080px">
+      <div id="p-dot" data-layout-allow-overflow style="position:absolute; left:0; top:0; width:44px; height:44px; opacity:0">
+        <div style="position:absolute; inset:-22px; border-radius:50%; background:rgba(29,78,216,0.18)"></div>
+        <div style="position:absolute; inset:0; border-radius:50%; background:#1D4ED8; border:5px solid #fff; box-shadow:0 4px 10px rgba(0,0,0,0.25)"></div>
+        <div id="p-q" style="position:absolute; left:40px; top:-62px; width:56px; height:56px; border-radius:50%; background:#F4EDDF; color:#DC2626; font-size:38px; font-weight:900; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 14px rgba(0,0,0,0.18); opacity:0">?</div>
+      </div>
+    </div>
+    <div id="p-target" class="card" style="left:120px; top:180px; padding:22px 34px">
+      <div class="kicker">Looking for</div>
+      <div style="font-size:44px; font-weight:800; margin-top:6px">Room 104 <span class="olive" style="font-weight:500">· First Floor</span></div>
+    </div>
+    <div id="p-gps" class="card" style="left:120px; top:390px; padding:20px 30px; display:flex; align-items:center; gap:18px; opacity:0">
+      <svg width="44" height="44" viewBox="0 0 24 24"><path fill="#586B45" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
+      <div style="position:relative; width:420px; height:44px">
+        <div id="p-gps-a" style="position:absolute; left:0; top:2px; font-size:34px; font-weight:700; color:#586B45">Searching for GPS<span id="p-d1">.</span><span id="p-d2">.</span><span id="p-d3">.</span></div>
+        <div id="p-gps-b" style="position:absolute; left:0; top:2px; font-size:34px; font-weight:800; color:#DC2626; opacity:0">No GPS signal indoors</div>
+      </div>
+    </div>
+    <div id="p-head" class="h1" style="position:absolute; left:120px; top:650px; width:600px; opacity:0">GPS stops<br>at the door.</div>
+"""
+script = '    tl.fromTo("#p-card", { scale: 1.0, transformOrigin: "60% 50%" }, { scale: 1.04, duration: 10, ease: "none" }, 0);\n'
+script += f'    tl.set("#p-dot", {{ x: {path[0][0]:.0f}, y: {path[0][1]:.0f}, opacity: 1 }}, 0);\n'
+t = 1.0
+for (x, y) in path[1:]:
+    script += f'    tl.to("#p-dot", {{ x: {x:.0f}, y: {y:.0f}, duration: 0.8, ease: "power1.inOut" }}, {t:.2f});\n'
+    t += 0.9
+script += '    tl.fromTo("#p-q", { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, 2.0);\n'
+script += show("#p-gps", 1.6)
+script += '    tl.set(["#p-d1", "#p-d2", "#p-d3"], { opacity: 0.25 }, 0);\n'
+for i, t0 in enumerate([2.0, 2.3, 2.6, 3.2, 3.5, 3.8, 4.4, 4.7, 5.0]):
+    d = f"#p-d{i % 3 + 1}"
+    script += f'    tl.to("{d}", {{ opacity: 1, duration: 0.15 }}, {t0});\n'
+    script += f'    tl.to("{d}", {{ opacity: 0.25, duration: 0.15 }}, {t0 + 0.3:.2f});\n'
+script += hide("#p-gps-a", 5.75, 0.2)
+script += '    tl.fromTo("#p-gps-b", { opacity: 0, x: -12 }, { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" }, 5.85);\n'
+script += show("#p-head", 7.6, 40, 0.7, "expo.out")
+scene("problem", 10.0, body, script)
+

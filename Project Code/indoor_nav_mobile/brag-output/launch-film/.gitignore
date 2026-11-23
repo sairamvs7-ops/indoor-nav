@@ -1,0 +1,16 @@
+# Regenerable intermediates (rebuild with work/rebuild_assets.sh, the capture
+# test and work/build_film3.py; see PRODUCTION_REPORT.md)
+work/*/
+work/*.mp4
+
+# HyperFrames caches
+composition/.hyperframes/
+composition/.thumbnails/
+composition/.transcode-cache/
+composition/.waveform-cache/
+
+# Superseded audio and clips
+composition/assets/voice/
+composition/assets/voice2/
+composition/assets/vo3raw/
+composition/assets/clips/sonar_sync.mp4
